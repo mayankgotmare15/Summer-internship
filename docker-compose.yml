@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.10.0
+    container_name: ticket_router_mlflow
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+      - ./mlflow_artifacts:/mlflow/artifacts
+    environment:
+      - MLFLOW_TRACKING_URI=sqlite:////mlflow/mlruns/mlflow.db
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:////mlflow/mlruns/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+      --host 0.0.0.0
+      --port 5000
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ticket_router_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - CONFIDENCE_THRESHOLD=0.75
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - ROUTING_CONFIG_PATH=configs/routing_map.yaml
+    depends_on:
+      - mlflow
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ticket_router_ui
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+    command: streamlit run ui/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+    depends_on:
+      - api

@@ -1,0 +1,51 @@
+name: Model Monitoring & Drift Telemetry
+
+on:
+  schedule:
+    # Run every Monday at 08:00 UTC
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+jobs:
+  monitor-and-alert:
+    name: Run Drift Analysis & Threshold Guard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install Project Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate Drift Telemetry Report
+        run: |
+          python src/monitoring/drift_report.py
+
+      - name: Archive Telemetry Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-telemetry-report
+          path: |
+            reports/drift_report.html
+            reports/drift_metrics.json
+
+      - name: Evaluate Alerting Thresholds
+        id: check_thresholds
+        run: |
+          python src/monitoring/check_thresholds.py
+        continue-on-error: true
+
+      - name: Dispatch Alert Issue on Breach
+        if: steps.check_thresholds.outcome == 'failure'
+        run: |
+          echo "ALERT: Operational thresholds breached! Creating notification."
+          # Workflow can trigger retrain.yml or open GitHub Issue

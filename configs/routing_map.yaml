@@ -1,0 +1,13 @@
+# Resolver team mapping for categories
+routing_map:
+  "Access": "Identity & Access Management (IAM)"
+  "Administrative rights": "Endpoint Operations & Security"
+  "HR Support": "People Operations & HR Systems"
+  "Hardware": "Desktop Support & Hardware Services"
+  "Internal Project": "Project Engineering & DevOps"
+  "Miscellaneous": "General IT Service Desk"
+  "Purchase": "IT Procurement & Asset Management"
+  "Storage": "Cloud & Storage Infrastructure"
+
+fallback_queue: "Human Triage Queue"
+default_priority: "Medium"

@@ -1,0 +1,182 @@
+[
+  {
+    "id": "messy-01",
+    "text": "pls give me admin rights on my laptop to install python",
+    "expected_category": "Administrative rights",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-02",
+    "text": "laptop wont turn on after the update, screen black",
+    "expected_category": "Hardware",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-03",
+    "text": "need a new 27 inch monitor for the new joiner",
+    "expected_category": "Purchase",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-04",
+    "text": "shared drive full, cant save files since morning, whole team blocked",
+    "expected_category": "Storage",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-05",
+    "text": "how do i update my bank details in the payroll portal",
+    "expected_category": "HR Support",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-06",
+    "text": "password reset not working and account locked",
+    "expected_category": "Access",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-07",
+    "text": "request access to the project repo for the migration work",
+    "expected_category": "Access",
+    "expected_decision": "human_review"
+  },
+  {
+    "id": "messy-08",
+    "text": "outlook keeps asking password and my printer is also not working",
+    "expected_category": "Miscellaneous",
+    "expected_decision": "human_review"
+  },
+  {
+    "id": "messy-09",
+    "text": "vpn disconnecting every 5 minutes when connected to office wifi",
+    "expected_category": "Access",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-10",
+    "text": "mouse clicker is broken and battery leaked inside",
+    "expected_category": "Hardware",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-11",
+    "text": "permission denied when pushing docker image to internal registry",
+    "expected_category": "Administrative rights",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-12",
+    "text": "urgent: maternity leave policy document and claims form download",
+    "expected_category": "HR Support",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-13",
+    "text": "order mechanical keyboard and standing desk converter for ergonomics",
+    "expected_category": "Purchase",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-14",
+    "text": "nas drive smb share unreachable from floor 4 subnet",
+    "expected_category": "Storage",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-15",
+    "text": "jira sprint board access for offshore qa team members",
+    "expected_category": "Internal Project",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-16",
+    "text": "where can i find coffee cups and office parking sticker badge",
+    "expected_category": "Miscellaneous",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-17",
+    "text": "need sudo privileges on linux bastion host staging01",
+    "expected_category": "Administrative rights",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-18",
+    "text": "macbook pro battery swelling trackpad is lifting up danger",
+    "expected_category": "Hardware",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-19",
+    "text": "sso okta token expired and push notifications not reaching my phone",
+    "expected_category": "Access",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-20",
+    "text": "annual appraisal review cycle dates and self-assessment portal link",
+    "expected_category": "HR Support",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-21",
+    "text": "quote approval for 10 jetbrains datagrip licenses for data engineering",
+    "expected_category": "Purchase",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-22",
+    "text": "increase s3 bucket quota or attach ebs volume for model training cache",
+    "expected_category": "Storage",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-23",
+    "text": "setup gitlab ci runner on dedicated on-prem server",
+    "expected_category": "Internal Project",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-24",
+    "text": "air conditioning in server room 2 is making a strange buzzing noise",
+    "expected_category": "Miscellaneous",
+    "expected_decision": "human_review"
+  },
+  {
+    "id": "messy-25",
+    "text": "cannot login to aws console error invalid credentials 403",
+    "expected_category": "Access",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-26",
+    "text": "grant local admin on windows desktop to debug visual studio compiler",
+    "expected_category": "Administrative rights",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-27",
+    "text": "docking station dual hdmi display flicker when connecting usb-c cable",
+    "expected_category": "Hardware",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-28",
+    "text": "expense reimbursement rejected in oracle portal without remarks",
+    "expected_category": "HR Support",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-29",
+    "text": "need po raised for cloudwatch logs data ingestion overage",
+    "expected_category": "Purchase",
+    "expected_decision": "auto_route"
+  },
+  {
+    "id": "messy-30",
+    "text": "i have a problem with my laptop screen and also need git access for project titan",
+    "expected_category": "Miscellaneous",
+    "expected_decision": "human_review"
+  }
+]
