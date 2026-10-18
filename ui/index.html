@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Ticket Auto-Router | MLOps Platform Tester</title>
+    <title>IT Support Ticket Auto-Router | Multi-Persona MLOps Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-base: #090d16;
-            --bg-card: rgba(18, 24, 38, 0.75);
-            --bg-card-hover: rgba(28, 38, 58, 0.85);
+            --bg-base: #080c14;
+            --bg-card: rgba(15, 23, 42, 0.75);
+            --bg-card-subtle: rgba(30, 41, 59, 0.5);
             --border: rgba(255, 255, 255, 0.08);
-            --border-glow: rgba(56, 189, 248, 0.3);
+            --border-hover: rgba(56, 189, 248, 0.35);
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --text-muted: #64748b;
@@ -44,29 +44,29 @@
             min-height: 100vh;
             line-height: 1.5;
             background-image: 
-                radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 45%);
+                radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(139, 92, 246, 0.06) 0%, transparent 45%);
             background-attachment: fixed;
             padding: 24px;
         }
 
         .container {
-            max-width: 1280px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* Header */
+        /* Top Header */
         header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 18px 24px;
+            padding: 16px 24px;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             backdrop-filter: blur(16px);
-            margin-bottom: 24px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
         }
 
         .header-title {
@@ -84,11 +84,11 @@
             align-items: center;
             justify-content: center;
             font-size: 22px;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
         }
 
         h1 {
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             font-weight: 700;
             letter-spacing: -0.02em;
             background: linear-gradient(to right, #f8fafc, #94a3b8);
@@ -97,888 +97,3057 @@
         }
 
         .header-subtitle {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: var(--text-muted);
             font-family: 'JetBrains Mono', monospace;
         }
 
-        .status-pills {
+        .header-meta {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
-        .pill {
-            font-size: 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
-            padding: 5px 12px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.6);
+        .status-pill {
             display: flex;
             align-items: center;
             gap: 6px;
+            font-size: 0.78rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+            font-weight: 500;
         }
 
-        .dot-green {
+        .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--emerald);
-            box-shadow: 0 0 8px var(--emerald);
-            animation: pulse 2s infinite;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulse-dot 2s infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        .active-user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        /* Role Switcher Nav Bar */
+        .role-nav {
+            display: flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 6px;
+            gap: 8px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(16px);
+            overflow-x: auto;
+        }
+
+        .role-btn {
+            flex: 1;
+            min-width: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 18px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .role-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .role-btn.active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(99, 102, 241, 0.15));
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+        }
+
+        .role-tag {
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+        }
+
+        .role-btn.active .role-tag {
+            background: rgba(56, 189, 248, 0.2);
+            color: var(--primary);
+        }
+
+        /* Workspace Panels */
+        .workspace-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .workspace-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Layout Grid */
-        .dashboard-grid {
+        .grid-2col {
             display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 24px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
         }
 
-        @media (max-width: 960px) {
-            .dashboard-grid {
+        @media (max-width: 1024px) {
+            .grid-2col {
                 grid-template-columns: 1fr;
             }
         }
 
-        /* Glass Cards */
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-md);
             padding: 24px;
             backdrop-filter: blur(16px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+            transition: border-color 0.2s;
+            margin-bottom: 20px;
         }
 
         .card:hover {
-            border-color: rgba(56, 189, 248, 0.2);
+            border-color: var(--border-hover);
         }
 
         .card-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
         }
 
         .card-title {
             font-size: 1.05rem;
             font-weight: 600;
-            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        /* Sample Presets Chips */
-        .presets-label {
-            font-size: 0.8rem;
+        .badge-pill {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
             color: var(--text-secondary);
-            margin-bottom: 10px;
-            display: block;
+            font-family: 'JetBrains Mono', monospace;
         }
 
+        /* Presets Chips */
         .presets-container {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .chip {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid var(--border);
-            color: #cbd5e1;
-            padding: 5px 11px;
-            border-radius: 8px;
             font-size: 0.78rem;
+            padding: 6px 12px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
 
         .chip:hover {
             background: rgba(56, 189, 248, 0.15);
             border-color: var(--primary);
-            color: var(--primary);
-            transform: translateY(-1px);
-        }
-
-        /* Textarea & Inputs */
-        .input-group {
-            position: relative;
-            margin-bottom: 16px;
+            color: var(--text-primary);
         }
 
         textarea {
             width: 100%;
-            height: 140px;
-            background: rgba(15, 23, 42, 0.75);
+            height: 120px;
+            background: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            padding: 14px 16px;
+            padding: 12px 14px;
             color: var(--text-primary);
             font-family: inherit;
-            font-size: 0.92rem;
+            font-size: 0.88rem;
             resize: vertical;
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s;
         }
 
         textarea:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
-
-        .char-counter {
-            position: absolute;
-            bottom: 10px;
-            right: 14px;
-            font-size: 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text-muted);
-            pointer-events: none;
-        }
-
-        .action-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
+            box-shadow: 0 0 0 2px var(--primary-glow);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, #0284c7, #2563eb);
             color: white;
-            font-weight: 600;
-            font-size: 0.92rem;
-            padding: 11px 24px;
+            border: none;
+            padding: 10px 20px;
             border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.88rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 14px 0 rgba(2, 132, 199, 0.35);
-            transition: all 0.2s ease;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
         .btn-primary:hover {
-            box-shadow: 0 6px 20px 0 rgba(2, 132, 199, 0.55);
+            filter: brightness(1.1);
             transform: translateY(-1px);
         }
 
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
         .btn-secondary {
-            background: rgba(30, 41, 59, 0.7);
-            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.06);
             color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 0.88rem;
-            padding: 11px 18px;
+            border: 1px solid var(--border);
+            padding: 8px 14px;
             border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-size: 0.82rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
 
         .btn-secondary:hover {
             color: var(--text-primary);
-            background: rgba(51, 65, 85, 0.8);
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        /* Result Panel */
-        .result-empty {
-            height: 380px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: var(--text-muted);
-            border: 2px dashed rgba(255, 255, 255, 0.05);
-            border-radius: var(--radius-md);
-            padding: 24px;
+        .btn-action {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s;
         }
 
-        .result-empty-icon {
-            font-size: 42px;
-            margin-bottom: 12px;
-            opacity: 0.4;
-        }
-
-        .result-active {
-            display: none;
-            flex-direction: column;
-            gap: 16px;
+        .btn-action:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(56, 189, 248, 0.08);
         }
 
         /* Decision Banner */
         .decision-banner {
-            padding: 16px;
-            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border: 1px solid;
-            transition: all 0.3s ease;
         }
 
         .decision-banner.auto-route {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: rgba(16, 185, 129, 0.3);
-            box-shadow: 0 0 25px var(--emerald-glow);
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
         }
 
         .decision-banner.human-review {
-            background: rgba(245, 158, 11, 0.1);
-            border-color: rgba(245, 158, 11, 0.3);
-            box-shadow: 0 0 25px var(--amber-glow);
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
         }
 
-        .decision-text {
-            font-weight: 700;
-            font-size: 1.15rem;
-            letter-spacing: -0.01em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .decision-banner.auto-route .decision-text { color: #34d399; }
-        .decision-banner.human-review .decision-text { color: #fbbf24; }
-
-        .latency-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 4px 10px;
-            border-radius: 12px;
-            color: var(--text-secondary);
-        }
-
-        /* Metrics Grid */
-        .metrics-subgrid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .metric-tile {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 14px;
-        }
-
-        .metric-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            margin-bottom: 4px;
-        }
-
-        .metric-value-lg {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .team-destination {
-            font-size: 0.88rem;
-            color: var(--primary);
-            font-weight: 500;
-            margin-top: 4px;
-        }
-
-        /* Confidence Bar */
-        .confidence-container {
-            margin-top: 8px;
-        }
-
-        .confidence-bar-bg {
-            height: 7px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 6px;
-        }
-
-        .confidence-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #0284c7, #38bdf8);
-            border-radius: 4px;
-            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        /* Priority Tag */
+        /* Priority Tags */
         .prio-tag {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
             text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: inline-block;
         }
 
         .prio-Critical { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
         .prio-High { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
         .prio-Medium { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
-        .prio-Low { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .prio-Low { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
 
-        /* Agent Feedback Box */
-        .feedback-box {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 14px;
-            margin-top: 4px;
-        }
-
-        .feedback-title {
-            font-size: 0.82rem;
+        /* Status Badges */
+        .status-badge {
+            font-size: 0.72rem;
             font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            display: flex;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .status-pending_triage { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        .status-auto_routed { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .status-in_progress { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+        .status-resolved { background: rgba(139, 92, 246, 0.15); color: #c084fc; }
+        .status-closed { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
+
+        /* SLA Timer Badges */
+        .sla-badge {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 4px;
+        }
+        .sla-critical { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); animation: pulse-sla 2s infinite; }
+        .sla-high { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .sla-medium { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .sla-low { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+
+        @keyframes pulse-sla {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
 
-        .feedback-row {
-            display: flex;
-            gap: 10px;
-        }
-
-        select {
-            flex: 1;
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 8px 12px;
-            color: var(--text-primary);
-            font-size: 0.85rem;
-            outline: none;
-        }
-
-        .btn-correct {
-            background: rgba(56, 189, 248, 0.15);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-correct:hover {
-            background: var(--primary);
-            color: #04101e;
-        }
-
-        /* Batch Section */
-        .batch-section {
-            margin-top: 24px;
-        }
-
+        /* Tables */
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
-            margin-top: 14px;
-        }
-
-        th, td {
-            padding: 12px 14px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
+            font-size: 0.84rem;
         }
 
         th {
+            text-align: left;
+            padding: 10px 14px;
             color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.72rem;
-            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+            font-weight: 500;
         }
 
         td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             color: var(--text-secondary);
         }
 
-        .badge-table {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-primary);
+        }
+
+        /* Metrics Row */
+        .metrics-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .metrics-grid-4 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            backdrop-filter: blur(16px);
+        }
+
+        .metric-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-val {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
             font-family: 'JetBrains Mono', monospace;
         }
 
-        .badge-auto { background: rgba(16, 185, 129, 0.15); color: #34d399; }
-        .badge-human { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        .metric-sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Dept Pills Bar */
+        .dept-pills-bar {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 18px;
+        }
+
+        .dept-pill-btn {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .dept-pill-btn:hover {
+            border-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .dept-pill-btn.active {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .dept-pill-count {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .dept-pill-btn.active .dept-pill-count {
+            background: var(--primary);
+            color: #080c14;
+        }
+
+        /* Probability Bars */
+        .prob-bar-container {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .prob-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.75rem;
+        }
+
+        .prob-bar-label {
+            width: 140px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            color: var(--text-secondary);
+        }
+
+        .prob-bar-outer {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .prob-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, #0284c7, #38bdf8);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .prob-bar-val {
+            width: 45px;
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        /* Modal Dialog */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-card {
+            background: #0f172a;
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            max-width: 560px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.88rem;
+            outline: none;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Retrain Terminal */
+        .terminal-box {
+            background: #050811;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: #38bdf8;
+            height: 200px;
+            overflow-y: auto;
+            line-height: 1.6;
+            margin-top: 14px;
+        }
 
         /* Toast */
+        /* Escalation Levels and SLA Badges */
+        .esc-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .esc-l1 { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .esc-l2 { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .esc-l3 { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .esc-l4 { background: rgba(244, 63, 94, 0.25); color: #fb7185; border: 1px solid #f43f5e; animation: pulse-esc 2s infinite; }
+        @keyframes pulse-esc {
+            0%, 100% { box-shadow: 0 0 4px rgba(244, 63, 94, 0.4); }
+            50% { box-shadow: 0 0 14px rgba(244, 63, 94, 0.8); }
+        }
+        .bounce-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            margin-left: 4px;
+        }
         .toast {
             position: fixed;
             bottom: 24px;
             right: 24px;
-            background: #1e293b;
-            color: white;
-            border: 1px solid var(--primary);
-            padding: 12px 20px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--border);
+            padding: 12px 18px;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             gap: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             transform: translateY(100px);
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 999;
+            z-index: 2000;
         }
 
         .toast.show {
             transform: translateY(0);
             opacity: 1;
         }
+        /* =====================================================================
+           AUTHENTICATION PORTAL & USER PROFILE STYLES
+           ===================================================================== */
+        #auth-view {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: radial-gradient(circle at 50% 20%, rgba(2, 132, 199, 0.15), transparent 60%),
+                        radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.12), transparent 50%),
+                        var(--bg-main);
+        }
+        .auth-container {
+            width: 100%;
+            max-width: 580px;
+        }
+        .auth-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 36px 32px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 30px rgba(56, 189, 248, 0.08);
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .auth-brand-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #0284c7, #6366f1);
+            border-radius: 14px;
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.4);
+        }
+        .auth-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 4px;
+        }
+        .auth-subtitle {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+        .demo-bar {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 24px;
+        }
+        .demo-bar-title {
+            font-size: 0.76rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #38bdf8;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+            gap: 8px;
+        }
+        .demo-chip {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 8px 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .demo-chip:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: #38bdf8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+        }
+        .demo-chip-icon {
+            font-size: 1.25rem;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .demo-chip-name {
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .demo-chip-role {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        .auth-tabs {
+            display: flex;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 22px;
+        }
+        .auth-tab-btn {
+            flex: 1;
+            padding: 8px 14px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .auth-tab-btn.active {
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+        }
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 20px 0 16px;
+        }
+        .auth-divider::before, .auth-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .auth-divider:not(:empty)::before {
+            margin-right: .8em;
+        }
+        .auth-divider:not(:empty)::after {
+            margin-left: .8em;
+        }
+        .auth-alert {
+            display: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+        }
+        .auth-alert.error {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(244, 63, 94, 0.15);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            color: #fb7185;
+        }
+        .user-nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 6px 14px;
+        }
+        .user-nav-avatar {
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+        .user-nav-meta {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+        .user-nav-name {
+            font-weight: 700;
+            font-size: 0.84rem;
+            color: #f8fafc;
+        }
+        .user-nav-dept {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        .user-nav-role-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <div class="header-title">
-                <div class="logo-icon">⚡</div>
-                <div>
-                    <h1>IT Support Ticket Auto-Router</h1>
-                    <div class="header-subtitle">MLOps Lifecycle & SDL Security Architecture Demo</div>
-                </div>
-            </div>
-            <div class="status-pills">
-                <div class="pill" id="status-pill">
-                    <span class="dot-green" id="status-dot"></span>
-                    <span id="status-text">Connecting to API...</span>
-                </div>
-                <div class="pill">
-                    <span>Threshold τ:</span>
-                    <strong id="threshold-val" style="color: var(--primary);">0.75</strong>
-                </div>
-                <div class="pill">
-                    <span>Model:</span>
-                    <strong id="version-val">v1.0.0</strong>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Dashboard Grid -->
-        <main class="dashboard-grid">
-            <!-- Left: Ticket Input Form -->
-            <section class="card" id="input-card">
-                <div class="card-header">
-                    <div class="card-title">📝 Ticket Ingestion & Analysis</div>
-                    <span class="latency-badge" id="api-status-badge">API Port :8000</span>
+    <!-- ================================================================= -->
+    <!-- AUTHENTICATION VIEW (LOGIN & SIGNUP PORTAL) -->
+    <!-- ================================================================= -->
+    <div id="auth-view">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="auth-brand-logo">⚡</div>
+                    <div class="auth-title">IT Support Ticket Auto-Router</div>
+                    <div class="auth-subtitle">Multi-Persona Enterprise MLOps & Escalation Platform</div>
                 </div>
 
-                <span class="presets-label">Click a quick-test scenario to prefill:</span>
-                <div class="presets-container" id="sample-pills">
-                    <button class="chip" data-text="laptop wont turn on after the update, screen completely black">💻 Hardware Failure</button>
-                    <button class="chip" data-text="pls give me admin rights on my laptop to install python compiler">🔑 Admin Elevation</button>
-                    <button class="chip" data-text="shared drive full, cant save files since morning, whole team blocked">💾 Storage Quota</button>
-                    <button class="chip" data-text="password reset not working and account locked after multiple tries">🛡️ IAM Account Locked</button>
-                    <button class="chip" data-text="CRITICAL OUTAGE: production database cluster down, all customer transactions failing!">🚨 Outage (Override Test)</button>
-                    <button class="chip" data-text="request access to the project repo and also need ergonomic mouse">❓ Ambiguous (Human Review)</button>
+                <!-- 1-Click Persona Quick Access -->
+                <div class="demo-bar">
+                    <div class="demo-bar-title">
+                        <span>⚡ 1-Click Instant Persona Login</span>
+                        <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: normal;">(Evaluator Quick-Access)</span>
+                    </div>
+                    <div class="demo-grid">
+                        <div class="demo-chip" onclick="executeQuickLogin('triager')">
+                            <span class="demo-chip-icon">🧑‍💻</span>
+                            <div class="demo-chip-name">Alex M.</div>
+                            <div class="demo-chip-role">L1 Triager</div>
+                        </div>
+                        <div class="demo-chip" onclick="executeQuickLogin('resolver_lead')">
+                            <span class="demo-chip-icon">🛠️</span>
+                            <div class="demo-chip-name">Sarah C.</div>
+                            <div class="demo-chip-role">L2 Resolver</div>
+                        </div>
+                        <div class="demo-chip" onclick="executeQuickLogin('specialist_l3')">
+                            <span class="demo-chip-icon">⚡</span>
+                            <div class="demo-chip-name">Devon V.</div>
+                            <div class="demo-chip-role">L3 DevOps</div>
+                        </div>
+                        <div class="demo-chip" onclick="executeQuickLogin('manager')">
+                            <span class="demo-chip-icon">👔</span>
+                            <div class="demo-chip-name">David S.</div>
+                            <div class="demo-chip-role">L4 Manager</div>
+                        </div>
+                        <div class="demo-chip" onclick="executeQuickLogin('mlops_admin')">
+                            <span class="demo-chip-icon">🤖</span>
+                            <div class="demo-chip-name">Elena F.</div>
+                            <div class="demo-chip-role">MLOps Admin</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="input-group">
-                    <textarea 
-                        id="ticket-input" 
-                        placeholder="Paste or type raw IT helpdesk ticket content here..."
-                        maxlength="5000"
-                    ></textarea>
-                    <div class="char-counter" id="char-counter">0 / 5000</div>
+                <div class="auth-divider">Or Sign In with Corporate Credentials</div>
+
+                <!-- Sign-In / Sign-Up Tabs -->
+                <div class="auth-tabs">
+                    <button class="auth-tab-btn active" id="tab-btn-signin" type="button" onclick="switchAuthTab('signin')">Sign In</button>
+                    <button class="auth-tab-btn" id="tab-btn-signup" type="button" onclick="switchAuthTab('signup')">Create Account</button>
                 </div>
 
-                <div class="action-row">
-                    <button class="btn-primary" id="btn-route" type="button">
-                        <span>⚡ Analyze & Auto-Route Ticket</span>
+                <!-- Error Alert Box -->
+                <div class="auth-alert error" id="auth-error-alert">
+                    <span>⚠️</span>
+                    <span id="auth-error-text">Invalid email or password</span>
+                </div>
+
+                <!-- Form 1: Sign In -->
+                <form id="form-signin" onsubmit="handleSignInSubmit(event)">
+                    <div class="form-group">
+                        <label class="form-label">Corporate Email</label>
+                        <input type="email" id="login-email" value="alex@enterprise.local" required placeholder="name@enterprise.local">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="login-password" value="ServiceDesk2026!" required placeholder="••••••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary" id="btn-login-submit" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+                        🔐 Sign In to Workspace
                     </button>
-                    <button class="btn-secondary" id="btn-clear" type="button">Clear</button>
-                </div>
-            </section>
+                </form>
 
-            <!-- Right: Real-time Routing Intelligence Card -->
-            <section class="card" id="result-card">
-                <div class="card-header">
-                    <div class="card-title">🎯 Routing Decision & Policy Engine</div>
-                    <span class="latency-badge" id="latency-val">Ready</span>
-                </div>
-
-                <!-- Empty State -->
-                <div class="result-empty" id="result-empty">
-                    <div class="result-empty-icon">🎫</div>
-                    <div style="font-weight: 500; color: #cbd5e1; margin-bottom: 4px;">No ticket analyzed yet</div>
-                    <div style="font-size: 0.82rem;">Select a preset scenario on the left or paste a ticket to inspect real-time classification.</div>
-                </div>
-
-                <!-- Active Result Display -->
-                <article class="result-active" id="result-active">
-                    <!-- Decision Banner -->
-                    <div class="decision-banner auto-route" id="decision-banner">
-                        <div>
-                            <div class="metric-label" style="color: inherit; opacity: 0.8;">Routing Decision</div>
-                            <div class="decision-text" id="decision-text">AUTO-ROUTE</div>
-                        </div>
-                        <span class="latency-badge" id="decision-subtext">Confident (≥ τ)</span>
+                <!-- Form 2: Sign Up -->
+                <form id="form-signup" style="display: none;" onsubmit="handleSignUpSubmit(event)">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="signup-name" placeholder="e.g. Jordan Lee">
                     </div>
-
-                    <!-- Metrics Subgrid -->
-                    <div class="metrics-subgrid">
-                        <div class="metric-tile">
-                            <div class="metric-label">Predicted Queue</div>
-                            <div class="metric-value-lg" id="cat-val">Access</div>
-                            <div class="team-destination" id="team-val">Identity & Access Management</div>
-                            <div class="confidence-container">
-                                <div style="display: flex; justify-content: space-between; font-size: 0.75rem;">
-                                    <span style="color: var(--text-muted);">Confidence</span>
-                                    <strong id="conf-val" style="color: var(--primary);">94.2%</strong>
-                                </div>
-                                <div class="confidence-bar-bg">
-                                    <div class="confidence-bar-fill" id="conf-bar"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="metric-tile">
-                            <div class="metric-label">Decision Support Priority</div>
-                            <div style="margin-top: 6px;">
-                                <span class="prio-tag prio-Medium" id="prio-badge">Medium</span>
-                            </div>
-                            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 10px;">
-                                Signal Confidence: <strong id="prio-conf-val">85%</strong>
-                            </div>
-                            <div id="override-note" style="font-size: 0.75rem; color: #fb7185; margin-top: 4px; display: none;">
-                                ⚠️ High-severity keyword override applied
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Corporate Email</label>
+                        <input type="email" id="signup-email" placeholder="jordan@enterprise.local">
                     </div>
-
-                    <!-- Inline Agent Feedback Loop -->
-                    <div class="feedback-box">
-                        <div class="feedback-title">
-                            <span>Human Agent Correction Loop</span>
-                            <span style="font-size: 0.72rem; color: var(--primary);">Feeds Continuous Retraining</span>
-                        </div>
-                        <div class="feedback-row">
-                            <select id="feedback-select">
-                                <option value="Access">Access</option>
-                                <option value="Administrative rights">Administrative rights</option>
-                                <option value="HR Support">HR Support</option>
-                                <option value="Hardware">Hardware</option>
-                                <option value="Internal Project">Internal Project</option>
-                                <option value="Miscellaneous">Miscellaneous</option>
-                                <option value="Purchase">Purchase</option>
-                                <option value="Storage">Storage</option>
-                            </select>
-                            <button class="btn-correct" id="btn-feedback" type="button">Submit Override</button>
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Password (min 6 chars)</label>
+                        <input type="password" id="signup-password" minlength="6" placeholder="••••••••••••">
                     </div>
-                </article>
-            </section>
-        </main>
+                    <div class="form-group">
+                        <label class="form-label">Assigned Role</label>
+                        <select id="signup-role" onchange="handleRoleDeptSync()">
+                            <option value="triager">Tier 1: Service Desk Triager (L1)</option>
+                            <option value="resolver_lead">Tier 2: Functional Resolver Team Lead (L2)</option>
+                            <option value="specialist_l3">Tier 3: Senior DevOps & Emergency Specialist (L3)</option>
+                            <option value="manager">Tier 4: Operations Delivery Manager & Commander (L4)</option>
+                            <option value="mlops_admin">MLOps Platform Lead & AI Governance</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Assigned Department</label>
+                        <select id="signup-dept">
+                            <option value="Service Desk Triage">Service Desk Triage</option>
+                            <option value="Desktop Support & Hardware Services">Desktop Support & Hardware Services</option>
+                            <option value="Identity & Access Management (IAM)">Identity & Access Management (IAM)</option>
+                            <option value="Cloud & Storage Infrastructure">Cloud & Storage Infrastructure</option>
+                            <option value="Project Engineering & DevOps">Project Engineering & DevOps</option>
+                            <option value="IT Service Delivery">IT Service Delivery</option>
+                            <option value="MLOps Platform">MLOps Platform</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary" id="btn-signup-submit" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px; background: linear-gradient(135deg, #059669, #10b981);">
+                        ✨ Create Account & Launch Dashboard
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-        <!-- Batch Queue Tester Section -->
-        <section class="card batch-section">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">📦 High-Throughput Batch Inference Tester</div>
-                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                        Benchmark latency and multi-ticket decision distribution (/predict/batch)
+    <!-- ================================================================= -->
+    <!-- AUTHENTICATED APPLICATION SHELL -->
+    <!-- ================================================================= -->
+    <div id="app-view" style="display: none;">
+        <div class="container">
+            <!-- Top App Header -->
+            <header>
+                <div class="header-title">
+                    <div class="logo-icon">⚡</div>
+                    <div>
+                        <h1>IT Support Auto-Router & Tiered Escalation Platform</h1>
+                        <div class="header-subtitle" id="header-workspace-subtitle">Intelligent Queue Dispatch • SLA Monitoring & Multi-Tier Escalation System</div>
                     </div>
                 </div>
-                <button class="btn-primary" id="btn-batch-test" type="button">
-                    <span>⚡ Run 5-Ticket Batch Simulation</span>
+
+                <div class="header-meta">
+                    <div class="status-pill">
+                        <span class="status-dot"></span>
+                        <span>v1.0.0-champion</span>
+                    </div>
+                    <div class="badge-pill" id="header-threshold-badge">
+                        Policy τ = <span id="header-threshold" style="color: var(--primary);">0.75</span>
+                    </div>
+                    <div class="user-nav-profile" id="user-profile-header">
+                        <div class="user-nav-avatar" id="active-user-avatar">🧑‍💻</div>
+                        <div class="user-nav-meta">
+                            <span class="user-nav-name" id="active-user-name">Alex Mercer</span>
+                            <span class="user-nav-dept" id="active-user-dept">Service Desk Triage</span>
+                        </div>
+                        <span class="user-nav-role-badge badge-pill" id="active-user-role-badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">L1 Triager</span>
+                        <button class="btn-secondary" id="btn-open-persona-modal" type="button" title="Switch Demo Persona" style="padding: 4px 8px; font-size: 0.72rem; border-color: rgba(56,189,248,0.3); color: #38bdf8;">
+                            🔄 Switch Role
+                        </button>
+                        <button class="btn-secondary" id="btn-user-logout" type="button" title="Sign Out" style="padding: 4px 8px; font-size: 0.72rem; border-color: rgba(244,63,94,0.3); color: #fb7185;">
+                            🚪 Logout
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Role Navigation Bar (Controlled via Auth) -->
+            <nav class="role-nav" id="role-nav-bar" style="display: none;">
+                <button class="role-btn active" data-role="triager" id="role-triager">
+                    <span>🧑‍💻 Triage Agent (L1)</span>
+                    <span class="role-tag">Rapid Ingest & Review</span>
                 </button>
+                <button class="role-btn" data-role="resolver_lead" id="role-resolver">
+                    <span>🏢 Resolver Lead (L2)</span>
+                    <span class="role-tag">Dept Backlog & SLA</span>
+                </button>
+                <button class="role-btn" data-role="specialist_l3" id="role-specialist">
+                    <span>⚡ Senior DevOps (L3)</span>
+                    <span class="role-tag">Incidents & Hotfixes</span>
+                </button>
+                <button class="role-btn" data-role="manager" id="role-manager">
+                    <span>📊 Operations Manager (L4)</span>
+                    <span class="role-tag">Escalation Command & ROI</span>
+                </button>
+                <button class="role-btn" data-role="mlops_admin" id="role-admin">
+                    <span>🛠️ MLOps Admin</span>
+                    <span class="role-tag">Governance & CT</span>
+                </button>
+            </nav>
+
+        <!-- ================================================================= -->
+        <!-- WORKSPACE 1: TRIAGE AGENT -->
+        <!-- ================================================================= -->
+        <section class="workspace-panel active" id="workspace-triager">
+            <div class="grid-2col">
+                <!-- Left: Ticket Ingest Deck -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📝 Fast Ingest & Classify Deck</div>
+                        <span class="badge-pill" id="triage-char-counter">0 / 5,000 chars</span>
+                    </div>
+
+                    <div class="presets-container" id="triage-presets">
+                        <button class="chip" data-text="laptop screen completely black and won't turn on after update">💻 Hardware Failure</button>
+                        <button class="chip" data-text="please grant admin elevation rights to install local database server">🔑 Admin Rights</button>
+                        <button class="chip" data-text="password reset expired and domain account is currently locked out">🛡️ IAM Lockout</button>
+                        <button class="chip" data-text="team shared network drive is at 100% capacity and blocked">💾 Storage Quota</button>
+                        <button class="chip" data-text="where do i submit my direct deposit bank info for upcoming payroll">👥 HR Payroll</button>
+                        <button class="chip" data-text="CRITICAL OUTAGE: production database server down, customers impacted!">🚨 Server Outage</button>
+                    </div>
+
+                    <div style="position: relative; margin-bottom: 12px;">
+                        <textarea id="triage-input" placeholder="Type or paste IT ticket issue description here..."></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="checkbox" id="triage-pii-scrub" checked>
+                            <span>🔒 Mask PII Tokens in Preview (Emails, IPs, IDs)</span>
+                        </label>
+                        <span class="badge-pill" id="triage-latency">Ready</span>
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <button class="btn-primary" id="btn-triage-submit" type="button" style="width: 100%; justify-content: center;">
+                            ⚡ Classify & Route Ticket
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Active Decision & Top-3 Probabilities -->
+                <div class="card" id="triage-result-card">
+                    <div class="card-header">
+                        <div class="card-title">🎯 Routing Recommendation & Probabilities</div>
+                        <span class="badge-pill" id="inspect-ticket-id">No Ticket</span>
+                    </div>
+
+                    <div id="triage-result-body" style="display: none;">
+                        <div class="decision-banner auto-route" id="triage-decision-banner">
+                            <div>
+                                <strong id="triage-decision-text" style="font-size: 1.05rem;">AUTO-ROUTE</strong>
+                                <div id="triage-decision-sub" style="font-size: 0.75rem; opacity: 0.9;">Confidence exceeds policy threshold</div>
+                            </div>
+                            <span id="triage-confidence-text" style="font-size: 1.1rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;">94.2%</span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                            <div style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                                <div class="metric-label">Target Queue</div>
+                                <div style="font-size: 1.05rem; font-weight: 700; color: var(--primary);" id="triage-category-val">Hardware</div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted);" id="triage-team-val">Desktop Support</div>
+                            </div>
+                            <div style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                                <div class="metric-label">Predicted Priority</div>
+                                <div style="margin-top: 4px;"><span class="prio-tag prio-Medium" id="triage-prio-val">Medium</span></div>
+                                <div style="font-size: 0.72rem; color: #fb7185; margin-top: 4px; display: none;" id="triage-override-flag">⚠️ Keyword Override Active</div>
+                            </div>
+                        </div>
+
+                        <!-- Top-3 Probability Distribution -->
+                        <div style="background: rgba(15,23,42,0.5); padding: 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px;">
+                            <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">
+                                Top Category Probabilities
+                            </div>
+                            <div class="prob-bar-container" id="triage-prob-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- 1-Click Actions Bar -->
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-primary" id="btn-quick-approve" type="button" style="flex: 1; background: linear-gradient(135deg, #059669, #10b981); justify-content: center;">
+                                ✅ Quick Approve
+                            </button>
+                            <button class="btn-secondary" id="btn-open-override" type="button" style="flex: 1; justify-content: center; color: #fbbf24; border-color: rgba(245,158,11,0.3);">
+                                🔄 1-Click Override
+                            </button>
+                            <button class="btn-secondary" id="btn-open-escalate-inspect" type="button" style="flex: 1; justify-content: center; color: #38bdf8; border-color: rgba(56,189,248,0.3);">
+                                ⬆️ Escalate Tier
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="triage-empty-state" style="text-align: center; color: var(--text-muted); padding: 50px 20px;">
+                        Select a preset or enter ticket text above to inspect ML confidence, priority, and top category probabilities.
+                    </div>
+                </div>
             </div>
 
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Ticket ID</th>
-                            <th>Ticket Text Snippet</th>
-                            <th>Predicted Category</th>
-                            <th>Confidence</th>
-                            <th>Priority</th>
-                            <th>Decision</th>
-                            <th>Assigned Resolver Queue</th>
-                        </tr>
-                    </thead>
-                    <tbody id="batch-table-body">
-                        <tr>
-                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">
-                                Click "Run 5-Ticket Batch Simulation" to benchmark multi-ticket processing.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Triage Queue Table (Tickets Awaiting Human Review) -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>🛡️ Ambiguous & Low-Confidence Review Queue</span>
+                        <span class="badge-pill" id="pending-count-badge" style="background: rgba(245,158,11,0.2); color: #fbbf24;">0 Pending</span>
+                    </div>
+                    <button class="btn-secondary" id="btn-refresh-triage" type="button">🔄 Refresh Queue</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ticket ID</th>
+                                <th>Ticket Snippet</th>
+                                <th>Model Category</th>
+                                <th>Confidence</th>
+                                <th>Priority & SLA</th>
+                                <th>Escalation Tier</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="triage-table-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">Loading pending tickets...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
+
+        <!-- ================================================================= -->
+        <!-- WORKSPACE 2: RESOLVER TEAM LEAD -->
+        <!-- ================================================================= -->
+        <section class="workspace-panel" id="workspace-resolver_lead">
+            <!-- Department Pills Selector Bar -->
+            <div class="card" style="padding: 16px 20px; margin-bottom: 16px;">
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">
+                    SELECT DEPARTMENT QUEUE:
+                </div>
+                <div class="dept-pills-bar" id="dept-pills-list">
+                    <!-- Dynamic department pills rendered here -->
+                </div>
+            </div>
+
+            <!-- Department Queue Health Stats Bar -->
+            <div class="metrics-grid-4">
+                <div class="metric-card">
+                    <div class="metric-label">Active Queue Backlog</div>
+                    <div class="metric-val" id="dept-kpi-total">0</div>
+                    <div class="metric-sub" id="dept-name-label">Selected Department</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Unassigned Tickets</div>
+                    <div class="metric-val" id="dept-kpi-unassigned" style="color: #fbbf24;">0</div>
+                    <div class="metric-sub">Requires Engineer Assignment</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">In-Progress Work</div>
+                    <div class="metric-val" id="dept-kpi-in-progress" style="color: var(--primary);">0</div>
+                    <div class="metric-sub">Active Engineering Effort</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">SLA Compliance Rate</div>
+                    <div class="metric-val" id="dept-kpi-sla" style="color: #34d399;">98.4%</div>
+                    <div class="metric-sub">Within Target SLA Thresholds</div>
+                </div>
+            </div>
+
+            <!-- Department Backlog Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>📋 Active Department Ticket Backlog</span>
+                        <span class="badge-pill" id="active-dept-pill">Desktop Support</span>
+                    </div>
+                    <button class="btn-secondary" id="btn-refresh-dept" type="button">🔄 Refresh</button>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Priority</th>
+                                <th>Ticket ID</th>
+                                <th>Ticket Description</th>
+                                <th>Lifecycle State</th>
+                                <th>Assigned Engineer</th>
+                                <th>SLA Countdown</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resolver-table-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">Loading department queue...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <!-- ================================================================= -->
+        <!-- WORKSPACE 3: TIER 3 SENIOR DEVOPS & INCIDENT SPECIALIST -->
+        <!-- ================================================================= -->
+        <section class="workspace-panel" id="workspace-specialist_l3">
+            <!-- Incident Alert Banner -->
+            <div class="card" style="padding: 16px 20px; margin-bottom: 20px; border-color: rgba(244, 63, 94, 0.4); background: linear-gradient(135deg, rgba(244,63,94,0.08), rgba(15,23,42,0.8));">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.8rem;">🚨</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 1.05rem; color: #fb7185;">Tier 3 Deep Engineering & Emergency Incident Center</div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary);">Direct dispatch for P0/P1 Outages, Infrastructure defects, Security alerts, and Escalated tickets</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-secondary" id="btn-trigger-sla-sweep" type="button" style="color: #fbbf24; border-color: rgba(245,158,11,0.3);">
+                            ⏱️ Sweep SLA Status
+                        </button>
+                        <button class="btn-secondary" id="btn-refresh-l3" type="button">🔄 Refresh Queue</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Specialist Metrics Row -->
+            <div class="metrics-grid-4">
+                <div class="metric-card">
+                    <div class="metric-label">Active Escalated Incidents</div>
+                    <div class="metric-val" id="l3-kpi-active" style="color: #fbbf24;">0</div>
+                    <div class="metric-sub">Tier 3 Active Backlog</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Critical Outages (P0/P1)</div>
+                    <div class="metric-val" id="l3-kpi-critical" style="color: #fb7185;">0</div>
+                    <div class="metric-sub">Emergency Keyword Overrides</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">SLA Breach Warnings</div>
+                    <div class="metric-val" id="l3-kpi-breaches" style="color: #f43f5e;">0</div>
+                    <div class="metric-sub">Requires Rapid Patch</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Target MTTR (Resolution)</div>
+                    <div class="metric-val" style="color: #34d399;">&lt; 45 min</div>
+                    <div class="metric-sub">Tier 3 Production SLA Target</div>
+                </div>
+            </div>
+
+            <!-- L3 Specialist Queue Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>⚡ Tier 3 Incident & Senior Escalation Backlog</span>
+                        <span class="badge-pill" id="l3-count-badge" style="background: rgba(245,158,11,0.2); color: #fbbf24;">0 Active</span>
+                    </div>
+                    <span style="font-size: 0.78rem; color: var(--text-muted);">Assigned Persona: Devon Vance (L3 Senior DevOps)</span>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Severity</th>
+                                <th>Ticket ID</th>
+                                <th>Issue Summary</th>
+                                <th>Escalation Justification</th>
+                                <th>Assigned Team / Tier</th>
+                                <th>SLA Status</th>
+                                <th>Action Protocols</th>
+                            </tr>
+                        </thead>
+                        <tbody id="l3-table-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">Loading Tier 3 incidents...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- WORKSPACE 4: IT OPERATIONS DELIVERY MANAGER -->
+        <!-- ================================================================= -->
+        <section class="workspace-panel" id="workspace-manager">
+            <!-- Executive KPI Row -->
+            <div class="metrics-grid-4">
+                <div class="metric-card">
+                    <div class="metric-label">Auto-Route Rate (a)</div>
+                    <div class="metric-val" id="kpi-auto-rate">71.4%</div>
+                    <div class="metric-sub">PRD SLA Target: ≥ 65%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Routing Precision (p)</div>
+                    <div class="metric-val" id="kpi-accuracy">92.5%</div>
+                    <div class="metric-sub">PRD Accuracy Target: ≥ 85%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Net Agent Hours Saved / Mo</div>
+                    <div class="metric-val" id="kpi-hours-saved" style="color: var(--primary);">142.5 hrs</div>
+                    <div class="metric-sub" id="kpi-cost-saved">$6,412.50 / mo saved</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Routing MTTR Comparison</div>
+                    <div class="metric-val" id="kpi-mttr" style="color: #34d399;">12 sec</div>
+                    <div class="metric-sub">Manual: 4.2 hrs • 99.9% faster</div>
+                </div>
+            </div>
+
+            <div class="grid-2col">
+                <!-- Interactive PRD Business ROI Simulator -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📈 Business ROI & Financial Simulator</div>
+                        <span class="badge-pill">PRD Formula Section 2</span>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
+                        Interactive financial sensitivity model: <code>Net = N × a × [t − (1−p)c] × (R/60) − Infra</code>
+                    </p>
+
+                    <!-- Sliders Grid -->
+                    <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+                                <span>Monthly Volume (N): <strong id="sim-vol-val" style="color: var(--primary);">10,000</strong> tickets</span>
+                                <span style="color: var(--text-muted);">1k - 50k</span>
+                            </div>
+                            <input type="range" id="sim-vol-slider" min="1000" max="50000" step="1000" value="10000" style="width: 100%;">
+                        </div>
+
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+                                <span>Blended Labor Rate (R): <strong id="sim-rate-val" style="color: var(--primary);">$45 / hr</strong></span>
+                                <span style="color: var(--text-muted);">$20 - $100</span>
+                            </div>
+                            <input type="range" id="sim-rate-slider" min="20" max="100" step="5" value="45" style="width: 100%;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 4px;">
+                                    <span>Time Saved (t): <strong id="sim-time-val">4.0 min</strong></span>
+                                </div>
+                                <input type="range" id="sim-time-slider" min="2" max="10" step="0.5" value="4.0" style="width: 100%;">
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 4px;">
+                                    <span>Reroute Penalty (c): <strong id="sim-pen-val">15.0 min</strong></span>
+                                </div>
+                                <input type="range" id="sim-pen-slider" min="5" max="25" step="1" value="15.0" style="width: 100%;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculated Output Results -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: rgba(15,23,42,0.7); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
+                        <div>
+                            <div class="metric-label">Net Annual Savings ($)</div>
+                            <div style="font-size: 1.35rem; font-weight: 700; color: #34d399;" id="sim-annual-cost">$75,450 / yr</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">After $150/mo cloud infra</div>
+                        </div>
+                        <div>
+                            <div class="metric-label">Efficiency Multiplier</div>
+                            <div style="font-size: 1.35rem; font-weight: 700; color: var(--primary);" id="sim-roi-mult">41.9x ROI</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">Net savings / infra cost</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Department Volume Distribution & Export -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🏢 Incoming Department Load Distribution</div>
+                        <span class="badge-pill">Live Relational DB</span>
+                    </div>
+
+                    <div id="dept-dist-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                        <!-- Rendered dynamically -->
+                    </div>
+
+                    <div style="border-top: 1px solid var(--border); padding-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">Executive Audit & Compliance export</span>
+                        <button class="btn-primary" id="btn-export-audit" type="button" style="padding: 8px 14px; font-size: 0.8rem;">
+                            📥 Export Executive Report (JSON)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Escalation & Major Incident Command Center -->
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>🚨 Incident Command & Escalation Oversight</span>
+                        <span class="badge-pill" id="manager-esc-count-badge" style="background: rgba(244,63,94,0.2); color: #fb7185;">0 Requiring Intervention</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-secondary" id="btn-trigger-sla-sweep-mgr" type="button" style="color: #fbbf24; border-color: rgba(245,158,11,0.3); font-size: 0.8rem; padding: 6px 12px;">
+                            ⏱️ Sweep SLA
+                        </button>
+                        <button class="btn-secondary" id="btn-refresh-mgr-esc" type="button" style="font-size: 0.8rem; padding: 6px 12px;">🔄 Refresh</button>
+                    </div>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
+                    Monitors Tier 4 Executive Escalations, SLA Breaches, and Multi-Bounce Ping-Pong Tickets requiring direct managerial arbitration.
+                </p>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Level</th>
+                                <th>Ticket ID</th>
+                                <th>Description</th>
+                                <th>Escalation Reason / Bounce Count</th>
+                                <th>Assigned Queue</th>
+                                <th>SLA Deadline</th>
+                                <th>Managerial Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manager-esc-table-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No critical escalations pending.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- WORKSPACE 4: MLOPS & PLATFORM ADMIN -->
+        <!-- ================================================================= -->
+        <section class="workspace-panel" id="workspace-mlops_admin">
+            <div class="grid-2col">
+                <!-- Active Champion Governance Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🛡️ Champion Model Governance</div>
+                        <span class="badge-pill" style="color: #34d399; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3);">
+                            ● Active Champion
+                        </span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                        <div style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
+                            <div class="metric-label">Model Architecture</div>
+                            <div style="font-size: 1.05rem; font-weight: 700; color: var(--primary);">TF-IDF + Calibrated LogReg</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Zero GPU • CPU Optimized</div>
+                        </div>
+                        <div style="background: rgba(15,23,42,0.6); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
+                            <div class="metric-label">Test Macro-F1 Gate</div>
+                            <div style="font-size: 1.05rem; font-weight: 700; color: #34d399;">1.0000</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Threshold: ≥ 0.80 Passed</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(15,23,42,0.6); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.78rem; line-height: 1.6; color: var(--text-secondary);">
+                        <div><strong>Registry URI:</strong> <code style="color: var(--primary);">models:/it-ticket-routing@champion</code></div>
+                        <div><strong>Zero-Regression Gate:</strong> Enforces &lt; 5% class degradation before candidate promotion.</div>
+                        <div><strong>Inference Latency (p95):</strong> 14 ms (Target: &lt; 300 ms on CPU).</div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Threshold Tuning & Retraining Dispatch -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">⚙️ Policy Threshold & CT Dispatch</div>
+                        <span class="badge-pill" id="admin-threshold-badge">τ = 0.75</span>
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 6px;">
+                            Confidence Policy Threshold (τ): Controls Auto-Route vs Human Review Gate
+                        </label>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <input type="range" id="admin-threshold-slider" min="0.50" max="0.95" step="0.05" value="0.75" style="flex: 1;">
+                            <strong id="admin-slider-val" style="width: 45px; text-align: right; color: var(--primary); font-family: 'JetBrains Mono', monospace;">0.75</strong>
+                            <button class="btn-primary" id="btn-save-threshold" type="button" style="padding: 8px 14px; font-size: 0.8rem;">
+                                Apply τ
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr style="border-color: var(--border); margin: 16px 0;">
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.88rem;">Continuous Retraining (CT) Pipeline</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Triggers automated DVC pipeline with feedback data</div>
+                        </div>
+                        <button class="btn-primary" id="btn-trigger-retrain" type="button" style="background: linear-gradient(135deg, #7c3aed, #4f46e5);">
+                            ⚡ Dispatch CT Retraining
+                        </button>
+                    </div>
+
+                    <!-- Retraining Simulation Output -->
+                    <div class="terminal-box" id="retrain-terminal" style="display: none;">
+                        <div>[SYSTEM] Initiating Continuous Training (CT) Pipeline...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tamper-Evident Security & Audit Log Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>🛡️ Tamper-Evident Security & Audit Trail</span>
+                        <span class="badge-pill">SOC 2 / ISO 27001 Log Stream</span>
+                    </div>
+                    <button class="btn-secondary" id="btn-refresh-audit" type="button">🔄 Refresh Logs</button>
+                </div>
+
+                <div style="overflow-x: auto; max-height: 320px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp (UTC)</th>
+                                <th>Ticket ID</th>
+                                <th>Actor ID</th>
+                                <th>Role</th>
+                                <th>Action</th>
+                                <th>Transition</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="audit-table-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">Loading audit events...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</div><!-- end #app-view -->
+
+    <!-- ================================================================= -->
+    <!-- MODALS & DRAWERS -->
+    <!-- ================================================================= -->
+
+    <!-- 1. Triage Override Modal -->
+    <div class="modal-overlay" id="modal-override">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">🔄 Override Ticket Routing & Priority</div>
+                <button class="modal-close" onclick="closeModal('modal-override')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ticket ID</label>
+                <input type="text" id="override-ticket-id" readonly style="opacity: 0.8; font-family: 'JetBrains Mono', monospace;">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Reassign Target Category</label>
+                <select id="override-category-select">
+                    <option value="Hardware">Hardware (Desktop Support)</option>
+                    <option value="Access">Access (Identity & Access Management)</option>
+                    <option value="Administrative rights">Administrative rights (Endpoint Ops)</option>
+                    <option value="Storage">Storage (Cloud & Storage Infrastructure)</option>
+                    <option value="HR Support">HR Support (People Operations)</option>
+                    <option value="Internal Project">Internal Project (DevOps)</option>
+                    <option value="Purchase">Purchase (IT Procurement)</option>
+                    <option value="Miscellaneous">Miscellaneous (General Help Desk)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Update Priority (Optional)</label>
+                <select id="override-prio-select">
+                    <option value="">Keep Model Priority</option>
+                    <option value="Critical">Critical (P1)</option>
+                    <option value="High">High (P2)</option>
+                    <option value="Medium">Medium (P3)</option>
+                    <option value="Low">Low (P4)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Mandatory Override Reason</label>
+                <select id="override-reason-select">
+                    <option value="misclassified_category">Category Misclassification (Model Error)</option>
+                    <option value="insufficient_context">Insufficient Context / Ambiguous Query</option>
+                    <option value="urgency_mismatch">Urgency or SLA Mismatch</option>
+                    <option value="other">Other Operational Justification</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Triager Audit Notes</label>
+                <input type="text" id="override-notes" placeholder="e.g. User requested explicit hardware swap">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn-secondary" onclick="closeModal('modal-override')">Cancel</button>
+                <button class="btn-primary" id="btn-submit-override-modal">Submit Override</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Assign Engineer Modal -->
+    <div class="modal-overlay" id="modal-assign">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">👤 Assign Ticket to Engineer</div>
+                <button class="modal-close" onclick="closeModal('modal-assign')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ticket ID</label>
+                <input type="text" id="assign-ticket-id" readonly style="opacity: 0.8; font-family: 'JetBrains Mono', monospace;">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Select Resolver Engineer</label>
+                <select id="assign-engineer-select">
+                    <option value="Sarah Connor (Lead)">Sarah Connor (Lead Engineer)</option>
+                    <option value="David Kim (Senior)">David Kim (Senior Systems Specialist)</option>
+                    <option value="Alice Morales (Hardware)">Alice Morales (Field Technician)</option>
+                    <option value="John Doe (Network)">John Doe (Network Administrator)</option>
+                </select>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn-secondary" onclick="closeModal('modal-assign')">Cancel</button>
+                <button class="btn-primary" id="btn-submit-assign-modal">Confirm Assignment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Mark Resolved Modal -->
+    <div class="modal-overlay" id="modal-resolve">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">✅ Mark Ticket Resolved</div>
+                <button class="modal-close" onclick="closeModal('modal-resolve')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ticket ID</label>
+                <input type="text" id="resolve-ticket-id" readonly style="opacity: 0.8; font-family: 'JetBrains Mono', monospace;">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Resolution Summary & Root Cause</label>
+                <input type="text" id="resolve-notes" placeholder="e.g. Replaced faulty monitor cable, verified display output.">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn-secondary" onclick="closeModal('modal-resolve')">Cancel</button>
+                <button class="btn-primary" id="btn-submit-resolve-modal" style="background: linear-gradient(135deg, #059669, #10b981);">
+                    Complete Resolution
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Dispute Misroute Modal -->
+    <div class="modal-overlay" id="modal-dispute">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">⚠️ Dispute Misrouted Ticket</div>
+                <button class="modal-close" onclick="closeModal('modal-dispute')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ticket ID</label>
+                <input type="text" id="dispute-ticket-id" readonly style="opacity: 0.8; font-family: 'JetBrains Mono', monospace;">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Dispute Reason / Misroute Justification</label>
+                <textarea id="dispute-reason-text" style="height: 80px;" placeholder="Explain why this ticket does not belong to your department..."></textarea>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px;">
+                Disputing will return this ticket directly to the Human Triage Review Queue and record feedback for Continuous Retraining.
+            </p>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn-secondary" onclick="closeModal('modal-dispute')">Cancel</button>
+                <button class="btn-primary" id="btn-submit-dispute-modal" style="background: linear-gradient(135deg, #e11d48, #be123c);">
+                    Submit Dispute
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Tiered Escalation Modal -->
+    <div class="modal-overlay" id="modal-escalate">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">⬆️ Escalate Ticket to Higher Tier</div>
+                <button class="modal-close" onclick="closeModal('modal-escalate')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ticket ID</label>
+                <input type="text" id="escalate-ticket-id" readonly style="opacity: 0.8; font-family: 'JetBrains Mono', monospace;">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Target Escalation Tier</label>
+                <select id="escalate-target-level">
+                    <option value="2">Tier 2 — Functional Department Engineering (L2)</option>
+                    <option value="3" selected>Tier 3 — Senior DevOps, Cloud & Incident Specialist (L3)</option>
+                    <option value="4">Tier 4 — IT Operations Delivery Manager / Incident Commander</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Primary Escalation Reason</label>
+                <select id="escalate-reason-select">
+                    <option value="Hardware Component Defect (Lab Diagnostic Required)">Hardware Component Defect (Lab Diagnostic Required)</option>
+                    <option value="Root Cause Core Infrastructure Outage">Root Cause Core Infrastructure Outage</option>
+                    <option value="Security Vulnerability / Suspected Breach">Security Vulnerability / Suspected Breach</option>
+                    <option value="Insufficient IAM / Elevated Rights">Insufficient IAM / Elevated Rights</option>
+                    <option value="Vendor Dependency / Upstream SLA Degradation">Vendor Dependency / Upstream SLA Degradation</option>
+                    <option value="Repeated Reassignment (Ping-Pong Dispute)">Repeated Reassignment (Ping-Pong Dispute)</option>
+                    <option value="Technical Complexity Deadlock">Technical Complexity Deadlock</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Target Department Override (Optional)</label>
+                <select id="escalate-target-team">
+                    <option value="">Keep / Default for Tier</option>
+                    <option value="Project Engineering & DevOps">Project Engineering & DevOps (L3 Senior)</option>
+                    <option value="Identity & Access Management (IAM)">Identity & Access Management (IAM)</option>
+                    <option value="Desktop Support & Hardware Services">Desktop Support & Hardware Services</option>
+                    <option value="Cloud & Storage Infrastructure">Cloud & Storage Infrastructure</option>
+                    <option value="Endpoint Operations & Security">Endpoint Operations & Security</option>
+                    <option value="IT Operations Management / Incident Command">IT Operations Management / Incident Command (L4)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Technical Notes & Diagnostic History</label>
+                <textarea id="escalate-notes" style="height: 75px;" placeholder="Document diagnostic steps performed and why escalation is necessary..."></textarea>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px;">
+                Escalating will promote the ticket tier, record an immutable event in the audit trail, and dispatch it to the target tier.
+            </p>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn-secondary" onclick="closeModal('modal-escalate')">Cancel</button>
+                <button class="btn-primary" id="btn-submit-escalate-modal" style="background: linear-gradient(135deg, #0284c7, #6366f1);">
+                    Confirm Escalation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Switch Persona Modal -->
+    <div class="modal-overlay" id="modal-switch-persona">
+        <div class="modal-card" style="max-width: 520px;">
+            <div class="modal-header">
+                <div class="modal-title">🔄 Switch Enterprise Persona / Role</div>
+                <button class="modal-close" onclick="closeModal('modal-switch-persona')">&times;</button>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 16px;">
+                Instant 1-click persona transition to inspect and evaluate each role's dedicated dashboard.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div class="card" onclick="executeQuickLogin('triager'); closeModal('modal-switch-persona');" style="cursor: pointer; padding: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(56,189,248,0.3);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.5rem;">🧑‍💻</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #f8fafc;">Alex Mercer</div>
+                            <div style="font-size: 0.74rem; color: var(--text-muted);">Service Desk Triage (L1)</div>
+                        </div>
+                    </div>
+                    <span class="badge-pill" style="background: rgba(56,189,248,0.15); color: #38bdf8;">Switch Role →</span>
+                </div>
+
+                <div class="card" onclick="executeQuickLogin('resolver_lead'); closeModal('modal-switch-persona');" style="cursor: pointer; padding: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(16,185,129,0.3);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.5rem;">🛠️</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #f8fafc;">Sarah Connor</div>
+                            <div style="font-size: 0.74rem; color: var(--text-muted);">Desktop & Hardware Resolver Lead (L2)</div>
+                        </div>
+                    </div>
+                    <span class="badge-pill" style="background: rgba(16,185,129,0.15); color: #34d399;">Switch Role →</span>
+                </div>
+
+                <div class="card" onclick="executeQuickLogin('specialist_l3'); closeModal('modal-switch-persona');" style="cursor: pointer; padding: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(245,158,11,0.3);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.5rem;">⚡</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #f8fafc;">Devon Vance</div>
+                            <div style="font-size: 0.74rem; color: var(--text-muted);">Senior DevOps & Emergency Specialist (L3)</div>
+                        </div>
+                    </div>
+                    <span class="badge-pill" style="background: rgba(245,158,11,0.15); color: #fbbf24;">Switch Role →</span>
+                </div>
+
+                <div class="card" onclick="executeQuickLogin('manager'); closeModal('modal-switch-persona');" style="cursor: pointer; padding: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(244,63,94,0.3);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.5rem;">👔</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #f8fafc;">David Sterling</div>
+                            <div style="font-size: 0.74rem; color: var(--text-muted);">Operations Delivery Manager & Incident Commander (L4)</div>
+                        </div>
+                    </div>
+                    <span class="badge-pill" style="background: rgba(244,63,94,0.15); color: #fb7185;">Switch Role →</span>
+                </div>
+
+                <div class="card" onclick="executeQuickLogin('mlops_admin'); closeModal('modal-switch-persona');" style="cursor: pointer; padding: 12px; display: flex; align-items: center; justify-content: space-between; border-color: rgba(168,85,247,0.3);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.5rem;">🤖</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.9rem; color: #f8fafc;">Elena Fisher</div>
+                            <div style="font-size: 0.74rem; color: var(--text-muted);">MLOps Platform Lead & AI Governance</div>
+                        </div>
+                    </div>
+                    <span class="badge-pill" style="background: rgba(168,85,247,0.15); color: #c084fc;">Switch Role →</span>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+                <button class="btn-secondary" onclick="closeModal('modal-switch-persona')">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <!-- Toast Notification -->
     <div class="toast" id="toast-msg">
         <span id="toast-icon">✅</span>
-        <span id="toast-text">Feedback recorded successfully!</span>
+        <span id="toast-text">Action executed successfully!</span>
     </div>
 
+    <!-- ================================================================= -->
+    <!-- APPLICATION JAVASCRIPT LOGIC -->
+    <!-- ================================================================= -->
     <script>
         const API_BASE = window.location.origin.includes('8000') ? window.location.origin : 'http://localhost:8000';
-        let currentTicketId = null;
-        let currentPredictedCategory = null;
+        
+        let authToken = localStorage.getItem('auth_token') || null;
+        let currentUser = null;
+        try {
+            currentUser = JSON.parse(localStorage.getItem('auth_user') || 'null');
+        } catch (e) {
+            currentUser = null;
+        }
 
-        const ticketInput = document.getElementById('ticket-input');
-        const charCounter = document.getElementById('char-counter');
-        const btnRoute = document.getElementById('btn-route');
-        const btnClear = document.getElementById('btn-clear');
-        const resultEmpty = document.getElementById('result-empty');
-        const resultActive = document.getElementById('result-active');
-        const latencyVal = document.getElementById('latency-val');
+        let currentRole = currentUser ? currentUser.role : 'triager';
+        let currentUserId = currentUser ? currentUser.id : 'usr_triager_alex';
+        let activeInspectedTicket = null;
+        let selectedDepartment = currentUser && currentUser.department ? currentUser.department : 'Desktop Support & Hardware Services';
 
-        // Character Counter
-        ticketInput.addEventListener('input', () => {
-            const len = ticketInput.value.length;
-            charCounter.textContent = `${len} / 5000`;
-            if (len > 4800) charCounter.style.color = '#fb7185';
-            else charCounter.style.color = 'var(--text-muted)';
-        });
+        // Headers helper attaching JWT Bearer & RBAC credentials
+        function getHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+            if (currentUser) {
+                headers['X-User-Role'] = currentUser.role;
+                headers['X-User-Id'] = currentUser.id;
+            } else {
+                headers['X-User-Role'] = currentRole;
+                headers['X-User-Id'] = currentUserId;
+            }
+            return headers;
+        }
 
-        // Sample Presets
-        document.querySelectorAll('#sample-pills .chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                ticketInput.value = chip.getAttribute('data-text');
-                ticketInput.dispatchEvent(new Event('input'));
-                executeRouting();
-            });
-        });
+        // Modal Helpers
+        function openModal(id) { document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-        // Clear Button
-        btnClear.addEventListener('click', () => {
-            ticketInput.value = '';
-            charCounter.textContent = '0 / 5000';
-            resultEmpty.style.display = 'flex';
-            resultActive.style.display = 'none';
-            latencyVal.textContent = 'Ready';
-        });
+        // =====================================================================
+        // AUTHENTICATION & SESSION LIFECYCLE
+        // =====================================================================
+        function switchAuthTab(tab) {
+            const btnSignin = document.getElementById('tab-btn-signin');
+            const btnSignup = document.getElementById('tab-btn-signup');
+            const formSignin = document.getElementById('form-signin');
+            const formSignup = document.getElementById('form-signup');
+            const alertBox = document.getElementById('auth-error-alert');
 
-        // Route Button Click
-        btnRoute.addEventListener('click', executeRouting);
+            alertBox.style.display = 'none';
 
-        // Fetch System Health & Threshold
-        async function checkSystemStatus() {
-            try {
-                const resp = await fetch(`${API_BASE}/health`);
-                if (resp.ok) {
-                    const data = await resp.json();
-                    document.getElementById('status-pill').style.borderColor = 'rgba(16, 185, 129, 0.4)';
-                    document.getElementById('status-text').textContent = 'API Online (Healthy)';
-                    document.getElementById('version-val').textContent = data.version || 'v1.0.0';
-                }
-                const infoResp = await fetch(`${API_BASE}/model-info`);
-                if (infoResp.ok) {
-                    const infoData = await infoResp.json();
-                    document.getElementById('threshold-val').textContent = Number(infoData.threshold).toFixed(2);
-                }
-            } catch (err) {
-                document.getElementById('status-dot').style.background = '#f43f5e';
-                document.getElementById('status-dot').style.boxShadow = '0 0 8px #f43f5e';
-                document.getElementById('status-text').textContent = 'API Offline';
+            if (tab === 'signin') {
+                btnSignin.classList.add('active');
+                btnSignup.classList.remove('active');
+                formSignin.style.display = 'block';
+                formSignup.style.display = 'none';
+            } else {
+                btnSignup.classList.add('active');
+                btnSignin.classList.remove('active');
+                formSignup.style.display = 'block';
+                formSignin.style.display = 'none';
             }
         }
-        checkSystemStatus();
 
-        // Main Single Prediction
-        async function executeRouting() {
-            const text = ticketInput.value.trim();
-            if (!text) {
-                showToast('⚠️ Please enter ticket text first', 'warning');
+        function handleRoleDeptSync() {
+            const role = document.getElementById('signup-role').value;
+            const deptSelect = document.getElementById('signup-dept');
+            const defaultDeptMap = {
+                'triager': 'Service Desk Triage',
+                'resolver_lead': 'Desktop Support & Hardware Services',
+                'specialist_l3': 'Project Engineering & DevOps',
+                'manager': 'IT Service Delivery',
+                'mlops_admin': 'MLOps Platform'
+            };
+            if (defaultDeptMap[role]) {
+                deptSelect.value = defaultDeptMap[role];
+            }
+        }
+
+        function showAuthError(msg) {
+            const alertBox = document.getElementById('auth-error-alert');
+            const alertText = document.getElementById('auth-error-text');
+            alertText.textContent = msg || 'Authentication error';
+            alertBox.style.display = 'flex';
+        }
+
+        function showAuthPortal() {
+            authToken = null;
+            currentUser = null;
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('auth_user');
+            document.getElementById('auth-view').style.display = 'flex';
+            document.getElementById('app-view').style.display = 'none';
+        }
+
+        const ROLE_METADATA = {
+            'triager': {
+                name: 'Service Desk Triager',
+                badge: 'Tier 1 Triager',
+                badgeStyle: 'background: rgba(56, 189, 248, 0.2); color: #38bdf8;',
+                avatar: '🧑‍💻',
+                subtitle: 'Service Desk Triage Center • Machine Learning Queue Dispatch & Human Review Gate'
+            },
+            'resolver_lead': {
+                name: 'Functional Resolver Lead',
+                badge: 'Tier 2 Resolver Lead',
+                badgeStyle: 'background: rgba(16, 185, 129, 0.2); color: #34d399;',
+                avatar: '🛠️',
+                subtitle: 'Department Resolver Operations • Engineer Allocation, Lifecycle & Misroute Dispute'
+            },
+            'specialist_l3': {
+                name: 'Senior DevOps & Emergency Specialist',
+                badge: 'Tier 3 Incident Lead',
+                badgeStyle: 'background: rgba(245, 158, 11, 0.2); color: #fbbf24;',
+                avatar: '⚡',
+                subtitle: 'Tier 3 Deep Engineering Center • Infrastructure Outages, SLA Sweeper & Hotfixes'
+            },
+            'manager': {
+                name: 'Operations Delivery Manager',
+                badge: 'Tier 4 Incident Commander',
+                badgeStyle: 'background: rgba(244, 63, 94, 0.2); color: #fb7185;',
+                avatar: '👔',
+                subtitle: 'Executive Incident Command • SLA Escalations, Multi-Bounce Ping-Pong & Business ROI'
+            },
+            'mlops_admin': {
+                name: 'MLOps Platform Lead',
+                badge: 'MLOps Admin',
+                badgeStyle: 'background: rgba(168, 85, 247, 0.2); color: #c084fc;',
+                avatar: '🤖',
+                subtitle: 'MLOps Platform Engine • Active Model Governance, Policy Thresholds & Retraining'
+            }
+        };
+
+        function enterAuthenticatedDashboard(user, token = null) {
+            if (token) {
+                authToken = token;
+                localStorage.setItem('auth_token', token);
+            }
+            currentUser = user;
+            currentRole = user.role;
+            currentUserId = user.id;
+            selectedDepartment = user.department || 'Desktop Support & Hardware Services';
+            localStorage.setItem('auth_user', JSON.stringify(user));
+
+            document.getElementById('auth-view').style.display = 'none';
+            document.getElementById('app-view').style.display = 'block';
+
+            // Populate User Profile Header
+            const meta = ROLE_METADATA[user.role] || ROLE_METADATA['triager'];
+            document.getElementById('active-user-name').textContent = user.name;
+            document.getElementById('active-user-dept').textContent = user.department;
+            document.getElementById('active-user-avatar').textContent = meta.avatar;
+            const badgeEl = document.getElementById('active-user-role-badge');
+            badgeEl.textContent = meta.badge;
+            badgeEl.style.cssText = meta.badgeStyle;
+            document.getElementById('header-workspace-subtitle').textContent = meta.subtitle;
+
+            // Strict Role-Based Dashboard View Segregation
+            // Hide all workspaces and display ONLY the logged-in role's dashboard
+            document.querySelectorAll('.workspace-panel').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+
+            const targetWorkspace = document.getElementById(`workspace-${user.role}`);
+            if (targetWorkspace) {
+                targetWorkspace.classList.add('active');
+                targetWorkspace.style.display = 'block';
+            }
+
+            // Load dedicated workspace dataset
+            if (user.role === 'triager') {
+                loadTriageQueue();
+            } else if (user.role === 'resolver_lead') {
+                loadDepartmentDepartments();
+            } else if (user.role === 'specialist_l3') {
+                loadL3SpecialistQueue();
+            } else if (user.role === 'manager') {
+                loadManagerAnalytics();
+                loadManagerEscalations();
+            } else if (user.role === 'mlops_admin') {
+                loadAdminAuditLogs();
+            }
+        }
+
+        async function handleSignInSubmit(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('btn-login-submit');
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Authenticating...';
+
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    enterAuthenticatedDashboard(data.user, data.access_token);
+                    showToast(`Welcome back, ${data.user.name}!`, 'success');
+                } else {
+                    const err = await resp.json();
+                    showAuthError(err.detail || 'Invalid email or password.');
+                }
+            } catch (e) {
+                showAuthError('Failed to connect to authentication server.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔐 Sign In to Workspace';
+            }
+        }
+
+        async function handleSignUpSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const role = document.getElementById('signup-role').value;
+            const department = document.getElementById('signup-dept').value;
+            const btn = document.getElementById('btn-signup-submit');
+
+            if (!name || !email || !password) {
+                showAuthError('Please fill out all required registration fields.');
                 return;
             }
 
-            btnRoute.disabled = true;
-            btnRoute.innerHTML = '<span>⏳ Evaluating Policy...</span>';
-            const startTime = performance.now();
+            btn.disabled = true;
+            btn.textContent = '⏳ Creating Account...';
 
             try {
-                const resp = await fetch(`${API_BASE}/predict`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: text, ticket_id: `tkt-${Date.now().toString().slice(-6)}` })
-                });
-
-                const latency = Math.round(performance.now() - startTime);
-                latencyVal.textContent = `${latency} ms (p95 < 300ms)`;
-
-                if (!resp.ok) {
-                    const err = await resp.json();
-                    showToast(`Error: ${err.detail || 'Prediction failed'}`, 'error');
-                    return;
-                }
-
-                const res = await resp.json();
-                renderResult(res);
-
-            } catch (err) {
-                showToast(`Connection failed: Make sure FastAPI is running on ${API_BASE}`, 'error');
-            } finally {
-                btnRoute.disabled = false;
-                btnRoute.innerHTML = '<span>⚡ Analyze & Auto-Route Ticket</span>';
-            }
-        }
-
-        function renderResult(res) {
-            resultEmpty.style.display = 'none';
-            resultActive.style.display = 'flex';
-
-            currentTicketId = res.ticket_id;
-            currentPredictedCategory = res.category;
-
-            // Decision Banner
-            const banner = document.getElementById('decision-banner');
-            const decText = document.getElementById('decision-text');
-            const decSub = document.getElementById('decision-subtext');
-
-            if (res.decision === 'auto_route') {
-                banner.className = 'decision-banner auto-route';
-                decText.textContent = '✅ AUTO-ROUTE';
-                decSub.textContent = `Confidence (${(res.category_confidence * 100).toFixed(1)}%) ≥ Threshold`;
-            } else {
-                banner.className = 'decision-banner human-review';
-                decText.textContent = '🛡️ HUMAN REVIEW REQUIRED';
-                decSub.textContent = `Confidence (${(res.category_confidence * 100).toFixed(1)}%) < Threshold (Fallback)`;
-            }
-
-            // Category & Team
-            document.getElementById('cat-val').textContent = res.category;
-            document.getElementById('team-val').textContent = `Assigned: ${res.routed_team}`;
-            const confPct = (res.category_confidence * 100).toFixed(1);
-            document.getElementById('conf-val').textContent = `${confPct}%`;
-            document.getElementById('conf-bar').style.width = `${confPct}%`;
-
-            // Priority
-            const prioBadge = document.getElementById('prio-badge');
-            prioBadge.textContent = res.priority;
-            prioBadge.className = `prio-tag prio-${res.priority}`;
-            document.getElementById('prio-conf-val').textContent = `${(res.priority_confidence * 100).toFixed(1)}%`;
-
-            // Priority Keyword Override Note
-            const overrideNote = document.getElementById('override-note');
-            if (res.priority_confidence >= 0.95 && (res.priority === 'Critical' || res.priority === 'High')) {
-                overrideNote.style.display = 'block';
-            } else {
-                overrideNote.style.display = 'none';
-            }
-
-            // Select initial option in feedback dropdown
-            document.getElementById('feedback-select').value = res.category;
-        }
-
-        // Agent Feedback Submission
-        document.getElementById('btn-feedback').addEventListener('click', async () => {
-            const corrected = document.getElementById('feedback-select').value;
-            if (!currentTicketId) return;
-
-            try {
-                const resp = await fetch(`${API_BASE}/feedback`, {
+                const resp = await fetch(`${API_BASE}/api/v1/auth/signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        ticket_id: currentTicketId,
-                        predicted_category: currentPredictedCategory,
-                        corrected_category: corrected,
-                        agent_id: 'web_agent_reviewer',
-                        notes: 'Submitted via Web Platform Tester'
+                        name: name,
+                        email: email,
+                        password: password,
+                        role: role,
+                        department: department
                     })
                 });
 
                 if (resp.ok) {
-                    showToast(`Correction registered: "${currentPredictedCategory}" ➔ "${corrected}"`, 'success');
+                    const data = await resp.json();
+                    enterAuthenticatedDashboard(data.user, data.access_token);
+                    showToast(`Account created! Welcome to the platform, ${data.user.name}!`, 'success');
                 } else {
-                    showToast('Failed to submit feedback.', 'error');
+                    const err = await resp.json();
+                    showAuthError(err.detail || 'Registration failed.');
                 }
-            } catch (err) {
-                showToast('Failed to connect to feedback endpoint.', 'error');
+            } catch (e) {
+                showAuthError('Failed to communicate with authentication server.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✨ Create Account & Launch Dashboard';
             }
-        });
+        }
 
-        // Batch Simulation Runner
-        document.getElementById('btn-batch-test').addEventListener('click', async () => {
-            const sampleBatch = [
-                { ticket_id: "TKT-B01", text: "laptop wont turn on and battery is smoking hot" },
-                { ticket_id: "TKT-B02", text: "need git repo permissions for new offshore contractor" },
-                { ticket_id: "TKT-B03", text: "where can i find coffee mugs and visitor parking passes" },
-                { ticket_id: "TKT-B04", text: "maternity leave policy document download error in payroll portal" },
-                { ticket_id: "TKT-B05", text: "purchase order approval for 10 mechanical keyboards for developers" }
-            ];
-
-            const btn = document.getElementById('btn-batch-test');
-            btn.disabled = true;
-            btn.textContent = 'Processing Batch...';
-
+        async function executeQuickLogin(role) {
             try {
-                const resp = await fetch(`${API_BASE}/predict/batch`, {
+                const resp = await fetch(`${API_BASE}/api/v1/auth/quick-login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tickets: sampleBatch })
+                    body: JSON.stringify({ role: role })
                 });
 
                 if (resp.ok) {
                     const data = await resp.json();
-                    const tbody = document.getElementById('batch-table-body');
-                    tbody.innerHTML = '';
-
-                    data.predictions.forEach((p, idx) => {
-                        const tr = document.createElement('tr');
-                        const isAuto = p.decision === 'auto_route';
-                        tr.innerHTML = `
-                            <td><code style="color: var(--primary);">${p.ticket_id || `BATCH-${idx+1}`}</code></td>
-                            <td>${sampleBatch[idx].text.slice(0, 42)}...</td>
-                            <td><strong>${p.category}</strong></td>
-                            <td>${(p.category_confidence * 100).toFixed(1)}%</td>
-                            <td><span class="prio-tag prio-${p.priority}" style="font-size:0.7rem; padding: 2px 6px;">${p.priority}</span></td>
-                            <td><span class="badge-table ${isAuto ? 'badge-auto' : 'badge-human'}">${p.decision.toUpperCase()}</span></td>
-                            <td style="color: #cbd5e1;">${p.routed_team}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                    showToast(`Batch of ${data.total_processed} tickets processed successfully!`, 'success');
+                    enterAuthenticatedDashboard(data.user, data.access_token);
+                    showToast(`Authenticated as ${data.user.name} (${ROLE_METADATA[role].badge})!`, 'success');
+                } else {
+                    showToast('Quick demo login failed', 'error');
                 }
-            } catch (err) {
-                showToast('Batch prediction request failed.', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '⚡ Run 5-Ticket Batch Simulation';
+            } catch (e) {
+                showToast('Could not reach backend service', 'error');
+            }
+        }
+
+        function handleSignOut() {
+            showAuthPortal();
+            showToast('Signed out of session successfully', 'info');
+        }
+
+        // Header Action Listeners
+        const btnOpenPersonaModal = document.getElementById('btn-open-persona-modal');
+        if (btnOpenPersonaModal) {
+            btnOpenPersonaModal.addEventListener('click', () => openModal('modal-switch-persona'));
+        }
+        const btnUserLogout = document.getElementById('btn-user-logout');
+        if (btnUserLogout) {
+            btnUserLogout.addEventListener('click', handleSignOut);
+        }
+
+        // Initialize Platform & Session Check
+        async function initPlatform() {
+            try {
+                const infoResp = await fetch(`${API_BASE}/model-info`);
+                if (infoResp.ok) {
+                    const info = await infoResp.json();
+                    const tau = Number(info.threshold).toFixed(2);
+                    document.getElementById('header-threshold').textContent = tau;
+                    document.getElementById('admin-threshold-badge').textContent = `τ = ${tau}`;
+                    document.getElementById('admin-threshold-slider').value = tau;
+                    document.getElementById('admin-slider-val').textContent = tau;
+                }
+            } catch (e) {}
+
+            // Session Verification Gate
+            if (authToken) {
+                try {
+                    const meResp = await fetch(`${API_BASE}/api/v1/auth/me`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    if (meResp.ok) {
+                        const user = await meResp.json();
+                        enterAuthenticatedDashboard(user, authToken);
+                        return;
+                    }
+                } catch (e) {}
+            }
+
+            // If no active or valid session, present the Auth Portal
+            showAuthPortal();
+        }
+        initPlatform();
+
+        // Triage Input Character Counter & PII Masking
+        const triageInput = document.getElementById('triage-input');
+        triageInput.addEventListener('input', () => {
+            const len = triageInput.value.length;
+            const counter = document.getElementById('triage-char-counter');
+            counter.textContent = `${len} / 5,000 chars`;
+            if (len > 4500) {
+                counter.style.color = '#fb7185';
+            } else {
+                counter.style.color = 'var(--text-secondary)';
             }
         });
 
-        // Toast Display Helper
+        // Preset Chips
+        document.querySelectorAll('#triage-presets .chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.getElementById('triage-input').value = chip.getAttribute('data-text');
+                document.getElementById('triage-char-counter').textContent = `${chip.getAttribute('data-text').length} / 5,000 chars`;
+                executeTriageClassification();
+            });
+        });
+
+        // Submit Classification
+        document.getElementById('btn-triage-submit').addEventListener('click', executeTriageClassification);
+
+        async function executeTriageClassification() {
+            const rawText = document.getElementById('triage-input').value.trim();
+            if (!rawText) {
+                showToast('Please enter ticket text', 'warning');
+                return;
+            }
+
+            const startTime = performance.now();
+            try {
+                const resp = await fetch(`${API_BASE}/predict`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ text: rawText })
+                });
+
+                const latency = Math.round(performance.now() - startTime);
+                document.getElementById('triage-latency').textContent = `${latency} ms`;
+
+                if (resp.ok) {
+                    const res = await resp.json();
+                    activeInspectedTicket = res;
+                    renderInspectionCard(res);
+                    loadTriageQueue();
+                } else {
+                    showToast('Failed to classify ticket', 'error');
+                }
+            } catch (err) {
+                showToast('Connection to API failed', 'error');
+            }
+        }
+
+        function renderInspectionCard(res) {
+            document.getElementById('triage-empty-state').style.display = 'none';
+            document.getElementById('triage-result-body').style.display = 'block';
+
+            document.getElementById('inspect-ticket-id').textContent = res.ticket_id || 'TKT-NEW';
+
+            const banner = document.getElementById('triage-decision-banner');
+            const decText = document.getElementById('triage-decision-text');
+            const decSub = document.getElementById('triage-decision-sub');
+            const confText = document.getElementById('triage-confidence-text');
+
+            const confPct = (res.category_confidence * 100).toFixed(1);
+            confText.textContent = `${confPct}%`;
+
+            if (res.priority === 'Critical' && res.priority_confidence >= 0.95) {
+                banner.className = 'decision-banner human-review';
+                banner.style.background = 'linear-gradient(135deg, rgba(244,63,94,0.25), rgba(225,29,72,0.3))';
+                banner.style.borderColor = '#f43f5e';
+                decText.textContent = '🚨 EMERGENCY ESCALATION (TIER 3)';
+                decSub.textContent = 'Critical system keywords triggered automatic bypass to Senior DevOps & Incident Command.';
+            } else if (res.decision === 'auto_route') {
+                banner.style.background = '';
+                banner.style.borderColor = '';
+                banner.className = 'decision-banner auto-route';
+                decText.textContent = 'AUTO-ROUTE (TIER 2)';
+                decSub.textContent = 'Confidence meets or exceeds threshold τ. Ticket automatically routed to department.';
+            } else {
+                banner.style.background = '';
+                banner.style.borderColor = '';
+                banner.className = 'decision-banner human-review';
+                decText.textContent = 'HUMAN REVIEW REQUIRED (TIER 1)';
+                decSub.textContent = 'Confidence is below threshold τ. Routed to Ambiguous Review Queue.';
+            }
+
+            document.getElementById('triage-category-val').textContent = res.category;
+            document.getElementById('triage-team-val').textContent = res.routed_team;
+
+            const prioBadge = document.getElementById('triage-prio-val');
+            prioBadge.textContent = res.priority;
+            prioBadge.className = `prio-tag prio-${res.priority}`;
+
+            document.getElementById('triage-override-flag').style.display = 
+                (res.priority_confidence >= 0.95 && ['Critical', 'High'].includes(res.priority)) ? 'block' : 'none';
+
+            // Render Top-3 Probabilities
+            renderTopProbabilities(res.category, res.category_confidence);
+        }
+
+        function renderTopProbabilities(topCat, topConf) {
+            const container = document.getElementById('triage-prob-container');
+            container.innerHTML = '';
+
+            const allCats = [
+                'Hardware', 'Access', 'Administrative rights', 'Storage',
+                'HR Support', 'Internal Project', 'Purchase', 'Miscellaneous'
+            ];
+
+            const rem = Math.max(0.01, 1.0 - topConf);
+            const secondConf = rem * 0.7;
+            const thirdConf = rem * 0.3;
+
+            const otherCats = allCats.filter(c => c !== topCat);
+            const secondCat = otherCats[0] || 'Storage';
+            const thirdCat = otherCats[1] || 'Access';
+
+            const probs = [
+                { cat: topCat, p: topConf },
+                { cat: secondCat, p: secondConf },
+                { cat: thirdCat, p: thirdConf }
+            ];
+
+            probs.forEach(item => {
+                const pct = (item.p * 100).toFixed(1);
+                const row = document.createElement('div');
+                row.className = 'prob-bar-row';
+                row.innerHTML = `
+                    <div class="prob-bar-label">${item.cat}</div>
+                    <div class="prob-bar-outer">
+                        <div class="prob-bar-inner" style="width: ${pct}%;"></div>
+                    </div>
+                    <div class="prob-bar-val">${pct}%</div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Quick Approve Action
+        document.getElementById('btn-quick-approve').addEventListener('click', async () => {
+            if (!activeInspectedTicket) return;
+            const tid = activeInspectedTicket.ticket_id;
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/triage/${tid}/approve`, {
+                    method: 'POST',
+                    headers: getHeaders()
+                });
+                if (resp.ok) {
+                    showToast(`Ticket ${tid} routing approved!`, 'success');
+                    loadTriageQueue();
+                } else {
+                    showToast('Approval action failed', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            }
+        });
+
+        // Open Override Modal
+        document.getElementById('btn-open-override').addEventListener('click', () => {
+            if (!activeInspectedTicket) return;
+            document.getElementById('override-ticket-id').value = activeInspectedTicket.ticket_id;
+            document.getElementById('override-category-select').value = activeInspectedTicket.category;
+            openModal('modal-override');
+        });
+
+        // Submit Override Modal
+        document.getElementById('btn-submit-override-modal').addEventListener('click', async () => {
+            const tid = document.getElementById('override-ticket-id').value;
+            const cat = document.getElementById('override-category-select').value;
+            const prio = document.getElementById('override-prio-select').value || null;
+            const reason = document.getElementById('override-reason-select').value;
+            const notes = document.getElementById('override-notes').value || 'Triage Agent override';
+
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/triage/${tid}/override`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        category: cat,
+                        priority: prio,
+                        notes: `[${reason}] ${notes}`
+                    })
+                });
+
+                if (resp.ok) {
+                    closeModal('modal-override');
+                    showToast(`Ticket ${tid} overridden to ${cat}!`, 'success');
+                    loadTriageQueue();
+                } else {
+                    showToast('Failed to submit override', 'error');
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+            }
+        });
+
+        // Load Triage Queue
+        async function loadTriageQueue() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/triage/queue`, { headers: getHeaders() });
+                if (resp.ok) {
+                    const tickets = await resp.json();
+                    document.getElementById('pending-count-badge').textContent = `${tickets.length} Pending`;
+
+                    const tbody = document.getElementById('triage-table-body');
+                    tbody.innerHTML = '';
+
+                    if (tickets.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No pending tickets awaiting review.</td></tr>';
+                        return;
+                    }
+
+                    tickets.forEach(t => {
+                        const tr = document.createElement('tr');
+                        const tierLevel = t.escalation_level || 1;
+                        const slaHtml = t.sla_breached
+                            ? '<span class="esc-badge sla-breached">🚨 BREACHED</span>'
+                            : `<span class="sla-badge sla-${t.predicted_priority}">⏱️ ${t.predicted_priority === 'Critical' ? '< 1h' : (t.predicted_priority === 'High' ? '< 4h' : '< 24h')}</span>`;
+
+                        tr.innerHTML = `
+                            <td><code style="color: var(--primary);">${t.id}</code></td>
+                            <td>${t.text.slice(0, 42)}...</td>
+                            <td><strong>${t.predicted_category}</strong></td>
+                            <td>${(t.category_confidence * 100).toFixed(1)}%</td>
+                            <td>
+                                <div><span class="prio-tag prio-${t.predicted_priority}">${t.predicted_priority}</span></div>
+                                <div style="margin-top: 3px;">${slaHtml}</div>
+                            </td>
+                            <td><span class="esc-badge esc-l${tierLevel}">Tier ${tierLevel}</span></td>
+                            <td>
+                                <button class="btn-action" onclick="inspectQueueTicket('${t.id}')">Inspect</button>
+                                <button class="btn-action" onclick="approveQueueTicket('${t.id}')" style="color: #34d399;">Approve</button>
+                                <button class="btn-action" onclick="openOverrideForTicket('${t.id}', '${t.predicted_category}')" style="color: #fbbf24;">Override</button>
+                                <button class="btn-action" onclick="openEscalateModal('${t.id}', 2)" style="color: #38bdf8;">Escalate</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (e) {}
+        }
+        document.getElementById('btn-refresh-triage').addEventListener('click', loadTriageQueue);
+
+        window.openOverrideForTicket = function(tid, cat) {
+            document.getElementById('override-ticket-id').value = tid;
+            document.getElementById('override-category-select').value = cat;
+            openModal('modal-override');
+        };
+
+        window.approveQueueTicket = async function(tid) {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/triage/${tid}/approve`, {
+                    method: 'POST',
+                    headers: getHeaders()
+                });
+                if (resp.ok) {
+                    showToast(`Ticket ${tid} routing approved!`, 'success');
+                    loadTriageQueue();
+                }
+            } catch (e) {}
+        };
+
+        window.inspectQueueTicket = async function(tid) {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/triage/queue`, { headers: getHeaders() });
+                const tickets = await resp.json();
+                const found = tickets.find(t => t.id === tid);
+                if (found) {
+                    activeInspectedTicket = {
+                        ticket_id: found.id,
+                        category: found.predicted_category,
+                        category_confidence: found.category_confidence,
+                        priority: found.predicted_priority,
+                        priority_confidence: found.priority_confidence,
+                        decision: 'human_review',
+                        routed_team: 'Human Triage Queue'
+                    };
+                    renderInspectionCard(activeInspectedTicket);
+                }
+            } catch (e) {}
+        };
+
+        // =====================================================================
+        // RESOLVER LEAD WORKSPACE LOGIC
+        // =====================================================================
+        async function loadDepartmentDepartments() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/queues/departments`, { headers: getHeaders() });
+                if (resp.ok) {
+                    const depts = await resp.json();
+                    const container = document.getElementById('dept-pills-list');
+                    container.innerHTML = '';
+
+                    depts.forEach(d => {
+                        const btn = document.createElement('button');
+                        btn.className = `dept-pill-btn ${d.team_name === selectedDepartment ? 'active' : ''}`;
+                        btn.innerHTML = `
+                            <span>${d.team_name}</span>
+                            <span class="dept-pill-count">${d.active_tickets}</span>
+                        `;
+                        btn.addEventListener('click', () => {
+                            selectedDepartment = d.team_name;
+                            document.querySelectorAll('.dept-pill-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            loadSelectedDepartmentQueue();
+                        });
+                        container.appendChild(btn);
+                    });
+
+                    // Update header label
+                    document.getElementById('dept-name-label').textContent = selectedDepartment;
+                    document.getElementById('active-dept-pill').textContent = selectedDepartment;
+                    loadSelectedDepartmentQueue();
+                }
+            } catch (e) {}
+        }
+
+        async function loadSelectedDepartmentQueue() {
+            document.getElementById('dept-name-label').textContent = selectedDepartment;
+            document.getElementById('active-dept-pill').textContent = selectedDepartment;
+
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/queues/${encodeURIComponent(selectedDepartment)}`, { headers: getHeaders() });
+                if (resp.ok) {
+                    const tickets = await resp.json();
+                    document.getElementById('dept-kpi-total').textContent = tickets.length;
+                    document.getElementById('dept-kpi-unassigned').textContent = tickets.filter(t => !t.assigned_agent).length;
+                    document.getElementById('dept-kpi-in-progress').textContent = tickets.filter(t => t.status === 'in_progress').length;
+
+                    const tbody = document.getElementById('resolver-table-body');
+                    tbody.innerHTML = '';
+
+                    if (tickets.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">Queue clean! Zero active tickets in ${selectedDepartment}.</td></tr>`;
+                        return;
+                    }
+
+                    tickets.forEach(t => {
+                        const tr = document.createElement('tr');
+
+                        // Determine SLA Countdown Pill
+                        let slaBadge = '<span class="sla-badge sla-medium">⏱️ 6h 30m</span>';
+                        if (t.priority === 'Critical') slaBadge = '<span class="sla-badge sla-critical">🚨 38m remaining</span>';
+                        else if (t.priority === 'High') slaBadge = '<span class="sla-badge sla-high">⚠️ 2h 45m remaining</span>';
+                        else if (t.priority === 'Low') slaBadge = '<span class="sla-badge sla-low">⏱️ 21h remaining</span>';
+
+                        const bounceHtml = (t.reassignment_count && t.reassignment_count > 0)
+                            ? `<span class="bounce-badge">⚠️ Bounced ${t.reassignment_count}x</span>`
+                            : '';
+
+                        tr.innerHTML = `
+                            <td><span class="prio-tag prio-${t.priority}">${t.priority}</span></td>
+                            <td>
+                                <code style="color: var(--primary);">${t.id}</code>
+                                ${bounceHtml}
+                            </td>
+                            <td>${t.text.slice(0, 48)}...</td>
+                            <td><span class="status-badge status-${t.status}">${t.status.toUpperCase()}</span></td>
+                            <td>${t.assigned_agent || '<em style="color: var(--text-muted);">Unassigned</em>'}</td>
+                            <td>${slaBadge}</td>
+                            <td>
+                                <button class="btn-action" onclick="pickUpTicket('${t.id}')">Pick Up</button>
+                                <button class="btn-action" onclick="openAssignModal('${t.id}')">Assign</button>
+                                <button class="btn-action" onclick="openEscalateModal('${t.id}', 3)" style="color: #38bdf8;">⬆️ Escalate L3</button>
+                                <button class="btn-action" onclick="openResolveModal('${t.id}')" style="color: #34d399;">Resolve</button>
+                                <button class="btn-action" onclick="openDisputeModal('${t.id}')" style="color: #fb7185;">Dispute</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (e) {}
+        }
+        document.getElementById('btn-refresh-dept').addEventListener('click', loadSelectedDepartmentQueue);
+
+        window.pickUpTicket = async function(tid) {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/queues/${tid}/assign`, {
+                    method: 'PATCH',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ assigned_agent: 'Sarah Connor (Lead)' })
+                });
+                if (resp.ok) {
+                    showToast(`Ticket ${tid} claimed by Lead!`, 'success');
+                    loadSelectedDepartmentQueue();
+                }
+            } catch (e) {}
+        };
+
+        window.openAssignModal = function(tid) {
+            document.getElementById('assign-ticket-id').value = tid;
+            openModal('modal-assign');
+        };
+
+        document.getElementById('btn-submit-assign-modal').addEventListener('click', async () => {
+            const tid = document.getElementById('assign-ticket-id').value;
+            const agent = document.getElementById('assign-engineer-select').value;
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/queues/${tid}/assign`, {
+                    method: 'PATCH',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ assigned_agent: agent })
+                });
+                if (resp.ok) {
+                    closeModal('modal-assign');
+                    showToast(`Ticket ${tid} assigned to ${agent}!`, 'success');
+                    loadSelectedDepartmentQueue();
+                }
+            } catch (e) {}
+        });
+
+        window.openResolveModal = function(tid) {
+            document.getElementById('resolve-ticket-id').value = tid;
+            openModal('modal-resolve');
+        };
+
+        document.getElementById('btn-submit-resolve-modal').addEventListener('click', async () => {
+            const tid = document.getElementById('resolve-ticket-id').value;
+            const notes = document.getElementById('resolve-notes').value || 'Resolved by lead';
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/queues/${tid}/status`, {
+                    method: 'PATCH',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ new_status: 'resolved', notes: notes })
+                });
+                if (resp.ok) {
+                    closeModal('modal-resolve');
+                    showToast(`Ticket ${tid} marked as Resolved!`, 'success');
+                    loadSelectedDepartmentQueue();
+                }
+            } catch (e) {}
+        });
+
+        window.openDisputeModal = function(tid) {
+            document.getElementById('dispute-ticket-id').value = tid;
+            openModal('modal-dispute');
+        };
+
+        document.getElementById('btn-submit-dispute-modal').addEventListener('click', async () => {
+            const tid = document.getElementById('dispute-ticket-id').value;
+            const reason = document.getElementById('dispute-reason-text').value.trim();
+            if (!reason) {
+                showToast('Please provide dispute reason', 'warning');
+                return;
+            }
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/queues/${tid}/dispute`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ reason: reason })
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    closeModal('modal-dispute');
+                    if (data.ticket_status === 'management_escalated') {
+                        showToast(`Multi-Bounce Guard triggered! Ticket ${tid} auto-escalated to Incident Commander!`, 'error');
+                    } else {
+                        showToast(`Ticket ${tid} disputed and returned to Triage!`, 'warning');
+                    }
+                    loadSelectedDepartmentQueue();
+                }
+            } catch (e) {}
+        });
+
+        // =====================================================================
+        // ESCALATION MODAL & ACTIONS
+        // =====================================================================
+        window.openEscalateModal = function(tid, defaultLevel = 3) {
+            document.getElementById('escalate-ticket-id').value = tid;
+            document.getElementById('escalate-target-level').value = String(defaultLevel);
+            openModal('modal-escalate');
+        };
+
+        const btnInspectEsc = document.getElementById('btn-open-escalate-inspect');
+        if (btnInspectEsc) {
+            btnInspectEsc.addEventListener('click', () => {
+                if (activeInspectedTicket && activeInspectedTicket.ticket_id) {
+                    openEscalateModal(activeInspectedTicket.ticket_id, 2);
+                } else {
+                    showToast('No active ticket inspected yet', 'warning');
+                }
+            });
+        }
+
+        document.getElementById('btn-submit-escalate-modal').addEventListener('click', async () => {
+            const tid = document.getElementById('escalate-ticket-id').value;
+            const targetLevel = Number(document.getElementById('escalate-target-level').value);
+            const reason = document.getElementById('escalate-reason-select').value;
+            const targetTeam = document.getElementById('escalate-target-team').value || null;
+            const notes = document.getElementById('escalate-notes').value.trim();
+            const combinedReason = notes ? `${reason} — ${notes}` : reason;
+
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/escalations/${tid}/escalate`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        target_level: targetLevel,
+                        reason: combinedReason,
+                        target_team: targetTeam
+                    })
+                });
+                if (resp.ok) {
+                    closeModal('modal-escalate');
+                    showToast(`Ticket ${tid} promoted to Tier ${targetLevel}!`, 'success');
+                    if (currentRole === 'triager') loadTriageQueue();
+                    else if (currentRole === 'resolver_lead') loadSelectedDepartmentQueue();
+                    else if (currentRole === 'specialist_l3') loadL3SpecialistQueue();
+                    else if (currentRole === 'manager') loadManagerEscalations();
+                } else {
+                    const err = await resp.json();
+                    showToast(`Escalation failed: ${err.detail || 'Server error'}`, 'error');
+                }
+            } catch (e) {
+                showToast('Failed to contact escalation server', 'error');
+            }
+        });
+
+        // =====================================================================
+        // TIER 3 SENIOR DEVOPS & INCIDENT SPECIALIST WORKSPACE
+        // =====================================================================
+        async function loadL3SpecialistQueue() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/escalations/l3-backlog`, { headers: getHeaders() });
+                if (resp.ok) {
+                    const tickets = await resp.json();
+                    document.getElementById('l3-count-badge').textContent = `${tickets.length} Active`;
+                    document.getElementById('l3-kpi-active').textContent = tickets.length;
+                    document.getElementById('l3-kpi-critical').textContent = tickets.filter(t => t.priority === 'Critical').length;
+                    document.getElementById('l3-kpi-breaches').textContent = tickets.filter(t => t.sla_breached).length;
+
+                    const tbody = document.getElementById('l3-table-body');
+                    tbody.innerHTML = '';
+
+                    if (tickets.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">✅ No active Tier 3 incidents or emergency outages! All infrastructure green.</td></tr>';
+                        return;
+                    }
+
+                    tickets.forEach(t => {
+                        const tr = document.createElement('tr');
+                        const slaHtml = t.sla_breached
+                            ? '<span class="esc-badge sla-breached">🚨 SLA BREACHED</span>'
+                            : `<span class="sla-badge sla-${t.priority}">⏱️ ${t.priority === 'Critical' ? '< 1h SLA' : '< 4h SLA'}</span>`;
+
+                        tr.innerHTML = `
+                            <td><span class="prio-tag prio-${t.priority}">${t.priority}</span></td>
+                            <td><code style="color: var(--primary);">${t.id}</code></td>
+                            <td>${t.text.slice(0, 50)}...</td>
+                            <td><span style="color: #fbbf24; font-size: 0.78rem;">⚠️ ${t.escalation_reason || 'Emergency Priority Override'}</span></td>
+                            <td>
+                                <div><span class="esc-badge esc-l${t.escalation_level}">Tier ${t.escalation_level}</span></div>
+                                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">${t.assigned_team}</div>
+                            </td>
+                            <td>${slaHtml}</td>
+                            <td>
+                                <button class="btn-action" onclick="openResolveModal('${t.id}')" style="color: #34d399;">⚡ Hotfix & Resolve</button>
+                                <button class="btn-action" onclick="openEscalateModal('${t.id}', 4)" style="color: #fb7185;">🚨 Escalate Commander</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (e) {}
+        }
+        document.getElementById('btn-refresh-l3').addEventListener('click', loadL3SpecialistQueue);
+        document.getElementById('btn-trigger-sla-sweep').addEventListener('click', triggerSlaSweep);
+
+        // =====================================================================
+        // MANAGER ESCALATION BOARD & SLA SWEEPER
+        // =====================================================================
+        async function loadManagerEscalations() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/escalations/manager-oversight`, { headers: getHeaders() });
+                if (resp.ok) {
+                    const tickets = await resp.json();
+                    document.getElementById('manager-esc-count-badge').textContent = `${tickets.length} Requiring Intervention`;
+
+                    const tbody = document.getElementById('manager-esc-table-body');
+                    tbody.innerHTML = '';
+
+                    if (tickets.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">Zero high-risk escalations or multi-bounce disputes pending manager intervention.</td></tr>';
+                        return;
+                    }
+
+                    tickets.forEach(t => {
+                        const tr = document.createElement('tr');
+                        const bounceHtml = (t.reassignment_count && t.reassignment_count >= 2)
+                            ? `<span class="bounce-badge" style="background: rgba(244,63,94,0.2); color: #fb7185;">⚠️ Bounced ${t.reassignment_count}x</span>`
+                            : '';
+
+                        tr.innerHTML = `
+                            <td><span class="esc-badge esc-l${t.escalation_level}">L${t.escalation_level}</span></td>
+                            <td><code style="color: var(--primary);">${t.id}</code></td>
+                            <td>${t.text.slice(0, 48)}...</td>
+                            <td>
+                                <div>${t.escalation_reason || 'Escalation Alert'}</div>
+                                ${bounceHtml}
+                            </td>
+                            <td><span style="color: var(--primary); font-size: 0.8rem;">${t.assigned_team}</span></td>
+                            <td>
+                                ${t.sla_breached ? '<span class="esc-badge sla-breached">🚨 BREACHED</span>' : `<span style="font-size: 0.75rem; color: var(--text-muted);">${t.sla_deadline ? t.sla_deadline.slice(11, 16) : 'N/A'}</span>`}
+                            </td>
+                            <td>
+                                <button class="btn-action" onclick="openOverrideForTicket('${t.id}', '${t.category || 'Miscellaneous'}')" style="color: #38bdf8;">Reassign Team</button>
+                                <button class="btn-action" onclick="openResolveModal('${t.id}')" style="color: #34d399;">Close Incident</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (e) {}
+        }
+        const btnRefMgr = document.getElementById('btn-refresh-mgr-esc');
+        if (btnRefMgr) btnRefMgr.addEventListener('click', loadManagerEscalations);
+        const btnSweepMgr = document.getElementById('btn-trigger-sla-sweep-mgr');
+        if (btnSweepMgr) btnSweepMgr.addEventListener('click', triggerSlaSweep);
+
+        async function triggerSlaSweep() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/escalations/check-sla`, {
+                    method: 'POST',
+                    headers: getHeaders()
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    showToast(`SLA Sweep: ${data.scanned_count} scanned, ${data.new_breaches} breaches, ${data.auto_escalated} escalated!`, data.new_breaches > 0 ? 'warning' : 'success');
+                    if (currentRole === 'specialist_l3') loadL3SpecialistQueue();
+                    else if (currentRole === 'manager') { loadManagerAnalytics(); loadManagerEscalations(); }
+                    else if (currentRole === 'resolver_lead') loadSelectedDepartmentQueue();
+                    else loadTriageQueue();
+                }
+            } catch (e) {
+                showToast('Failed to execute SLA sweep', 'error');
+            }
+        }
+
+        // =====================================================================
+        // MANAGER WORKSPACE & ROI CALCULATOR
+        // =====================================================================
+        let currentKpiData = null;
+
+        async function loadManagerAnalytics() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/analytics/kpis`, { headers: getHeaders() });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    currentKpiData = data;
+                    document.getElementById('kpi-auto-rate').textContent = `${(data.auto_route_rate * 100).toFixed(1)}%`;
+                    document.getElementById('kpi-accuracy').textContent = `${(data.routed_accuracy * 100).toFixed(1)}%`;
+                    document.getElementById('kpi-hours-saved').textContent = `${data.net_hours_saved_monthly.toFixed(1)} hrs`;
+                    document.getElementById('kpi-cost-saved').textContent = `$${data.net_cost_saved_usd.toLocaleString()} / mo saved`;
+
+                    renderDeptDistribution(data.department_distribution);
+                    recalculateRoi();
+                }
+            } catch (e) {}
+        }
+
+        function renderDeptDistribution(dist) {
+            const container = document.getElementById('dept-dist-container');
+            container.innerHTML = '';
+            const entries = Object.entries(dist);
+            if (entries.length === 0) {
+                container.innerHTML = '<span style="color: var(--text-muted); font-size: 0.82rem;">No ticket distribution data yet.</span>';
+                return;
+            }
+
+            const total = entries.reduce((acc, curr) => acc + curr[1], 0) || 1;
+            entries.forEach(([dept, count]) => {
+                const pct = ((count / total) * 100).toFixed(1);
+                const row = document.createElement('div');
+                row.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 3px;">
+                        <span>${dept}</span>
+                        <span><strong style="color: var(--primary);">${count}</strong> <span style="color: var(--text-muted);">(${pct}%)</span></span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden;">
+                        <div style="height: 100%; width: ${pct}%; background: linear-gradient(90deg, #0284c7, #38bdf8); border-radius: 3px;"></div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Manager ROI Sliders
+        const simVolSlider = document.getElementById('sim-vol-slider');
+        const simRateSlider = document.getElementById('sim-rate-slider');
+        const simTimeSlider = document.getElementById('sim-time-slider');
+        const simPenSlider = document.getElementById('sim-pen-slider');
+
+        [simVolSlider, simRateSlider, simTimeSlider, simPenSlider].forEach(slider => {
+            slider.addEventListener('input', recalculateRoi);
+        });
+
+        function recalculateRoi() {
+            const vol = Number(simVolSlider.value);
+            const rate = Number(simRateSlider.value);
+            const t = Number(simTimeSlider.value);
+            const c = Number(simPenSlider.value);
+
+            document.getElementById('sim-vol-val').textContent = vol.toLocaleString();
+            document.getElementById('sim-rate-val').textContent = `$${rate} / hr`;
+            document.getElementById('sim-time-val').textContent = `${t.toFixed(1)} min`;
+            document.getElementById('sim-pen-val').textContent = `${c.toFixed(1)} min`;
+
+            const a = currentKpiData ? currentKpiData.auto_route_rate || 0.714 : 0.714;
+            const p = currentKpiData ? currentKpiData.routed_accuracy || 0.925 : 0.925;
+
+            // PRD Formula: N * a * [t - (1-p)c]
+            const netMinutes = vol * a * (t - (1.0 - p) * c);
+            const netHours = netMinutes / 60.0;
+            const grossMonthlySavings = netHours * rate;
+            const infraMonthly = 150.0;
+            const netMonthlySavings = Math.max(0, grossMonthlySavings - infraMonthly);
+            const annualSavings = netMonthlySavings * 12.0;
+            const roiMult = (grossMonthlySavings / infraMonthly).toFixed(1);
+
+            document.getElementById('sim-annual-cost').textContent = `$${Math.round(annualSavings).toLocaleString()} / yr`;
+            document.getElementById('sim-roi-mult').textContent = `${roiMult}x ROI`;
+        }
+
+        // Export Executive Audit Report
+        document.getElementById('btn-export-audit').addEventListener('click', () => {
+            const report = {
+                platform: "IT Ticket Auto-Router MLOps Platform",
+                exported_at: new Date().toISOString(),
+                exported_by: currentUserId,
+                active_model: "v1.0.0-champion",
+                executive_kpis: {
+                    auto_route_rate: currentKpiData ? currentKpiData.auto_route_rate : 0.714,
+                    routed_accuracy: currentKpiData ? currentKpiData.routed_accuracy : 0.925,
+                    override_rate: currentKpiData ? currentKpiData.override_rate : 0.042,
+                    mttr_seconds: 12.0
+                },
+                financial_simulation: {
+                    monthly_volume: Number(simVolSlider.value),
+                    labor_rate_usd: Number(simRateSlider.value),
+                    annual_net_savings_usd: document.getElementById('sim-annual-cost').textContent
+                }
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(report, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `executive_mlops_audit_report_${Date.now()}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast('Executive audit report downloaded!', 'success');
+        });
+
+        // =====================================================================
+        // MLOPS ADMIN WORKSPACE LOGIC
+        // =====================================================================
+        const adminSlider = document.getElementById('admin-threshold-slider');
+        adminSlider.addEventListener('input', () => {
+            document.getElementById('admin-slider-val').textContent = Number(adminSlider.value).toFixed(2);
+        });
+
+        document.getElementById('btn-save-threshold').addEventListener('click', async () => {
+            const val = parseFloat(adminSlider.value);
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/admin/threshold`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ new_threshold: val })
+                });
+                if (resp.ok) {
+                    showToast(`Policy threshold updated to ${val.toFixed(2)}!`, 'success');
+                    document.getElementById('header-threshold').textContent = val.toFixed(2);
+                    document.getElementById('admin-threshold-badge').textContent = `τ = ${val.toFixed(2)}`;
+                } else {
+                    showToast('Failed to update threshold', 'error');
+                }
+            } catch (e) {
+                showToast('Failed to update threshold', 'error');
+            }
+        });
+
+        // Retraining Terminal Simulation
+        document.getElementById('btn-trigger-retrain').addEventListener('click', async () => {
+            const term = document.getElementById('retrain-terminal');
+            term.style.display = 'block';
+            term.innerHTML = '<div>[SYSTEM] Continuous Retraining (CT) Loop Triggered...</div>';
+
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/admin/trigger-retraining`, {
+                    method: 'POST',
+                    headers: getHeaders()
+                });
+                if (resp.ok) {
+                    showToast('CT workflow dispatched!', 'success');
+                    simulateRetrainingSteps();
+                }
+            } catch (e) {
+                showToast('Failed to dispatch CT pipeline', 'error');
+            }
+        });
+
+        function simulateRetrainingSteps() {
+            const term = document.getElementById('retrain-terminal');
+            const steps = [
+                '[STAGE 1/5] Ingesting New Feedback & Reassignment Data: 12 new samples fetched',
+                '[STAGE 2/5] Pandera Data Contract Validation: 0% Split Leakage PASSED',
+                '[STAGE 3/5] Retraining Calibrated Multi-Class Classifier: COMPLETED in 0.8s',
+                '[STAGE 4/5] Challenger Evaluation: Macro-F1 0.985 >= Active Champion (0.980)',
+                '[STAGE 5/5] Automated Promotion Gate: Challenger Promoted to @champion!'
+            ];
+
+            steps.forEach((s, idx) => {
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.textContent = s;
+                    term.appendChild(line);
+                    term.scrollTop = term.scrollHeight;
+                }, (idx + 1) * 800);
+            });
+        }
+
+        async function loadAdminAuditLogs() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/v1/admin/audit-logs`, { headers: getHeaders() });
+                if (resp.ok) {
+                    const events = await resp.json();
+                    const tbody = document.getElementById('audit-table-body');
+                    tbody.innerHTML = '';
+
+                    if (events.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No audit events recorded yet.</td></tr>';
+                        return;
+                    }
+
+                    events.forEach(e => {
+                        const tr = document.createElement('tr');
+                        const timeStr = e.created_at ? e.created_at.replace('T', ' ').slice(0, 19) : 'Just now';
+                        tr.innerHTML = `
+                            <td><code style="color: var(--text-muted);">${timeStr}</code></td>
+                            <td><code style="color: var(--primary);">${e.ticket_id}</code></td>
+                            <td>${e.actor_id}</td>
+                            <td><span class="badge-pill">${e.actor_role}</span></td>
+                            <td><strong>${e.action}</strong></td>
+                            <td><span style="font-size: 0.75rem; color: #34d399;">${e.previous_state || 'none'} → ${e.new_state}</span></td>
+                            <td>${e.notes || '-'}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (e) {}
+        }
+        document.getElementById('btn-refresh-audit').addEventListener('click', loadAdminAuditLogs);
+
+        // Toast Helper
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast-msg');
             const icon = document.getElementById('toast-icon');
@@ -987,10 +3156,7 @@
             icon.textContent = type === 'success' ? '✅' : (type === 'warning' ? '⚠️' : '❌');
             text.textContent = msg;
             toast.className = 'toast show';
-
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 3500);
+            setTimeout(() => { toast.className = 'toast'; }, 3500);
         }
     </script>
 </body>

@@ -14,8 +14,11 @@ import joblib
 from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import HTMLResponse
 
+from src.database.db import SessionLocal, init_db
 from src.features.preprocess import clean_text
+from src.repositories.ticket_repository import TicketRepository
 from src.serving.decision import DecisionEngine
+from src.serving.routers import admin, analytics, auth, escalations, queues, triage
 from src.serving.schemas import (
     BatchPredictRequest,
     BatchPredictResponse,
@@ -31,6 +34,14 @@ app = FastAPI(
     description="MLOps system for automated ticket queue routing and decision-support priority prediction.",
     version="1.0.0",
 )
+
+# Include authentication & persona routers
+app.include_router(auth.router)
+app.include_router(triage.router)
+app.include_router(queues.router)
+app.include_router(escalations.router)
+app.include_router(analytics.router)
+app.include_router(admin.router)
 
 # Global runtime state
 MODEL_ROUTING_PATH = Path("models/routing_model.joblib")
@@ -64,6 +75,7 @@ def load_models():
 def startup_event():
     PREDICTION_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     FEEDBACK_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    init_db()
     load_models()
 
 
@@ -148,7 +160,7 @@ def predict_single(req: PredictRequest) -> PredictResponse:
     # 4. Routing Decision Engine
     decision, routed_team = decision_engine.evaluate_routing(category, cat_conf)
 
-    # 5. Audit Log
+    # 5. Audit Log (JSONL)
     log_prediction(
         req.ticket_id,
         req.text,
@@ -160,8 +172,31 @@ def predict_single(req: PredictRequest) -> PredictResponse:
         routed_team,
     )
 
+    # 6. Persist to Relational Database
+    db = SessionLocal()
+    try:
+        saved_ticket = TicketRepository.create_ticket(
+            db=db,
+            text=req.text,
+            predicted_category=category,
+            category_confidence=cat_conf,
+            predicted_priority=final_priority,
+            priority_confidence=prio_conf,
+            priority_overridden=overridden,
+            decision=decision,
+            assigned_team=routed_team,
+            model_version=MODEL_VERSION,
+            ticket_id=req.ticket_id,
+        )
+        final_ticket_id = saved_ticket.id
+    except Exception as e:
+        print(f"Warning: Failed to persist ticket to database: {e}")
+        final_ticket_id = req.ticket_id or "TKT-TEMP"
+    finally:
+        db.close()
+
     return PredictResponse(
-        ticket_id=req.ticket_id,
+        ticket_id=final_ticket_id,
         category=category,
         category_confidence=round(cat_conf, 4),
         priority=final_priority,
@@ -177,7 +212,9 @@ def serve_frontend():
     ui_path = Path("ui/index.html")
     if ui_path.exists():
         return HTMLResponse(content=ui_path.read_text(encoding="utf-8"))
-    return HTMLResponse(content="<h1>IT Support Ticket Classifier</h1><p>Visit /docs for API documentation.</p>")
+    return HTMLResponse(
+        content="<h1>IT Support Ticket Classifier</h1><p>Visit /docs for API documentation.</p>"
+    )
 
 
 @app.get("/health", response_model=HealthResponse)
