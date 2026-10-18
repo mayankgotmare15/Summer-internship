@@ -124,4 +124,3 @@ def get_audit_logs(
         ]
     finally:
         db.close()
-

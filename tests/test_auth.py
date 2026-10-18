@@ -129,7 +129,9 @@ def test_quick_demo_login():
     token = data["access_token"]
 
     # Verify token access to L3 restricted backlog
-    l3_resp = client.get("/api/v1/escalations/l3-backlog", headers={"Authorization": f"Bearer {token}"})
+    l3_resp = client.get(
+        "/api/v1/escalations/l3-backlog", headers={"Authorization": f"Bearer {token}"}
+    )
     assert l3_resp.status_code == 200
 
 

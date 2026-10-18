@@ -395,7 +395,8 @@ class TicketRepository:
         return (
             db.query(Ticket)
             .filter(
-                (Ticket.escalation_level == 3) | (Ticket.assigned_team == "Project Engineering & DevOps"),
+                (Ticket.escalation_level == 3)
+                | (Ticket.assigned_team == "Project Engineering & DevOps"),
                 Ticket.status.notin_([TicketStatus.RESOLVED, TicketStatus.CLOSED]),
             )
             .order_by(Ticket.created_at.desc())
@@ -552,10 +553,4 @@ class TicketRepository:
     @staticmethod
     def list_audit_events(db: Session, limit: int = 50) -> list[TicketEvent]:
         """Retrieves recent audit events for tamper-evident security logging."""
-        return (
-            db.query(TicketEvent)
-            .order_by(TicketEvent.timestamp.desc())
-            .limit(limit)
-            .all()
-        )
-
+        return db.query(TicketEvent).order_by(TicketEvent.timestamp.desc()).limit(limit).all()

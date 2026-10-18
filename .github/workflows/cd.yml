@@ -21,6 +21,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Set Lowercase Image Name
+        run: |
+          echo "IMAGE_NAME=$(echo '${{ github.repository }}/ticket-router-api' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -31,9 +35,18 @@ jobs:
       - name: Container Smoke Test
         run: |
           docker run -d --name test-api -p 8000:8000 ${{ env.IMAGE_NAME }}:latest
-          sleep 5
-          curl -f http://localhost:8000/health || (docker logs test-api && exit 1)
-          docker stop test-api
+          for i in {1..20}; do
+            if curl -sf http://localhost:8000/health; then
+              echo "Container health check passed successfully!"
+              docker stop test-api
+              exit 0
+            fi
+            echo "Waiting for container to boot (attempt $i/20)..."
+            sleep 2
+          done
+          echo "Container health check failed. Diagnostic logs:"
+          docker logs test-api
+          exit 1
 
       - name: Log in to GitHub Container Registry
         if: github.event_name != 'pull_request'
@@ -48,6 +61,7 @@ jobs:
         run: |
           docker tag ${{ env.IMAGE_NAME }}:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker tag ${{ env.IMAGE_NAME }}:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
       - name: Deploy Verification

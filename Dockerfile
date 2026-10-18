@@ -45,8 +45,9 @@ COPY src/ /app/src/
 COPY models/ /app/models/
 COPY ui/ /app/ui/
 
-# Set file permissions for unprivileged user
-RUN chown -R appuser:appuser /app
+# Set up runtime directories and file permissions for unprivileged user
+RUN mkdir -p /app/data/monitoring /app/models \
+    && chown -R appuser:appuser /app
 
 USER appuser
 

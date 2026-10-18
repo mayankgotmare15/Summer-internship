@@ -28,13 +28,7 @@ def hash_password(password: str, salt: str | None = None) -> tuple[str, str]:
     salt_bytes = salt.encode("utf-8")
     pw_bytes = password.encode("utf-8")
 
-    derived_key = hashlib.pbkdf2_hmac(
-        "sha256",
-        pw_bytes,
-        salt_bytes,
-        PBKDF2_ITERATIONS,
-        dklen=32
-    )
+    derived_key = hashlib.pbkdf2_hmac("sha256", pw_bytes, salt_bytes, PBKDF2_ITERATIONS, dklen=32)
     return derived_key.hex(), salt
 
 
@@ -73,9 +67,7 @@ def create_access_token(
     payload_b64 = base64.urlsafe_b64encode(payload_json).decode("utf-8").rstrip("=")
 
     signature = hmac.new(
-        SECRET_KEY.encode("utf-8"),
-        payload_b64.encode("utf-8"),
-        hashlib.sha256
+        SECRET_KEY.encode("utf-8"), payload_b64.encode("utf-8"), hashlib.sha256
     ).digest()
     sig_b64 = base64.urlsafe_b64encode(signature).decode("utf-8").rstrip("=")
 
@@ -96,9 +88,7 @@ def decode_access_token(token: str) -> dict[str, Any] | None:
 
         # Verify signature
         expected_sig = hmac.new(
-            SECRET_KEY.encode("utf-8"),
-            payload_b64.encode("utf-8"),
-            hashlib.sha256
+            SECRET_KEY.encode("utf-8"), payload_b64.encode("utf-8"), hashlib.sha256
         ).digest()
         expected_sig_b64 = base64.urlsafe_b64encode(expected_sig).decode("utf-8").rstrip("=")
 

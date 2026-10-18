@@ -19,8 +19,12 @@ router = APIRouter(prefix="/api/v1/escalations", tags=["Escalation & SLA Managem
 
 
 class EscalateRequest(BaseModel):
-    target_level: int = Field(..., ge=2, le=4, description="Target escalation level (2=L2, 3=L3, 4=Manager)")
-    reason: str = Field(..., min_length=3, description="Operational justification for ticket escalation")
+    target_level: int = Field(
+        ..., ge=2, le=4, description="Target escalation level (2=L2, 3=L3, 4=Manager)"
+    )
+    reason: str = Field(
+        ..., min_length=3, description="Operational justification for ticket escalation"
+    )
     target_team: str | None = Field(None, description="Optional target department team")
 
 
@@ -50,13 +54,15 @@ def escalate_ticket(
     req: EscalateRequest,
     db: Session = Depends(get_db),
     user: AuthenticatedUser = Depends(
-        require_role([
-            UserRole.TRIAGER,
-            UserRole.RESOLVER_LEAD,
-            UserRole.SPECIALIST_L3,
-            UserRole.MANAGER,
-            UserRole.MLOPS_ADMIN,
-        ])
+        require_role(
+            [
+                UserRole.TRIAGER,
+                UserRole.RESOLVER_LEAD,
+                UserRole.SPECIALIST_L3,
+                UserRole.MANAGER,
+                UserRole.MLOPS_ADMIN,
+            ]
+        )
     ),
 ):
     """
@@ -89,13 +95,15 @@ def get_active_escalations(
     limit: int = 100,
     db: Session = Depends(get_db),
     user: AuthenticatedUser = Depends(
-        require_role([
-            UserRole.TRIAGER,
-            UserRole.RESOLVER_LEAD,
-            UserRole.SPECIALIST_L3,
-            UserRole.MANAGER,
-            UserRole.MLOPS_ADMIN,
-        ])
+        require_role(
+            [
+                UserRole.TRIAGER,
+                UserRole.RESOLVER_LEAD,
+                UserRole.SPECIALIST_L3,
+                UserRole.MANAGER,
+                UserRole.MLOPS_ADMIN,
+            ]
+        )
     ),
 ) -> list[dict[str, Any]]:
     """Returns all active escalated tickets."""
@@ -120,9 +128,7 @@ def get_l3_specialist_backlog(
 def get_manager_escalation_oversight(
     limit: int = 100,
     db: Session = Depends(get_db),
-    user: AuthenticatedUser = Depends(
-        require_role([UserRole.MANAGER, UserRole.MLOPS_ADMIN])
-    ),
+    user: AuthenticatedUser = Depends(require_role([UserRole.MANAGER, UserRole.MLOPS_ADMIN])),
 ) -> list[dict[str, Any]]:
     """Returns critical tickets requiring Incident Commander attention (Level 4, SLA breached, multi-bounce)."""
     tickets = TicketRepository.list_manager_escalations(db, limit=limit)
@@ -133,13 +139,15 @@ def get_manager_escalation_oversight(
 def check_sla_breaches(
     db: Session = Depends(get_db),
     user: AuthenticatedUser = Depends(
-        require_role([
-            UserRole.TRIAGER,
-            UserRole.RESOLVER_LEAD,
-            UserRole.SPECIALIST_L3,
-            UserRole.MANAGER,
-            UserRole.MLOPS_ADMIN,
-        ])
+        require_role(
+            [
+                UserRole.TRIAGER,
+                UserRole.RESOLVER_LEAD,
+                UserRole.SPECIALIST_L3,
+                UserRole.MANAGER,
+                UserRole.MLOPS_ADMIN,
+            ]
+        )
     ),
 ) -> dict[str, Any]:
     """Sweeps active tickets against SLA timers and automatically promotes breached tickets."""

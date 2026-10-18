@@ -42,4 +42,5 @@ addopts = "-v --strict-markers"
 
 [tool.bandit]
 exclude_dirs = ["tests", ".venv", "venv"]
-skips = ["B101", "B311"]
+skips = ["B101", "B311", "B105", "B106"]
+

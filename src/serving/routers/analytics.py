@@ -114,4 +114,3 @@ def calculate_custom_roi(
         "annual_net_savings_usd": round(annual_savings, 2),
         "roi_multiplier": round(roi_multiplier, 1),
     }
-
