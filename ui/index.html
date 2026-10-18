@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Ticket Auto-Router | MLOps Platform Tester</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #090d16;
+            --bg-card: rgba(18, 24, 38, 0.75);
+            --bg-card-hover: rgba(28, 38, 58, 0.85);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(56, 189, 248, 0.3);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.25);
+            --emerald: #10b981;
+            --emerald-glow: rgba(16, 185, 129, 0.2);
+            --amber: #f59e0b;
+            --amber-glow: rgba(245, 158, 11, 0.2);
+            --rose: #f43f5e;
+            --rose-glow: rgba(244, 63, 94, 0.2);
+            --violet: #8b5cf6;
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 45%);
+            background-attachment: fixed;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(16px);
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #0284c7, #6366f1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+        }
+
+        h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to right, #f8fafc, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .status-pills {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pill {
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot-green {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 8px var(--emerald);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Layout Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 960px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glass Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Sample Presets Chips */
+        .presets-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .presets-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .chip {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            padding: 5px 11px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chip:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* Textarea & Inputs */
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 140px;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.92rem;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .char-counter {
+            position: absolute;
+            bottom: 10px;
+            right: 14px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .action-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 600;
+            font-size: 0.92rem;
+            padding: 11px 24px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px 0 rgba(2, 132, 199, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px 0 rgba(2, 132, 199, 0.55);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.88rem;
+            padding: 11px 18px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            color: var(--text-primary);
+            background: rgba(51, 65, 85, 0.8);
+        }
+
+        /* Result Panel */
+        .result-empty {
+            height: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-muted);
+            border: 2px dashed rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 24px;
+        }
+
+        .result-empty-icon {
+            font-size: 42px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+
+        .result-active {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Decision Banner */
+        .decision-banner {
+            padding: 16px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid;
+            transition: all 0.3s ease;
+        }
+
+        .decision-banner.auto-route {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 25px var(--emerald-glow);
+        }
+
+        .decision-banner.human-review {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.3);
+            box-shadow: 0 0 25px var(--amber-glow);
+        }
+
+        .decision-text {
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .decision-banner.auto-route .decision-text { color: #34d399; }
+        .decision-banner.human-review .decision-text { color: #fbbf24; }
+
+        .latency-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Metrics Grid */
+        .metrics-subgrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .metric-tile {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .metric-value-lg {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .team-destination {
+            font-size: 0.88rem;
+            color: var(--primary);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* Confidence Bar */
+        .confidence-container {
+            margin-top: 8px;
+        }
+
+        .confidence-bar-bg {
+            height: 7px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .confidence-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0284c7, #38bdf8);
+            border-radius: 4px;
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Priority Tag */
+        .prio-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .prio-Critical { background: rgba(244, 63, 94, 0.2); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
+        .prio-High { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .prio-Medium { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+        .prio-Low { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+        /* Agent Feedback Box */
+        .feedback-box {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            margin-top: 4px;
+        }
+
+        .feedback-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .feedback-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        select {
+            flex: 1;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .btn-correct {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-correct:hover {
+            background: var(--primary);
+            color: #04101e;
+        }
+
+        /* Batch Section */
+        .batch-section {
+            margin-top: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 14px;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        .badge-table {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-auto { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .badge-human { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1e293b;
+            color: white;
+            border: 1px solid var(--primary);
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-title">
+                <div class="logo-icon">⚡</div>
+                <div>
+                    <h1>IT Support Ticket Auto-Router</h1>
+                    <div class="header-subtitle">MLOps Lifecycle & SDL Security Architecture Demo</div>
+                </div>
+            </div>
+            <div class="status-pills">
+                <div class="pill" id="status-pill">
+                    <span class="dot-green" id="status-dot"></span>
+                    <span id="status-text">Connecting to API...</span>
+                </div>
+                <div class="pill">
+                    <span>Threshold τ:</span>
+                    <strong id="threshold-val" style="color: var(--primary);">0.75</strong>
+                </div>
+                <div class="pill">
+                    <span>Model:</span>
+                    <strong id="version-val">v1.0.0</strong>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-grid">
+            <!-- Left: Ticket Input Form -->
+            <section class="card" id="input-card">
+                <div class="card-header">
+                    <div class="card-title">📝 Ticket Ingestion & Analysis</div>
+                    <span class="latency-badge" id="api-status-badge">API Port :8000</span>
+                </div>
+
+                <span class="presets-label">Click a quick-test scenario to prefill:</span>
+                <div class="presets-container" id="sample-pills">
+                    <button class="chip" data-text="laptop wont turn on after the update, screen completely black">💻 Hardware Failure</button>
+                    <button class="chip" data-text="pls give me admin rights on my laptop to install python compiler">🔑 Admin Elevation</button>
+                    <button class="chip" data-text="shared drive full, cant save files since morning, whole team blocked">💾 Storage Quota</button>
+                    <button class="chip" data-text="password reset not working and account locked after multiple tries">🛡️ IAM Account Locked</button>
+                    <button class="chip" data-text="CRITICAL OUTAGE: production database cluster down, all customer transactions failing!">🚨 Outage (Override Test)</button>
+                    <button class="chip" data-text="request access to the project repo and also need ergonomic mouse">❓ Ambiguous (Human Review)</button>
+                </div>
+
+                <div class="input-group">
+                    <textarea 
+                        id="ticket-input" 
+                        placeholder="Paste or type raw IT helpdesk ticket content here..."
+                        maxlength="5000"
+                    ></textarea>
+                    <div class="char-counter" id="char-counter">0 / 5000</div>
+                </div>
+
+                <div class="action-row">
+                    <button class="btn-primary" id="btn-route" type="button">
+                        <span>⚡ Analyze & Auto-Route Ticket</span>
+                    </button>
+                    <button class="btn-secondary" id="btn-clear" type="button">Clear</button>
+                </div>
+            </section>
+
+            <!-- Right: Real-time Routing Intelligence Card -->
+            <section class="card" id="result-card">
+                <div class="card-header">
+                    <div class="card-title">🎯 Routing Decision & Policy Engine</div>
+                    <span class="latency-badge" id="latency-val">Ready</span>
+                </div>
+
+                <!-- Empty State -->
+                <div class="result-empty" id="result-empty">
+                    <div class="result-empty-icon">🎫</div>
+                    <div style="font-weight: 500; color: #cbd5e1; margin-bottom: 4px;">No ticket analyzed yet</div>
+                    <div style="font-size: 0.82rem;">Select a preset scenario on the left or paste a ticket to inspect real-time classification.</div>
+                </div>
+
+                <!-- Active Result Display -->
+                <article class="result-active" id="result-active">
+                    <!-- Decision Banner -->
+                    <div class="decision-banner auto-route" id="decision-banner">
+                        <div>
+                            <div class="metric-label" style="color: inherit; opacity: 0.8;">Routing Decision</div>
+                            <div class="decision-text" id="decision-text">AUTO-ROUTE</div>
+                        </div>
+                        <span class="latency-badge" id="decision-subtext">Confident (≥ τ)</span>
+                    </div>
+
+                    <!-- Metrics Subgrid -->
+                    <div class="metrics-subgrid">
+                        <div class="metric-tile">
+                            <div class="metric-label">Predicted Queue</div>
+                            <div class="metric-value-lg" id="cat-val">Access</div>
+                            <div class="team-destination" id="team-val">Identity & Access Management</div>
+                            <div class="confidence-container">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.75rem;">
+                                    <span style="color: var(--text-muted);">Confidence</span>
+                                    <strong id="conf-val" style="color: var(--primary);">94.2%</strong>
+                                </div>
+                                <div class="confidence-bar-bg">
+                                    <div class="confidence-bar-fill" id="conf-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="metric-tile">
+                            <div class="metric-label">Decision Support Priority</div>
+                            <div style="margin-top: 6px;">
+                                <span class="prio-tag prio-Medium" id="prio-badge">Medium</span>
+                            </div>
+                            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 10px;">
+                                Signal Confidence: <strong id="prio-conf-val">85%</strong>
+                            </div>
+                            <div id="override-note" style="font-size: 0.75rem; color: #fb7185; margin-top: 4px; display: none;">
+                                ⚠️ High-severity keyword override applied
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inline Agent Feedback Loop -->
+                    <div class="feedback-box">
+                        <div class="feedback-title">
+                            <span>Human Agent Correction Loop</span>
+                            <span style="font-size: 0.72rem; color: var(--primary);">Feeds Continuous Retraining</span>
+                        </div>
+                        <div class="feedback-row">
+                            <select id="feedback-select">
+                                <option value="Access">Access</option>
+                                <option value="Administrative rights">Administrative rights</option>
+                                <option value="HR Support">HR Support</option>
+                                <option value="Hardware">Hardware</option>
+                                <option value="Internal Project">Internal Project</option>
+                                <option value="Miscellaneous">Miscellaneous</option>
+                                <option value="Purchase">Purchase</option>
+                                <option value="Storage">Storage</option>
+                            </select>
+                            <button class="btn-correct" id="btn-feedback" type="button">Submit Override</button>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </main>
+
+        <!-- Batch Queue Tester Section -->
+        <section class="card batch-section">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">📦 High-Throughput Batch Inference Tester</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                        Benchmark latency and multi-ticket decision distribution (/predict/batch)
+                    </div>
+                </div>
+                <button class="btn-primary" id="btn-batch-test" type="button">
+                    <span>⚡ Run 5-Ticket Batch Simulation</span>
+                </button>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Ticket Text Snippet</th>
+                            <th>Predicted Category</th>
+                            <th>Confidence</th>
+                            <th>Priority</th>
+                            <th>Decision</th>
+                            <th>Assigned Resolver Queue</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batch-table-body">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                                Click "Run 5-Ticket Batch Simulation" to benchmark multi-ticket processing.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast-msg">
+        <span id="toast-icon">✅</span>
+        <span id="toast-text">Feedback recorded successfully!</span>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin.includes('8000') ? window.location.origin : 'http://localhost:8000';
+        let currentTicketId = null;
+        let currentPredictedCategory = null;
+
+        const ticketInput = document.getElementById('ticket-input');
+        const charCounter = document.getElementById('char-counter');
+        const btnRoute = document.getElementById('btn-route');
+        const btnClear = document.getElementById('btn-clear');
+        const resultEmpty = document.getElementById('result-empty');
+        const resultActive = document.getElementById('result-active');
+        const latencyVal = document.getElementById('latency-val');
+
+        // Character Counter
+        ticketInput.addEventListener('input', () => {
+            const len = ticketInput.value.length;
+            charCounter.textContent = `${len} / 5000`;
+            if (len > 4800) charCounter.style.color = '#fb7185';
+            else charCounter.style.color = 'var(--text-muted)';
+        });
+
+        // Sample Presets
+        document.querySelectorAll('#sample-pills .chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                ticketInput.value = chip.getAttribute('data-text');
+                ticketInput.dispatchEvent(new Event('input'));
+                executeRouting();
+            });
+        });
+
+        // Clear Button
+        btnClear.addEventListener('click', () => {
+            ticketInput.value = '';
+            charCounter.textContent = '0 / 5000';
+            resultEmpty.style.display = 'flex';
+            resultActive.style.display = 'none';
+            latencyVal.textContent = 'Ready';
+        });
+
+        // Route Button Click
+        btnRoute.addEventListener('click', executeRouting);
+
+        // Fetch System Health & Threshold
+        async function checkSystemStatus() {
+            try {
+                const resp = await fetch(`${API_BASE}/health`);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    document.getElementById('status-pill').style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                    document.getElementById('status-text').textContent = 'API Online (Healthy)';
+                    document.getElementById('version-val').textContent = data.version || 'v1.0.0';
+                }
+                const infoResp = await fetch(`${API_BASE}/model-info`);
+                if (infoResp.ok) {
+                    const infoData = await infoResp.json();
+                    document.getElementById('threshold-val').textContent = Number(infoData.threshold).toFixed(2);
+                }
+            } catch (err) {
+                document.getElementById('status-dot').style.background = '#f43f5e';
+                document.getElementById('status-dot').style.boxShadow = '0 0 8px #f43f5e';
+                document.getElementById('status-text').textContent = 'API Offline';
+            }
+        }
+        checkSystemStatus();
+
+        // Main Single Prediction
+        async function executeRouting() {
+            const text = ticketInput.value.trim();
+            if (!text) {
+                showToast('⚠️ Please enter ticket text first', 'warning');
+                return;
+            }
+
+            btnRoute.disabled = true;
+            btnRoute.innerHTML = '<span>⏳ Evaluating Policy...</span>';
+            const startTime = performance.now();
+
+            try {
+                const resp = await fetch(`${API_BASE}/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text, ticket_id: `tkt-${Date.now().toString().slice(-6)}` })
+                });
+
+                const latency = Math.round(performance.now() - startTime);
+                latencyVal.textContent = `${latency} ms (p95 < 300ms)`;
+
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    showToast(`Error: ${err.detail || 'Prediction failed'}`, 'error');
+                    return;
+                }
+
+                const res = await resp.json();
+                renderResult(res);
+
+            } catch (err) {
+                showToast(`Connection failed: Make sure FastAPI is running on ${API_BASE}`, 'error');
+            } finally {
+                btnRoute.disabled = false;
+                btnRoute.innerHTML = '<span>⚡ Analyze & Auto-Route Ticket</span>';
+            }
+        }
+
+        function renderResult(res) {
+            resultEmpty.style.display = 'none';
+            resultActive.style.display = 'flex';
+
+            currentTicketId = res.ticket_id;
+            currentPredictedCategory = res.category;
+
+            // Decision Banner
+            const banner = document.getElementById('decision-banner');
+            const decText = document.getElementById('decision-text');
+            const decSub = document.getElementById('decision-subtext');
+
+            if (res.decision === 'auto_route') {
+                banner.className = 'decision-banner auto-route';
+                decText.textContent = '✅ AUTO-ROUTE';
+                decSub.textContent = `Confidence (${(res.category_confidence * 100).toFixed(1)}%) ≥ Threshold`;
+            } else {
+                banner.className = 'decision-banner human-review';
+                decText.textContent = '🛡️ HUMAN REVIEW REQUIRED';
+                decSub.textContent = `Confidence (${(res.category_confidence * 100).toFixed(1)}%) < Threshold (Fallback)`;
+            }
+
+            // Category & Team
+            document.getElementById('cat-val').textContent = res.category;
+            document.getElementById('team-val').textContent = `Assigned: ${res.routed_team}`;
+            const confPct = (res.category_confidence * 100).toFixed(1);
+            document.getElementById('conf-val').textContent = `${confPct}%`;
+            document.getElementById('conf-bar').style.width = `${confPct}%`;
+
+            // Priority
+            const prioBadge = document.getElementById('prio-badge');
+            prioBadge.textContent = res.priority;
+            prioBadge.className = `prio-tag prio-${res.priority}`;
+            document.getElementById('prio-conf-val').textContent = `${(res.priority_confidence * 100).toFixed(1)}%`;
+
+            // Priority Keyword Override Note
+            const overrideNote = document.getElementById('override-note');
+            if (res.priority_confidence >= 0.95 && (res.priority === 'Critical' || res.priority === 'High')) {
+                overrideNote.style.display = 'block';
+            } else {
+                overrideNote.style.display = 'none';
+            }
+
+            // Select initial option in feedback dropdown
+            document.getElementById('feedback-select').value = res.category;
+        }
+
+        // Agent Feedback Submission
+        document.getElementById('btn-feedback').addEventListener('click', async () => {
+            const corrected = document.getElementById('feedback-select').value;
+            if (!currentTicketId) return;
+
+            try {
+                const resp = await fetch(`${API_BASE}/feedback`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ticket_id: currentTicketId,
+                        predicted_category: currentPredictedCategory,
+                        corrected_category: corrected,
+                        agent_id: 'web_agent_reviewer',
+                        notes: 'Submitted via Web Platform Tester'
+                    })
+                });
+
+                if (resp.ok) {
+                    showToast(`Correction registered: "${currentPredictedCategory}" ➔ "${corrected}"`, 'success');
+                } else {
+                    showToast('Failed to submit feedback.', 'error');
+                }
+            } catch (err) {
+                showToast('Failed to connect to feedback endpoint.', 'error');
+            }
+        });
+
+        // Batch Simulation Runner
+        document.getElementById('btn-batch-test').addEventListener('click', async () => {
+            const sampleBatch = [
+                { ticket_id: "TKT-B01", text: "laptop wont turn on and battery is smoking hot" },
+                { ticket_id: "TKT-B02", text: "need git repo permissions for new offshore contractor" },
+                { ticket_id: "TKT-B03", text: "where can i find coffee mugs and visitor parking passes" },
+                { ticket_id: "TKT-B04", text: "maternity leave policy document download error in payroll portal" },
+                { ticket_id: "TKT-B05", text: "purchase order approval for 10 mechanical keyboards for developers" }
+            ];
+
+            const btn = document.getElementById('btn-batch-test');
+            btn.disabled = true;
+            btn.textContent = 'Processing Batch...';
+
+            try {
+                const resp = await fetch(`${API_BASE}/predict/batch`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tickets: sampleBatch })
+                });
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const tbody = document.getElementById('batch-table-body');
+                    tbody.innerHTML = '';
+
+                    data.predictions.forEach((p, idx) => {
+                        const tr = document.createElement('tr');
+                        const isAuto = p.decision === 'auto_route';
+                        tr.innerHTML = `
+                            <td><code style="color: var(--primary);">${p.ticket_id || `BATCH-${idx+1}`}</code></td>
+                            <td>${sampleBatch[idx].text.slice(0, 42)}...</td>
+                            <td><strong>${p.category}</strong></td>
+                            <td>${(p.category_confidence * 100).toFixed(1)}%</td>
+                            <td><span class="prio-tag prio-${p.priority}" style="font-size:0.7rem; padding: 2px 6px;">${p.priority}</span></td>
+                            <td><span class="badge-table ${isAuto ? 'badge-auto' : 'badge-human'}">${p.decision.toUpperCase()}</span></td>
+                            <td style="color: #cbd5e1;">${p.routed_team}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                    showToast(`Batch of ${data.total_processed} tickets processed successfully!`, 'success');
+                }
+            } catch (err) {
+                showToast('Batch prediction request failed.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⚡ Run 5-Ticket Batch Simulation';
+            }
+        });
+
+        // Toast Display Helper
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast-msg');
+            const icon = document.getElementById('toast-icon');
+            const text = document.getElementById('toast-text');
+
+            icon.textContent = type === 'success' ? '✅' : (type === 'warning' ? '⚠️' : '❌');
+            text.textContent = msg;
+            toast.className = 'toast show';
+
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3500);
+        }
+    </script>
+</body>
+</html>

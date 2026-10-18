@@ -29,6 +29,7 @@ ignore = [
     "S101", # allow assert in tests
     "E501", # line too long handled by formatter
     "S311", # pseudo-random generator ok for bootstrap/simulation data
+    "E402", # allow sys.path bootstrap before local imports
 ]
 
 [tool.pytest.ini_options]

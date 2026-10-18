@@ -9,6 +9,13 @@ from src.serving.app import app
 client = TestClient(app)
 
 
+def test_root_endpoint_serves_frontend():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "IT Support Ticket Auto-Router" in response.text
+    assert "text/html" in response.headers.get("content-type", "")
+
+
 def test_health_endpoint():
     response = client.get("/health")
     assert response.status_code == 200

@@ -12,6 +12,7 @@ from typing import Any
 
 import joblib
 from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import HTMLResponse
 
 from src.features.preprocess import clean_text
 from src.serving.decision import DecisionEngine
@@ -169,6 +170,14 @@ def predict_single(req: PredictRequest) -> PredictResponse:
         routed_team=routed_team,
         model_version=MODEL_VERSION,
     )
+
+
+@app.get("/", response_class=HTMLResponse)
+def serve_frontend():
+    ui_path = Path("ui/index.html")
+    if ui_path.exists():
+        return HTMLResponse(content=ui_path.read_text(encoding="utf-8"))
+    return HTMLResponse(content="<h1>IT Support Ticket Classifier</h1><p>Visit /docs for API documentation.</p>")
 
 
 @app.get("/health", response_model=HealthResponse)
