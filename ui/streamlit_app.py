@@ -7,6 +7,7 @@ and operational business impact KPIs.
 import json
 import os
 from pathlib import Path
+
 import pandas as pd
 import requests
 import streamlit as st
@@ -30,7 +31,9 @@ try:
         health_data = health_resp.json()
         st.sidebar.success("● API Status: Healthy")
         st.sidebar.info(f"Model Version: `{health_data.get('version', 'v1.0')}`")
-        st.sidebar.write(f"Model Loaded: {'✅ Yes' if health_data.get('model_loaded') else '⚠️ Using Stubs'}")
+        st.sidebar.write(
+            f"Model Loaded: {'✅ Yes' if health_data.get('model_loaded') else '⚠️ Using Stubs'}"
+        )
     else:
         st.sidebar.warning("API Unreachable")
 except Exception:
@@ -43,12 +46,19 @@ try:
     if info_resp.status_code == 200:
         info_data = info_resp.json()
         current_threshold = info_data.get("threshold", 0.75)
-except Exception:
-    pass
+except requests.RequestException:
+    current_threshold = 0.75
 
 st.sidebar.metric("Confidence Threshold (τ)", f"{current_threshold:.2f}")
 
-tabs = st.tabs(["🚀 Ticket Routing Playground", "🏢 Mock Resolver Queues", "✍️ Agent Feedback Loop", "📊 Operational KPIs"])
+tabs = st.tabs(
+    [
+        "🚀 Ticket Routing Playground",
+        "🏢 Mock Resolver Queues",
+        "✍️ Agent Feedback Loop",
+        "📊 Operational KPIs",
+    ]
+)
 
 # TAB 1: PLAYGROUND
 with tabs[0]:
@@ -68,7 +78,7 @@ with tabs[0]:
                 "password reset not working and account locked",
                 "outlook keeps asking password and my printer is also not working",
                 "how do i update my bank details in the payroll portal",
-            ]
+            ],
         )
 
     with col1:
@@ -77,7 +87,7 @@ with tabs[0]:
             "Ticket Description (Free text):",
             value=default_val,
             height=130,
-            placeholder="Type or paste the support ticket text here..."
+            placeholder="Type or paste the support ticket text here...",
         )
         submit_btn = st.button("⚡ Classify & Route Ticket", type="primary")
 
@@ -101,10 +111,18 @@ with tabs[0]:
                     res_col1.metric("Routing Decision", "HUMAN REVIEW", "⚠️ Escalated")
 
                 # Category & Confidence
-                res_col2.metric("Predicted Category", res["category"], f"{res['category_confidence']*100:.1f}%")
+                res_col2.metric(
+                    "Predicted Category",
+                    res["category"],
+                    f"{res['category_confidence'] * 100:.1f}%",
+                )
 
                 # Priority
-                res_col3.metric("Predicted Priority", res["priority"], f"{res['priority_confidence']*100:.1f}%")
+                res_col3.metric(
+                    "Predicted Priority",
+                    res["priority"],
+                    f"{res['priority_confidence'] * 100:.1f}%",
+                )
 
                 # Destination Queue
                 res_col4.metric("Assigned Destination", res["routed_team"])
@@ -112,9 +130,13 @@ with tabs[0]:
                 # Detailed Card
                 st.markdown("---")
                 if decision == "auto_route":
-                    st.info(f"✨ **Auto-Routed to `{res['routed_team']}`**: Model confidence ({res['category_confidence']:.2f}) meets or exceeds the policy threshold ({current_threshold:.2f}). No manual triage required.")
+                    st.info(
+                        f"✨ **Auto-Routed to `{res['routed_team']}`**: Model confidence ({res['category_confidence']:.2f}) meets or exceeds the policy threshold ({current_threshold:.2f}). No manual triage required."
+                    )
                 else:
-                    st.warning(f"🛡️ **Escalated to `{res['routed_team']}`**: Model confidence ({res['category_confidence']:.2f}) is below threshold ({current_threshold:.2f}). Forwarded to human triage to prevent misrouting penalty.")
+                    st.warning(
+                        f"🛡️ **Escalated to `{res['routed_team']}`**: Model confidence ({res['category_confidence']:.2f}) is below threshold ({current_threshold:.2f}). Forwarded to human triage to prevent misrouting penalty."
+                    )
 
             else:
                 st.error(f"Error {resp.status_code}: {resp.text}")
@@ -124,20 +146,31 @@ with tabs[0]:
 # TAB 2: RESOLVER QUEUES
 with tabs[1]:
     st.subheader("Departmental Resolver Queues")
-    st.write("Visualizing real-time tickets routed to respective departments vs. human triage queue.")
+    st.write(
+        "Visualizing real-time tickets routed to respective departments vs. human triage queue."
+    )
 
     log_path = Path("data/monitoring/prediction_log.jsonl")
     if log_path.exists():
         records = []
-        with open(log_path, "r", encoding="utf-8") as f:
+        with open(log_path, encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     records.append(json.loads(line))
         if records:
             df_logs = pd.DataFrame(records)
             st.dataframe(
-                df_logs[["timestamp", "ticket_id", "predicted_category", "category_confidence", "decision", "routed_team"]].tail(10),
-                use_container_width=True
+                df_logs[
+                    [
+                        "timestamp",
+                        "ticket_id",
+                        "predicted_category",
+                        "category_confidence",
+                        "decision",
+                        "routed_team",
+                    ]
+                ].tail(10),
+                use_container_width=True,
             )
             st.bar_chart(df_logs["routed_team"].value_counts())
         else:
@@ -148,21 +181,45 @@ with tabs[1]:
 # TAB 3: AGENT FEEDBACK
 with tabs[2]:
     st.subheader("Human Triage Agent Feedback Loop")
-    st.write("Enable service desk agents to correct misrouted tickets. Corrections feed into the continuous retraining pipeline.")
+    st.write(
+        "Enable service desk agents to correct misrouted tickets. Corrections feed into the continuous retraining pipeline."
+    )
 
     f_col1, f_col2 = st.columns(2)
     with f_col1:
         fb_ticket_id = st.text_input("Ticket ID:", value="tkt-sample-01")
-        fb_pred_cat = st.selectbox("Original Prediction:", [
-            "Miscellaneous", "Access", "Administrative rights", "HR Support", "Hardware", "Internal Project", "Purchase", "Storage"
-        ])
+        fb_pred_cat = st.selectbox(
+            "Original Prediction:",
+            [
+                "Miscellaneous",
+                "Access",
+                "Administrative rights",
+                "HR Support",
+                "Hardware",
+                "Internal Project",
+                "Purchase",
+                "Storage",
+            ],
+        )
     with f_col2:
-        fb_corr_cat = st.selectbox("Correct Category (Agent Correction):", [
-            "Hardware", "Access", "Administrative rights", "HR Support", "Internal Project", "Miscellaneous", "Purchase", "Storage"
-        ])
+        fb_corr_cat = st.selectbox(
+            "Correct Category (Agent Correction):",
+            [
+                "Hardware",
+                "Access",
+                "Administrative rights",
+                "HR Support",
+                "Internal Project",
+                "Miscellaneous",
+                "Purchase",
+                "Storage",
+            ],
+        )
         fb_agent = st.text_input("Reviewing Agent ID:", value="agent_alex")
 
-    fb_notes = st.text_input("Reviewer Notes (optional):", value="User specifically requested monitor replacement.")
+    fb_notes = st.text_input(
+        "Reviewer Notes (optional):", value="User specifically requested monitor replacement."
+    )
 
     if st.button("Submit Agent Correction", type="primary"):
         try:
@@ -171,7 +228,7 @@ with tabs[2]:
                 "predicted_category": fb_pred_cat,
                 "corrected_category": fb_corr_cat,
                 "agent_id": fb_agent,
-                "notes": fb_notes
+                "notes": fb_notes,
             }
             fb_resp = requests.post(f"{API_URL}/feedback", json=payload, timeout=3)
             if fb_resp.status_code == 200:
@@ -194,4 +251,6 @@ with tabs[3]:
     st.markdown("---")
     st.markdown("#### Cost-Benefit Formula Sensitivity")
     st.latex(r"\text{Net Minutes Saved} = N \times a \times [t - (1 - p) \times c]")
-    st.caption("Where N = Monthly Tickets, a = Auto-route rate, p = Accuracy on routed tickets, t = Triage savings (3 min), c = Misroute penalty (15 min).")
+    st.caption(
+        "Where N = Monthly Tickets, a = Auto-route rate, p = Accuracy on routed tickets, t = Triage savings (3 min), c = Misroute penalty (15 min)."
+    )

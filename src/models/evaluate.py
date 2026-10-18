@@ -4,16 +4,23 @@ Computes test metrics, per-class reports, confusion matrices, and the business c
 """
 
 import json
+import sys
 from pathlib import Path
+
+# Ensure workspace root is always on sys.path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.metrics import classification_report, confusion_matrix, f1_score
 import yaml
+from sklearn.metrics import classification_report, f1_score
 
 
 def load_config() -> dict:
-    with open("configs/params.yaml", "r", encoding="utf-8") as f:
+    with open("configs/params.yaml", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
@@ -44,7 +51,7 @@ def evaluate_models():
     weighted_f1 = f1_score(y_test, preds, average="weighted")
     clf_report = classification_report(y_test, preds, output_dict=True)
 
-    print(f"Test Set Evaluation Results:")
+    print("Test Set Evaluation Results:")
     print(f" - Macro-F1: {macro_f1:.4f}")
     print(f" - Weighted-F1: {weighted_f1:.4f}")
 
@@ -64,7 +71,7 @@ def evaluate_models():
 
     for tau in thresholds:
         tau = round(float(tau), 2)
-        routed_mask = (max_probs >= tau)
+        routed_mask = max_probs >= tau
         auto_routed_count = int(routed_mask.sum())
         auto_route_rate = auto_routed_count / total_tickets if total_tickets > 0 else 0.0
 
@@ -100,7 +107,9 @@ def evaluate_models():
     if max_net_hours == -float("inf") and sweep_results:
         best_threshold = max(sweep_results, key=lambda x: x["net_hours_saved"])["threshold"]
 
-    print(f"Optimal Threshold Selected: {best_threshold} (Max Net Hours Saved: {max_net_hours:.1f} hrs/mo)")
+    print(
+        f"Optimal Threshold Selected: {best_threshold} (Max Net Hours Saved: {max_net_hours:.1f} hrs/mo)"
+    )
 
     # 3. Save Reports
     reports_dir = Path("reports")

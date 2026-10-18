@@ -31,7 +31,7 @@ def test_priority_override_critical_keyword():
     final_prio, overridden = engine.apply_priority_overrides(
         "Production server outage affecting all clients",
         predicted_priority="Low",
-        priority_confidence=0.9
+        priority_confidence=0.9,
     )
     assert final_prio == "Critical"
     assert overridden is True
@@ -40,9 +40,7 @@ def test_priority_override_critical_keyword():
 def test_priority_no_override():
     engine = DecisionEngine()
     final_prio, overridden = engine.apply_priority_overrides(
-        "Please install python on my mac",
-        predicted_priority="Medium",
-        priority_confidence=0.8
+        "Please install python on my mac", predicted_priority="Medium", priority_confidence=0.8
     )
     assert final_prio == "Medium"
     assert overridden is False

@@ -28,6 +28,7 @@ select = [
 ignore = [
     "S101", # allow assert in tests
     "E501", # line too long handled by formatter
+    "S311", # pseudo-random generator ok for bootstrap/simulation data
 ]
 
 [tool.pytest.ini_options]
@@ -37,4 +38,4 @@ addopts = "-v --strict-markers"
 
 [tool.bandit]
 exclude_dirs = ["tests", ".venv", "venv"]
-skips = ["B101"]
+skips = ["B101", "B311"]

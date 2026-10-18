@@ -6,7 +6,7 @@ pipeline across offline training, batch evaluation, and online FastAPI serving.
 
 import re
 import string
-from typing import List, Union
+from typing import Any
 
 try:
     import nltk
@@ -30,29 +30,139 @@ try:
 except Exception:
     # Safe fallback if NLTK is not yet initialized
     _STOPWORDS = {
-        "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your",
-        "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she",
-        "her", "hers", "herself", "it", "its", "itself", "they", "them", "their",
-        "theirs", "themselves", "what", "which", "who", "whom", "this", "that",
-        "these", "those", "am", "is", "are", "was", "were", "be", "been", "being",
-        "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an",
-        "the", "and", "but", "if", "or", "because", "as", "until", "while", "of",
-        "at", "by", "for", "with", "about", "against", "between", "into", "through",
-        "during", "before", "after", "above", "below", "to", "from", "up", "down",
-        "in", "out", "on", "off", "over", "under", "again", "further", "then",
-        "once", "here", "there", "when", "where", "why", "how", "all", "any",
-        "both", "each", "few", "more", "most", "other", "some", "such", "no",
-        "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s",
-        "t", "can", "will", "just", "don", "should", "now"
+        "i",
+        "me",
+        "my",
+        "myself",
+        "we",
+        "our",
+        "ours",
+        "ourselves",
+        "you",
+        "your",
+        "yours",
+        "yourself",
+        "yourselves",
+        "he",
+        "him",
+        "his",
+        "himself",
+        "she",
+        "her",
+        "hers",
+        "herself",
+        "it",
+        "its",
+        "itself",
+        "they",
+        "them",
+        "their",
+        "theirs",
+        "themselves",
+        "what",
+        "which",
+        "who",
+        "whom",
+        "this",
+        "that",
+        "these",
+        "those",
+        "am",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "having",
+        "do",
+        "does",
+        "did",
+        "doing",
+        "a",
+        "an",
+        "the",
+        "and",
+        "but",
+        "if",
+        "or",
+        "because",
+        "as",
+        "until",
+        "while",
+        "of",
+        "at",
+        "by",
+        "for",
+        "with",
+        "about",
+        "against",
+        "between",
+        "into",
+        "through",
+        "during",
+        "before",
+        "after",
+        "above",
+        "below",
+        "to",
+        "from",
+        "up",
+        "down",
+        "in",
+        "out",
+        "on",
+        "off",
+        "over",
+        "under",
+        "again",
+        "further",
+        "then",
+        "once",
+        "here",
+        "there",
+        "when",
+        "where",
+        "why",
+        "how",
+        "all",
+        "any",
+        "both",
+        "each",
+        "few",
+        "more",
+        "most",
+        "other",
+        "some",
+        "such",
+        "no",
+        "nor",
+        "not",
+        "only",
+        "own",
+        "same",
+        "so",
+        "than",
+        "too",
+        "very",
+        "s",
+        "t",
+        "can",
+        "will",
+        "just",
+        "don",
+        "should",
+        "now",
     }
     _LEMMATIZER = None
 
 
 def clean_text(
-    text: str,
-    lowercase: bool = True,
-    remove_stopwords: bool = True,
-    lemmatize: bool = True
+    text: str, lowercase: bool = True, remove_stopwords: bool = True, lemmatize: bool = True
 ) -> str:
     """
     Cleans raw ticket text by:
@@ -75,7 +185,7 @@ def clean_text(
     text = re.sub(r"\S+@\S+", " ", text)
 
     # Remove punctuations and digits
-    text = re.sub(r"[%s]" % re.escape(string.punctuation), " ", text)
+    text = re.sub(f"[{re.escape(string.punctuation)}]", " ", text)
     text = re.sub(r"\d+", " ", text)
 
     # Tokenize by whitespace
@@ -93,13 +203,14 @@ def clean_text(
 
 
 def preprocess_corpus(
-    texts: Union[List[str], "pd.Series"],
+    texts: Any,
     lowercase: bool = True,
     remove_stopwords: bool = True,
-    lemmatize: bool = True
-) -> List[str]:
+    lemmatize: bool = True,
+) -> list[str]:
     """Applies clean_text across a sequence of documents."""
     return [
         clean_text(t, lowercase=lowercase, remove_stopwords=remove_stopwords, lemmatize=lemmatize)
         for t in texts
     ]
+

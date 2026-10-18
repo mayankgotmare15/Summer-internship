@@ -4,7 +4,7 @@ Enforces schema contracts using Pandera and performs data leakage checks across 
 """
 
 import hashlib
-from typing import Dict, List, Set, Tuple
+
 import pandas as pd
 import pandera as pa
 from pandera.typing import Series
@@ -33,7 +33,7 @@ class RoutingDataSchema(pa.DataFrameModel):
         coerce = True
 
 
-def validate_routing_dataframe(df: pd.DataFrame) -> Tuple[bool, List[str]]:
+def validate_routing_dataframe(df: pd.DataFrame) -> tuple[bool, list[str]]:
     """
     Validates the routing dataframe against schema contracts and data quality checks:
     - Required columns present
@@ -65,21 +65,24 @@ def validate_routing_dataframe(df: pd.DataFrame) -> Tuple[bool, List[str]]:
     try:
         RoutingDataSchema.validate(df, lazy=True)
     except pa.errors.SchemaErrors as e:
-        issues.append(f"Pandera validation failed with {len(e.failure_cases)} issues: {e.failure_cases.head(5).to_dict()}")
+        issues.append(
+            f"Pandera validation failed with {len(e.failure_cases)} issues: {e.failure_cases.head(5).to_dict()}"
+        )
 
     is_valid = len(issues) == 0
     return is_valid, issues
 
 
-def compute_text_hashes(series: pd.Series) -> Set[str]:
+def compute_text_hashes(series: pd.Series) -> set[str]:
     """Generates SHA-256 hashes of normalized strings for exact match leakage detection."""
     return {
         hashlib.sha256(str(val).strip().lower().encode("utf-8")).hexdigest()
-        for val in series if isinstance(val, str) and val.strip()
+        for val in series
+        if isinstance(val, str) and val.strip()
     }
 
 
-def verify_no_data_leakage(train_df: pd.DataFrame, test_df: pd.DataFrame) -> Tuple[bool, int]:
+def verify_no_data_leakage(train_df: pd.DataFrame, test_df: pd.DataFrame) -> tuple[bool, int]:
     """
     Verifies that no text in test_df leaked from train_df.
     Returns (is_clean, overlap_count).

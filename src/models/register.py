@@ -3,10 +3,15 @@ Model Registration and Quality Gate Module.
 Validates candidate model against performance thresholds before promoting to Champion.
 """
 
-from datetime import datetime, timezone
 import json
-from pathlib import Path
 import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+# Ensure workspace root is always on sys.path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 TARGET_MACRO_F1 = 0.80
 TARGET_ROUTED_ACCURACY = 0.90
@@ -21,7 +26,7 @@ def verify_quality_gate() -> bool:
         print(f"Error: Evaluation metrics not found at {METRICS_PATH}")
         return False
 
-    with open(METRICS_PATH, "r", encoding="utf-8") as f:
+    with open(METRICS_PATH, encoding="utf-8") as f:
         metrics = json.load(f)
 
     macro_f1 = metrics.get("macro_f1", 0.0)
@@ -35,7 +40,6 @@ def verify_quality_gate() -> bool:
     print(f"Candidate Macro-F1: {macro_f1:.4f} (Target: >= {TARGET_MACRO_F1})")
     print(f"Candidate Auto-Route Accuracy: {routed_acc:.4f} (Target: >= {TARGET_ROUTED_ACCURACY})")
 
-    passed = True
     reasons = []
 
     if macro_f1 < TARGET_MACRO_F1:
@@ -43,11 +47,13 @@ def verify_quality_gate() -> bool:
         reasons.append(f"Macro-F1 {macro_f1:.4f} did not meet target {TARGET_MACRO_F1}")
 
     if routed_acc < TARGET_ROUTED_ACCURACY:
-        reasons.append(f"Auto-route accuracy {routed_acc:.4f} did not meet target {TARGET_ROUTED_ACCURACY}")
+        reasons.append(
+            f"Auto-route accuracy {routed_acc:.4f} did not meet target {TARGET_ROUTED_ACCURACY}"
+        )
 
     # Check against previous champion for class regression if exists
     if CHAMPION_META_PATH.exists():
-        with open(CHAMPION_META_PATH, "r", encoding="utf-8") as f:
+        with open(CHAMPION_META_PATH, encoding="utf-8") as f:
             prev_meta = json.load(f)
         prev_classes = prev_meta.get("per_class", {})
         curr_classes = metrics.get("per_class", {})

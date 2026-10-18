@@ -4,10 +4,8 @@ Simulates production traffic including normal requests, vocabulary shift drift,
 and emergent unseen category drift (e.g. held-out Storage tickets).
 """
 
-import json
-from pathlib import Path
-import random
 import time
+
 import requests
 
 API_URL = "http://localhost:8000"
@@ -42,13 +40,13 @@ HELD_OUT_CATEGORY_SAMPLES = [
 def send_ticket(text: str, ticket_id: str):
     try:
         resp = requests.post(
-            f"{API_URL}/predict",
-            json={"text": text, "ticket_id": ticket_id},
-            timeout=3
+            f"{API_URL}/predict", json={"text": text, "ticket_id": ticket_id}, timeout=3
         )
         if resp.status_code == 200:
             res = resp.json()
-            print(f"[{res['decision'].upper()}] {ticket_id} -> {res['category']} ({res['category_confidence']:.2f})")
+            print(
+                f"[{res['decision'].upper()}] {ticket_id} -> {res['category']} ({res['category_confidence']:.2f})"
+            )
         else:
             print(f"Error {resp.status_code} for {ticket_id}")
     except Exception as e:
@@ -62,24 +60,26 @@ def run_traffic_simulation(mode: str = "all"):
     if mode in ["all", "normal"]:
         print("\n--- Sending In-Distribution Normal Traffic ---")
         for i, text in enumerate(NORMAL_SAMPLES * 3):
-            send_ticket(text, f"sim-normal-{i+1:03d}")
+            send_ticket(text, f"sim-normal-{i + 1:03d}")
             time.sleep(0.05)
 
     # Batch 2: Vocabulary Shift
     if mode in ["all", "drift"]:
         print("\n--- Sending Vocabulary Shift Traffic ---")
         for i, text in enumerate(DRIFT_VOCABULARY_SAMPLES * 2):
-            send_ticket(text, f"sim-drift-vocab-{i+1:03d}")
+            send_ticket(text, f"sim-drift-vocab-{i + 1:03d}")
             time.sleep(0.05)
 
     # Batch 3: Held-out Unseen Category Drift
     if mode in ["all", "drift"]:
         print("\n--- Sending Emergent Category Drift (Storage) Traffic ---")
         for i, text in enumerate(HELD_OUT_CATEGORY_SAMPLES * 3):
-            send_ticket(text, f"sim-drift-cat-{i+1:03d}")
+            send_ticket(text, f"sim-drift-cat-{i + 1:03d}")
             time.sleep(0.05)
 
-    print("\nTraffic simulation batch complete. Logs written to data/monitoring/prediction_log.jsonl")
+    print(
+        "\nTraffic simulation batch complete. Logs written to data/monitoring/prediction_log.jsonl"
+    )
 
 
 if __name__ == "__main__":

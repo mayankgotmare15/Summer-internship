@@ -4,16 +4,24 @@ Enforces stratified splitting, data contract validation, leakage detection,
 and creates the held-out category set for Phase 5 drift drill.
 """
 
+import sys
 from pathlib import Path
+
+# Ensure workspace root is always on sys.path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import pandas as pd
-from sklearn.model_selection import train_test_split
 import yaml
+from sklearn.model_selection import train_test_split
+
 from src.data.validate import validate_routing_dataframe, verify_no_data_leakage
 from src.features.preprocess import preprocess_corpus
 
 
 def split_and_preprocess_data():
-    with open("configs/params.yaml", "r", encoding="utf-8") as f:
+    with open("configs/params.yaml", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     raw_path = Path(config["data"]["raw_routing_path"])
@@ -38,27 +46,28 @@ def split_and_preprocess_data():
         trainable_df = df[df["category"] != held_out_cat].copy()
         drift_path = processed_dir / "drift_held_out_category.csv"
         drift_df.to_csv(drift_path, index=False)
-        print(f"Extracted {len(drift_df)} samples for held-out drift category '{held_out_cat}' -> {drift_path}")
+        print(
+            f"Extracted {len(drift_df)} samples for held-out drift category '{held_out_cat}' -> {drift_path}"
+        )
     else:
         trainable_df = df.copy()
 
+    # Deduplicate to strictly prevent split leakage
+    trainable_df = trainable_df.drop_duplicates(subset=["text"]).copy()
+
     # 3. Stratified Split: 70% Train, 15% Val, 15% Test
     train_df, temp_df = train_test_split(
-        trainable_df,
-        test_size=0.30,
-        random_state=seed,
-        stratify=trainable_df["category"]
+        trainable_df, test_size=0.30, random_state=seed, stratify=trainable_df["category"]
     )
     val_df, test_df = train_test_split(
-        temp_df,
-        test_size=0.50,
-        random_state=seed,
-        stratify=temp_df["category"]
+        temp_df, test_size=0.50, random_state=seed, stratify=temp_df["category"]
     )
 
     # 4. Leakage Verification
     is_clean, overlap = verify_no_data_leakage(train_df, test_df)
-    print(f"Split leakage check: {'CLEAN' if is_clean else 'LEAK DETECTED'} ({overlap} overlapping texts)")
+    print(
+        f"Split leakage check: {'CLEAN' if is_clean else 'LEAK DETECTED'} ({overlap} overlapping texts)"
+    )
 
     # 5. Preprocessing
     print("Running shared preprocessing engine...")

@@ -5,27 +5,33 @@ Logs parameters, metrics, and model artifacts to MLflow.
 """
 
 import json
+import sys
 from pathlib import Path
+
+# Ensure workspace root is always on sys.path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import joblib
 import pandas as pd
+import yaml
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, f1_score
+from sklearn.metrics import f1_score
 from sklearn.pipeline import Pipeline
-import yaml
 
 try:
     import mlflow
     import mlflow.sklearn
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
 
-from src.features.preprocess import clean_text
-
 
 def load_config() -> dict:
-    with open("configs/params.yaml", "r", encoding="utf-8") as f:
+    with open("configs/params.yaml", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
@@ -42,8 +48,10 @@ def train_models():
     # Fallback to raw ingestion if processed data does not exist yet
     if not train_path.exists():
         from src.data.ingest import ingest_data
+
         ingest_data()
         from src.data.split import split_and_preprocess_data
+
         split_and_preprocess_data()
 
     print(f"Loading training data from {train_path}...")
@@ -63,19 +71,22 @@ def train_models():
     class_weight = train_params.get("class_weight", "balanced")
     seed = train_params.get("random_seed", 42)
 
-    routing_pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(
-            ngram_range=ngram_range,
-            max_features=max_features,
-            sublinear_tf=True
-        )),
-        ("clf", LogisticRegression(
-            C=C_param,
-            class_weight=class_weight,
-            max_iter=1000,
-            random_state=seed
-        ))
-    ])
+    routing_pipeline = Pipeline(
+        [
+            (
+                "tfidf",
+                TfidfVectorizer(
+                    ngram_range=ngram_range, max_features=max_features, sublinear_tf=True
+                ),
+            ),
+            (
+                "clf",
+                LogisticRegression(
+                    C=C_param, class_weight=class_weight, max_iter=1000, random_state=seed
+                ),
+            ),
+        ]
+    )
 
     print("Fitting Routing Model Pipeline...")
     routing_pipeline.fit(X_train, y_train_routing)
@@ -92,19 +103,20 @@ def train_models():
         y_train_priority = train_df["priority"]
         y_val_priority = val_df["priority"]
 
-        priority_pipeline = Pipeline([
-            ("tfidf", TfidfVectorizer(
-                ngram_range=(1, 2),
-                max_features=5000,
-                sublinear_tf=True
-            )),
-            ("clf", LogisticRegression(
-                C=1.0,
-                class_weight="balanced",
-                max_iter=1000,
-                random_state=seed
-            ))
-        ])
+        priority_pipeline = Pipeline(
+            [
+                (
+                    "tfidf",
+                    TfidfVectorizer(ngram_range=(1, 2), max_features=5000, sublinear_tf=True),
+                ),
+                (
+                    "clf",
+                    LogisticRegression(
+                        C=1.0, class_weight="balanced", max_iter=1000, random_state=seed
+                    ),
+                ),
+            ]
+        )
         print("Fitting Priority Model Pipeline...")
         priority_pipeline.fit(X_train, y_train_priority)
         prio_val_preds = priority_pipeline.predict(X_val)
@@ -125,18 +137,22 @@ def train_models():
     if MLFLOW_AVAILABLE:
         try:
             with mlflow.start_run(run_name="train_champion_baseline"):
-                mlflow.log_params({
-                    "model_type": train_params.get("model_type", "logistic_regression"),
-                    "C": C_param,
-                    "class_weight": str(class_weight),
-                    "ngram_range": str(ngram_range),
-                    "max_features": max_features,
-                    "seed": seed,
-                })
-                mlflow.log_metrics({
-                    "val_macro_f1": val_macro_f1,
-                    "val_weighted_f1": val_weighted_f1,
-                })
+                mlflow.log_params(
+                    {
+                        "model_type": train_params.get("model_type", "logistic_regression"),
+                        "C": C_param,
+                        "class_weight": str(class_weight),
+                        "ngram_range": str(ngram_range),
+                        "max_features": max_features,
+                        "seed": seed,
+                    }
+                )
+                mlflow.log_metrics(
+                    {
+                        "val_macro_f1": val_macro_f1,
+                        "val_weighted_f1": val_weighted_f1,
+                    }
+                )
                 mlflow.sklearn.log_model(routing_pipeline, "routing_model")
                 print("MLflow logging completed.")
         except Exception as e:
@@ -145,12 +161,16 @@ def train_models():
     # Save summary metrics
     Path("reports").mkdir(exist_ok=True)
     with open("reports/val_metrics.json", "w", encoding="utf-8") as f:
-        json.dump({
-            "val_macro_f1": round(val_macro_f1, 4),
-            "val_weighted_f1": round(val_weighted_f1, 4),
-            "train_samples": len(train_df),
-            "val_samples": len(val_df),
-        }, f, indent=2)
+        json.dump(
+            {
+                "val_macro_f1": round(val_macro_f1, 4),
+                "val_weighted_f1": round(val_weighted_f1, 4),
+                "train_samples": len(train_df),
+                "val_samples": len(val_df),
+            },
+            f,
+            indent=2,
+        )
 
 
 if __name__ == "__main__":

@@ -5,21 +5,19 @@ the baseline training reference and recent production prediction logs.
 Generates interactive HTML and JSON reports.
 """
 
-from datetime import datetime, timezone
 import json
+from datetime import datetime, timezone
 from pathlib import Path
+
 import pandas as pd
 
 try:
-    from evidently.report import Report
-    from evidently.metric_preset import DataDriftPreset, TargetDriftPreset
     EVIDENTLY_AVAILABLE = True
 except Exception:
     EVIDENTLY_AVAILABLE = False
 
 
 def generate_drift_report():
-    reference_path = Path("data/processed/train.csv")
     current_log_path = Path("data/monitoring/prediction_log.jsonl")
     reports_dir = Path("reports")
     reports_dir.mkdir(parents=True, exist_ok=True)
@@ -31,12 +29,14 @@ def generate_drift_report():
 
     if not current_log_path.exists():
         print(f"Prediction log not found at {current_log_path}. Generating empty baseline report.")
-        html_out.write_text("<html><body><h1>No prediction data available for drift analysis yet.</h1></body></html>")
+        html_out.write_text(
+            "<html><body><h1>No prediction data available for drift analysis yet.</h1></body></html>"
+        )
         return
 
     # Load recent predictions
     records = []
-    with open(current_log_path, "r", encoding="utf-8") as f:
+    with open(current_log_path, encoding="utf-8") as f:
         for line in f:
             if line.strip():
                 try:
@@ -52,9 +52,19 @@ def generate_drift_report():
     total_logs = len(current_df)
 
     # Calculate summary metrics
-    avg_conf = current_df["category_confidence"].mean() if "category_confidence" in current_df.columns else 0.0
-    auto_route_share = (current_df["decision"] == "auto_route").mean() if "decision" in current_df.columns else 0.0
-    category_counts = current_df["predicted_category"].value_counts().to_dict() if "predicted_category" in current_df.columns else {}
+    avg_conf = (
+        current_df["category_confidence"].mean()
+        if "category_confidence" in current_df.columns
+        else 0.0
+    )
+    auto_route_share = (
+        (current_df["decision"] == "auto_route").mean() if "decision" in current_df.columns else 0.0
+    )
+    category_counts = (
+        current_df["predicted_category"].value_counts().to_dict()
+        if "predicted_category" in current_df.columns
+        else {}
+    )
 
     summary = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -96,9 +106,9 @@ def generate_drift_report():
 <body>
     <div class="card">
         <h1>📊 IT Support Ticket Classifier - Observability & Drift Report</h1>
-        <p>Telemetry generated at: <strong>{summary['generated_at']}</strong></p>
-        <span class="badge {'badge-drift' if summary['drift_detected'] else 'badge-healthy'}">
-            {'🚨 SYSTEM DRIFT DETECTED' if summary['drift_detected'] else '✅ TELEMETRY HEALTHY'}
+        <p>Telemetry generated at: <strong>{summary["generated_at"]}</strong></p>
+        <span class="badge {"badge-drift" if summary["drift_detected"] else "badge-healthy"}">
+            {"🚨 SYSTEM DRIFT DETECTED" if summary["drift_detected"] else "✅ TELEMETRY HEALTHY"}
         </span>
     </div>
 
@@ -109,11 +119,11 @@ def generate_drift_report():
             <div class="metric-label">Evaluated Logs</div>
         </div>
         <div class="metric">
-            <div class="metric-value">{avg_conf*100:.1f}%</div>
+            <div class="metric-value">{avg_conf * 100:.1f}%</div>
             <div class="metric-label">Average Confidence</div>
         </div>
         <div class="metric">
-            <div class="metric-value">{auto_route_share*100:.1f}%</div>
+            <div class="metric-value">{auto_route_share * 100:.1f}%</div>
             <div class="metric-label">Auto-Route Share</div>
         </div>
     </div>
@@ -122,7 +132,7 @@ def generate_drift_report():
         <h2>Production Output Distribution</h2>
         <table>
             <tr><th>Predicted Category</th><th>Prediction Count</th><th>Share</th></tr>
-            {''.join(f'<tr><td>{k}</td><td>{v}</td><td>{(v/total_logs)*100:.1f}%</td></tr>' for k, v in category_counts.items())}
+            {"".join(f"<tr><td>{k}</td><td>{v}</td><td>{(v / total_logs) * 100:.1f}%</td></tr>" for k, v in category_counts.items())}
         </table>
     </div>
 </body>

@@ -32,10 +32,7 @@ def test_clean_text_empty_and_null():
 
 
 def test_preprocess_corpus():
-    corpus = [
-        "Printer not responding",
-        "Need new monitor for desk"
-    ]
+    corpus = ["Printer not responding", "Need new monitor for desk"]
     cleaned_corpus = preprocess_corpus(corpus)
     assert len(cleaned_corpus) == 2
     assert "printer" in cleaned_corpus[0]

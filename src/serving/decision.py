@@ -3,7 +3,7 @@ Decision engine for ticket classification, routing assignment, and priority elev
 """
 
 import os
-from typing import Dict, Optional, Tuple
+
 import yaml
 
 DEFAULT_ROUTING_MAP = {
@@ -41,7 +41,7 @@ HIGH_OVERRIDE_KEYWORDS = [
 class DecisionEngine:
     def __init__(
         self,
-        routing_config_path: Optional[str] = "configs/routing_map.yaml",
+        routing_config_path: str | None = "configs/routing_map.yaml",
         default_threshold: float = 0.75,
     ):
         self.threshold = float(os.getenv("CONFIDENCE_THRESHOLD", default_threshold))
@@ -50,20 +50,19 @@ class DecisionEngine:
 
         if routing_config_path and os.path.exists(routing_config_path):
             try:
-                with open(routing_config_path, "r", encoding="utf-8") as f:
+                with open(routing_config_path, encoding="utf-8") as f:
                     cfg = yaml.safe_load(f)
                     if cfg and "routing_map" in cfg:
                         self.routing_map.update(cfg["routing_map"])
                     if cfg and "fallback_queue" in cfg:
                         self.fallback_queue = cfg["fallback_queue"]
-            except Exception:
+            except (yaml.YAMLError, OSError):
+                # Fallback to default routing map if config file cannot be read
                 pass
 
     def evaluate_routing(
-        self,
-        predicted_category: str,
-        category_confidence: float
-    ) -> Tuple[str, str]:
+        self, predicted_category: str, category_confidence: float
+    ) -> tuple[str, str]:
         """
         Determines routing decision and assigned team based on model confidence threshold.
         Returns (decision, routed_team).
@@ -78,11 +77,8 @@ class DecisionEngine:
         return decision, routed_team
 
     def apply_priority_overrides(
-        self,
-        raw_text: str,
-        predicted_priority: str,
-        priority_confidence: float
-    ) -> Tuple[str, bool]:
+        self, raw_text: str, predicted_priority: str, priority_confidence: float
+    ) -> tuple[str, bool]:
         """
         Checks for high-severity enterprise keywords to elevate priority safely.
         Returns (final_priority, was_overridden).

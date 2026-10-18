@@ -3,6 +3,7 @@ API tests for FastAPI endpoints using TestClient.
 """
 
 from fastapi.testclient import TestClient
+
 from src.serving.app import app
 
 client = TestClient(app)
@@ -28,7 +29,7 @@ def test_model_info_endpoint():
 def test_predict_endpoint_valid():
     payload = {
         "text": "My laptop monitor won't turn on and screen is completely black.",
-        "ticket_id": "test-tkt-101"
+        "ticket_id": "test-tkt-101",
     }
     response = client.post("/predict", json=payload)
     assert response.status_code == 200
@@ -75,7 +76,7 @@ def test_feedback_endpoint():
         "predicted_category": "Miscellaneous",
         "corrected_category": "Hardware",
         "agent_id": "agent-007",
-        "notes": "User clearly specified laptop screen failure."
+        "notes": "User clearly specified laptop screen failure.",
     }
     response = client.post("/feedback", json=payload)
     assert response.status_code == 200

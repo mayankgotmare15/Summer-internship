@@ -4,11 +4,10 @@ Loads raw IT Support Ticket datasets or generates a validated bootstrap dataset
 if Kaggle raw files are not yet manually downloaded, ensuring pipeline testability.
 """
 
-import os
-from pathlib import Path
 import random
+from pathlib import Path
+
 import pandas as pd
-import yaml
 
 DATA_RAW_DIR = Path("data/raw")
 ROUTING_RAW_FILE = DATA_RAW_DIR / "ticket_routing.csv"
@@ -110,11 +109,15 @@ def generate_bootstrap_data(num_samples: int = 1600) -> pd.DataFrame:
 
     for cat in cats:
         templates = CATEGORIES_TEMPLATES[cat]
-        for i in range(per_cat):
+        for _i in range(per_cat):
             base = random.choice(templates)
             # Add subtle variations
-            prefix = random.choice(["Hi team, ", "Urgent: ", "Request: ", "Issue reported: ", "", "Please help: "])
-            suffix = random.choice([" Thanks.", " Appreciate quick help.", " ASAP.", " Need this resolved today.", ""])
+            prefix = random.choice(
+                ["Hi team, ", "Urgent: ", "Request: ", "Issue reported: ", "", "Please help: "]
+            )
+            suffix = random.choice(
+                [" Thanks.", " Appreciate quick help.", " ASAP.", " Need this resolved today.", ""]
+            )
             text = f"{prefix}{base}{suffix}".strip()
 
             # Assign priority with realistic distribution
@@ -125,12 +128,14 @@ def generate_bootstrap_data(num_samples: int = 1600) -> pd.DataFrame:
             else:
                 priority = random.choice(["Low", "Medium"])
 
-            records.append({
-                "ticket_id": f"TKT-{len(records)+1:06d}",
-                "text": text,
-                "category": cat,
-                "priority": priority,
-            })
+            records.append(
+                {
+                    "ticket_id": f"TKT-{len(records) + 1:06d}",
+                    "text": text,
+                    "category": cat,
+                    "priority": priority,
+                }
+            )
 
     random.shuffle(records)
     return pd.DataFrame(records)

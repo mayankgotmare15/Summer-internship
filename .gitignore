@@ -68,7 +68,11 @@ secrets/
 
 # MLflow run cache & sqlite db if local
 mlruns/
-mlruns.db
+*.db
+*.sqlite
+.dvc_remote/
+data/monitoring/*.jsonl
+!data/monitoring/.gitkeep
 
 # OS generated files
 .DS_Store

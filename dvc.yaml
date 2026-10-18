@@ -14,8 +14,9 @@ stages:
       - src/features/preprocess.py
       - data/raw/ticket_routing.csv
     params:
-      - data
-      - preprocess
+      - configs/params.yaml:
+          - data
+          - preprocess
     outs:
       - data/processed/train.csv
       - data/processed/val.csv
@@ -28,7 +29,8 @@ stages:
       - data/processed/train.csv
       - data/processed/val.csv
     params:
-      - train
+      - configs/params.yaml:
+          - train
     outs:
       - models/routing_model.joblib
 

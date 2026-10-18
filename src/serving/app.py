@@ -3,14 +3,16 @@ FastAPI Serving Application for IT Support Ticket Routing & Priority Classifier.
 Includes input validation, confidence decision engine, audit logging, and feedback loops.
 """
 
-from datetime import datetime, timezone
 import hashlib
 import json
 import os
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
+
 import joblib
 from fastapi import FastAPI, HTTPException, status
+
 from src.features.preprocess import clean_text
 from src.serving.decision import DecisionEngine
 from src.serving.schemas import (
@@ -35,8 +37,8 @@ MODEL_PRIORITY_PATH = Path("models/priority_model.joblib")
 PREDICTION_LOG_PATH = Path("data/monitoring/prediction_log.jsonl")
 FEEDBACK_LOG_PATH = Path("data/monitoring/feedback_log.jsonl")
 
-routing_pipeline: Optional[Any] = None
-priority_pipeline: Optional[Any] = None
+routing_pipeline: Any | None = None
+priority_pipeline: Any | None = None
 decision_engine: DecisionEngine = DecisionEngine()
 MODEL_VERSION = os.getenv("MODEL_VERSION", "v1.0.0-champion")
 
@@ -65,7 +67,7 @@ def startup_event():
 
 
 def log_prediction(
-    ticket_id: Optional[str],
+    ticket_id: str | None,
     raw_text: str,
     category: str,
     cat_conf: float,
@@ -101,7 +103,7 @@ def predict_single(req: PredictRequest) -> PredictResponse:
     if not cleaned:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Ticket text contains no valid tokens after preprocessing."
+            detail="Ticket text contains no valid tokens after preprocessing.",
         )
 
     # 1. Routing Prediction
