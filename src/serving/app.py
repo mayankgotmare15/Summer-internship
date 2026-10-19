@@ -28,20 +28,7 @@ from src.serving.schemas import (
     PredictRequest,
     PredictResponse,
 )
-
-app = FastAPI(
-    title="IT Ticket Auto-Routing & Priority Classifier",
-    description="MLOps system for automated ticket queue routing and decision-support priority prediction.",
-    version="1.0.0",
-)
-
-# Include authentication & persona routers
-app.include_router(auth.router)
-app.include_router(triage.router)
-app.include_router(queues.router)
-app.include_router(escalations.router)
-app.include_router(analytics.router)
-app.include_router(admin.router)
+from contextlib import asynccontextmanager
 
 # Global runtime state
 MODEL_ROUTING_PATH = Path("models/routing_model.joblib")
@@ -71,12 +58,41 @@ def load_models():
             print(f"Warning: Failed to load priority model from {MODEL_PRIORITY_PATH}: {e}")
 
 
-@app.on_event("startup")
-def startup_event():
+# Initialize paths and eager load models on module import
+PREDICTION_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+FEEDBACK_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+load_models()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     PREDICTION_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     FEEDBACK_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     init_db()
     load_models()
+    yield
+
+
+app = FastAPI(
+    title="IT Ticket Auto-Routing & Priority Classifier",
+    description="MLOps system for automated ticket queue routing and decision-support priority prediction.",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+# Include authentication & persona routers
+app.include_router(auth.router)
+app.include_router(triage.router)
+app.include_router(queues.router)
+app.include_router(escalations.router)
+app.include_router(analytics.router)
+app.include_router(admin.router)
+
+# Mount reports directory for drift HTML reports
+from fastapi.staticfiles import StaticFiles
+REPORTS_DIR = Path("reports")
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/reports", StaticFiles(directory="reports", html=True), name="reports")
 
 
 def log_prediction(
@@ -190,7 +206,8 @@ def predict_single(req: PredictRequest) -> PredictResponse:
         )
         final_ticket_id = saved_ticket.id
     except Exception as e:
-        print(f"Warning: Failed to persist ticket to database: {e}")
+        logger.error(f"Failed to persist ticket to database: {e}", exc_info=True)
+        db.rollback()
         final_ticket_id = req.ticket_id or "TKT-TEMP"
     finally:
         db.close()

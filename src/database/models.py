@@ -28,6 +28,7 @@ class UserRole(str, enum.Enum):
     SPECIALIST_L3 = "specialist_l3"
     MANAGER = "manager"
     MLOPS_ADMIN = "mlops_admin"
+    SYSTEM = "system"
 
 
 class TicketStatus(str, enum.Enum):
@@ -99,14 +100,18 @@ class TicketEvent(Base):
     __tablename__ = "ticket_events"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    ticket_id = Column(String(64), ForeignKey("tickets.id"), nullable=False, index=True)
-    actor_id = Column(String(64), ForeignKey("users.id"), nullable=False)
+    ticket_id = Column(
+        String(64), ForeignKey("tickets.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    actor_id = Column(
+        String(64), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     actor_role = Column(String(32), nullable=False)
     action = Column(String(64), nullable=False)
     previous_state = Column(String(64), nullable=True)
     new_state = Column(String(64), nullable=True)
     notes = Column(Text, nullable=True)
-    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
     ticket = relationship("Ticket", back_populates="events")
     actor = relationship("User", back_populates="events")
@@ -116,13 +121,17 @@ class FeedbackSubmission(Base):
     __tablename__ = "feedback_submissions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    ticket_id = Column(String(64), ForeignKey("tickets.id"), nullable=False, index=True)
-    submitted_by = Column(String(64), ForeignKey("users.id"), nullable=False)
+    ticket_id = Column(
+        String(64), ForeignKey("tickets.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    submitted_by = Column(
+        String(64), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     predicted_category = Column(String(64), nullable=False)
     corrected_category = Column(String(64), nullable=False)
     is_override = Column(Boolean, default=True)
     notes = Column(Text, nullable=True)
-    submitted_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    submitted_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
     ticket = relationship("Ticket", back_populates="feedbacks")
     user = relationship("User", back_populates="feedbacks")

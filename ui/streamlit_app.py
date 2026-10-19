@@ -20,6 +20,66 @@ st.set_page_config(
     layout="wide",
 )
 
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+    .stApp {
+        background-color: #f8fafc;
+        background-image: radial-gradient(circle at 10% 10%, rgba(14, 165, 233, 0.06) 0%, transparent 40%),
+                          radial-gradient(circle at 90% 12%, rgba(20, 184, 166, 0.05) 0%, transparent 40%);
+        background-attachment: fixed;
+    }
+    [data-testid="stSidebar"] {
+        background-color: #ffffff;
+        border-right: 1px solid #e2e8f0;
+    }
+    [data-testid="stMetricValue"] {
+        color: #0f172a;
+        font-weight: 700;
+    }
+    [data-testid="stMetricLabel"] {
+        color: #64748b;
+        font-weight: 500;
+    }
+    .stButton>button {
+        background: linear-gradient(135deg, #0284c7, #0ea5e9);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+    }
+    .stButton>button:hover {
+        filter: brightness(1.05);
+        color: white;
+        border: none;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: #f1f5f9;
+        border-radius: 12px;
+        padding: 4px;
+        gap: 6px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px;
+        color: #64748b;
+        font-weight: 600;
+        padding: 8px 16px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #ffffff !important;
+        color: #0284c7 !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.title("🎫 IT Ticket Auto-Routing & Priority Classifier")
 st.caption("End-to-End MLOps System | SDL Security Controls | Human-in-the-Loop Fallback")
 

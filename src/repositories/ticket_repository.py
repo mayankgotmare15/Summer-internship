@@ -9,6 +9,7 @@ from typing import Any
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from src.database.db import ensure_user_exists
 from src.database.models import FeedbackSubmission, Ticket, TicketEvent, TicketStatus
 
 SLA_DURATIONS = {
@@ -73,6 +74,7 @@ class TicketRepository:
             existing.sla_deadline = sla_deadline
             existing.sla_breached = False
             existing.reassignment_count = 0
+            existing.created_at = now
             existing.updated_at = now
             db.commit()
             db.refresh(existing)
@@ -99,6 +101,13 @@ class TicketRepository:
         )
         db.add(ticket)
 
+        ensure_user_exists(
+            db,
+            "system_ml_classifier",
+            "system",
+            name="ML Classifier System Agent",
+            department="MLOps Platform",
+        )
         event = TicketEvent(
             ticket_id=tid,
             actor_id="system_ml_classifier",
@@ -118,11 +127,11 @@ class TicketRepository:
         return db.query(Ticket).filter(Ticket.id == ticket_id).first()
 
     @staticmethod
-    def list_triage_queue(db: Session, limit: int = 50) -> list[Ticket]:
+    def list_triage_queue(db: Session, limit: int = 200) -> list[Ticket]:
         return (
             db.query(Ticket)
             .filter(Ticket.status == TicketStatus.PENDING_TRIAGE)
-            .order_by(Ticket.created_at.desc())
+            .order_by(Ticket.updated_at.desc())
             .limit(limit)
             .all()
         )
@@ -155,6 +164,8 @@ class TicketRepository:
         ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
         if not ticket:
             raise ValueError(f"Ticket {ticket_id} not found")
+
+        ensure_user_exists(db, actor_id, actor_role)
 
         prev_cat = ticket.predicted_category
         prev_status = ticket.status.value
@@ -204,6 +215,8 @@ class TicketRepository:
         if not ticket:
             raise ValueError(f"Ticket {ticket_id} not found")
 
+        ensure_user_exists(db, actor_id, actor_role)
+
         prev_status = ticket.status.value
         ticket.status = TicketStatus.AUTO_ROUTED
 
@@ -234,6 +247,8 @@ class TicketRepository:
         if not ticket:
             raise ValueError(f"Ticket {ticket_id} not found")
 
+        ensure_user_exists(db, actor_id, actor_role)
+
         prev_status = ticket.status.value
         ticket.status = new_status
 
@@ -262,6 +277,8 @@ class TicketRepository:
         ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
         if not ticket:
             raise ValueError(f"Ticket {ticket_id} not found")
+
+        ensure_user_exists(db, actor_id, actor_role)
 
         ticket.assigned_agent = assigned_agent
         if ticket.status == TicketStatus.AUTO_ROUTED:
@@ -293,6 +310,8 @@ class TicketRepository:
         ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
         if not ticket:
             raise ValueError(f"Ticket {ticket_id} not found")
+
+        ensure_user_exists(db, actor_id, actor_role)
 
         prev_team = ticket.assigned_team
         ticket.reassignment_count = (ticket.reassignment_count or 0) + 1
@@ -340,6 +359,8 @@ class TicketRepository:
         ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
         if not ticket:
             raise ValueError(f"Ticket {ticket_id} not found")
+
+        ensure_user_exists(db, actor_id, actor_role)
 
         prev_status = ticket.status.value
         ticket.escalation_level = target_level
@@ -450,6 +471,13 @@ class TicketRepository:
                             t.status = TicketStatus.MANAGEMENT_ESCALATED
                             t.escalation_reason = "Automated SLA Breach Escalation"
                             auto_escalated_count += 1
+                            ensure_user_exists(
+                                db,
+                                "system_sla_daemon",
+                                "system",
+                                name="SLA Monitor Daemon",
+                                department="IT Operations",
+                            )
                             event = TicketEvent(
                                 ticket_id=t.id,
                                 actor_id="system_sla_daemon",

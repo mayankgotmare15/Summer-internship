@@ -8,7 +8,7 @@ import time
 
 import requests
 
-API_URL = "http://localhost:8000"
+API_URL = "http://127.0.0.1:8000"
 
 NORMAL_SAMPLES = [
     "Unable to connect to company VPN from home network.",
@@ -45,12 +45,13 @@ def send_ticket(text: str, ticket_id: str):
         if resp.status_code == 200:
             res = resp.json()
             print(
-                f"[{res['decision'].upper()}] {ticket_id} -> {res['category']} ({res['category_confidence']:.2f})"
+                f"[{res['decision'].upper()}] {ticket_id} -> {res['category']} ({res['category_confidence']:.2f})",
+                flush=True,
             )
         else:
-            print(f"Error {resp.status_code} for {ticket_id}")
+            print(f"Error {resp.status_code} for {ticket_id}", flush=True)
     except Exception as e:
-        print(f"Failed to send {ticket_id}: {e}")
+        print(f"Failed to send {ticket_id}: {e}", flush=True)
 
 
 def run_traffic_simulation(mode: str = "all"):
