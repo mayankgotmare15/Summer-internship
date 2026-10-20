@@ -1,0 +1,372 @@
+{
+  "routing": {
+    "macro_f1": 0.8554,
+    "weighted_f1": 0.8569,
+    "test_samples": 6759,
+    "labels": [
+      "Access",
+      "Administrative rights",
+      "HR Support",
+      "Hardware",
+      "Internal Project",
+      "Miscellaneous",
+      "Purchase"
+    ],
+    "per_class": {
+      "Access": {
+        "precision": 0.8902,
+        "recall": 0.8718,
+        "f1": 0.8809,
+        "support": 1069.0
+      },
+      "Administrative rights": {
+        "precision": 0.7456,
+        "recall": 0.7992,
+        "f1": 0.7715,
+        "support": 264.0
+      },
+      "HR Support": {
+        "precision": 0.8826,
+        "recall": 0.854,
+        "f1": 0.8681,
+        "support": 1637.0
+      },
+      "Hardware": {
+        "precision": 0.851,
+        "recall": 0.8394,
+        "f1": 0.8452,
+        "support": 2042.0
+      },
+      "Internal Project": {
+        "precision": 0.8202,
+        "recall": 0.9182,
+        "f1": 0.8665,
+        "support": 318.0
+      },
+      "Miscellaneous": {
+        "precision": 0.8127,
+        "recall": 0.8565,
+        "f1": 0.834,
+        "support": 1059.0
+      },
+      "Purchase": {
+        "precision": 0.9359,
+        "recall": 0.9081,
+        "f1": 0.9218,
+        "support": 370.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        932,
+        7,
+        28,
+        50,
+        13,
+        36,
+        3
+      ],
+      [
+        5,
+        211,
+        2,
+        43,
+        0,
+        3,
+        0
+      ],
+      [
+        28,
+        7,
+        1398,
+        116,
+        19,
+        65,
+        4
+      ],
+      [
+        57,
+        51,
+        87,
+        1714,
+        21,
+        98,
+        14
+      ],
+      [
+        3,
+        0,
+        12,
+        8,
+        292,
+        3,
+        0
+      ],
+      [
+        21,
+        7,
+        52,
+        60,
+        10,
+        907,
+        2
+      ],
+      [
+        1,
+        0,
+        5,
+        23,
+        1,
+        4,
+        336
+      ]
+    ]
+  },
+  "robustness": {
+    "total_test_cases": 30,
+    "correct": 7,
+    "accuracy": 0.2333,
+    "results": [
+      {
+        "id": "MESSY-01",
+        "text": "pls give me admin rights on my laptop to install python...",
+        "expected": "Administrative rights",
+        "predicted": "Hardware",
+        "confidence": 0.5886,
+        "match": false
+      },
+      {
+        "id": "MESSY-02",
+        "text": "laptop wont turn on after the update, screen black...",
+        "expected": "Hardware",
+        "predicted": "Hardware",
+        "confidence": 0.9135,
+        "match": true
+      },
+      {
+        "id": "MESSY-03",
+        "text": "need a new 27 inch monitor for the new joiner starting monda...",
+        "expected": "Purchase",
+        "predicted": "Hardware",
+        "confidence": 0.858,
+        "match": false
+      },
+      {
+        "id": "MESSY-04",
+        "text": "shared drive full, cant save files since morning, whole team...",
+        "expected": "Storage",
+        "predicted": "Administrative rights",
+        "confidence": 0.3788,
+        "match": false
+      },
+      {
+        "id": "MESSY-05",
+        "text": "how do i update my bank details in the payroll portal...",
+        "expected": "HR Support",
+        "predicted": "Hardware",
+        "confidence": 0.4478,
+        "match": false
+      },
+      {
+        "id": "MESSY-06",
+        "text": "password reset not working and account locked after 3 attemp...",
+        "expected": "Access",
+        "predicted": "Access",
+        "confidence": 1.0,
+        "match": true
+      },
+      {
+        "id": "MESSY-07",
+        "text": "request access to the project repo for the migration work...",
+        "expected": "Internal Project",
+        "predicted": "HR Support",
+        "confidence": 0.4572,
+        "match": false
+      },
+      {
+        "id": "MESSY-08",
+        "text": "outlook keeps asking password and my printer is also not wor...",
+        "expected": "Miscellaneous",
+        "predicted": "Administrative rights",
+        "confidence": 0.9999,
+        "match": false
+      },
+      {
+        "id": "MESSY-09",
+        "text": "vpn drops every 5 minutes when connected to home wifi...",
+        "expected": "Access",
+        "predicted": "Hardware",
+        "confidence": 0.4084,
+        "match": false
+      },
+      {
+        "id": "MESSY-10",
+        "text": "printer on 3rd floor paper jam and red error light blinking...",
+        "expected": "Hardware",
+        "predicted": "HR Support",
+        "confidence": 0.9112,
+        "match": false
+      },
+      {
+        "id": "MESSY-11",
+        "text": "urgent: need license key for intellij idea ultimate version...",
+        "expected": "Purchase",
+        "predicted": "Access",
+        "confidence": 0.9781,
+        "match": false
+      },
+      {
+        "id": "MESSY-12",
+        "text": "backup restore required for deleted folder in marketing shar...",
+        "expected": "Storage",
+        "predicted": "Hardware",
+        "confidence": 0.4295,
+        "match": false
+      },
+      {
+        "id": "MESSY-13",
+        "text": "mfa token app reset needed after changing to new phone devic...",
+        "expected": "Access",
+        "predicted": "Hardware",
+        "confidence": 0.4057,
+        "match": false
+      },
+      {
+        "id": "MESSY-14",
+        "text": "annual leave balance incorrect on workday portal after syste...",
+        "expected": "HR Support",
+        "predicted": "HR Support",
+        "confidence": 0.9798,
+        "match": true
+      },
+      {
+        "id": "MESSY-15",
+        "text": "need docker and kubctl installed with sudo permissions on de...",
+        "expected": "Administrative rights",
+        "predicted": "Hardware",
+        "confidence": 0.758,
+        "match": false
+      },
+      {
+        "id": "MESSY-16",
+        "text": "github action runner failing with permission denied on aws s...",
+        "expected": "Internal Project",
+        "predicted": "Hardware",
+        "confidence": 0.4362,
+        "match": false
+      },
+      {
+        "id": "MESSY-17",
+        "text": "mouse scroll wheel broken and monitor flickering randomly...",
+        "expected": "Hardware",
+        "predicted": "Hardware",
+        "confidence": 0.919,
+        "match": true
+      },
+      {
+        "id": "MESSY-18",
+        "text": "reimbursement claim rejected in expenses module without expl...",
+        "expected": "HR Support",
+        "predicted": "HR Support",
+        "confidence": 0.4356,
+        "match": true
+      },
+      {
+        "id": "MESSY-19",
+        "text": "major outage: entire internal database cluster unreachable p...",
+        "expected": "Storage",
+        "predicted": "Hardware",
+        "confidence": 0.7132,
+        "match": false
+      },
+      {
+        "id": "MESSY-20",
+        "text": "can i get ergonomic chair recommendation for back pain...",
+        "expected": "Purchase",
+        "predicted": "Hardware",
+        "confidence": 0.5881,
+        "match": false
+      },
+      {
+        "id": "MESSY-21",
+        "text": "sso login redirect loop on salesforce login page...",
+        "expected": "Access",
+        "predicted": "HR Support",
+        "confidence": 0.7963,
+        "match": false
+      },
+      {
+        "id": "MESSY-22",
+        "text": "nas quota exceeded for team folder cannot export final video...",
+        "expected": "Storage",
+        "predicted": "Hardware",
+        "confidence": 0.6281,
+        "match": false
+      },
+      {
+        "id": "MESSY-23",
+        "text": "jenkins build pipeline stuck in queue for internal analytics...",
+        "expected": "Internal Project",
+        "predicted": "Internal Project",
+        "confidence": 0.9404,
+        "match": true
+      },
+      {
+        "id": "MESSY-24",
+        "text": "temp local admin needed for 2 hours to run security scanner ...",
+        "expected": "Administrative rights",
+        "predicted": "Hardware",
+        "confidence": 0.4255,
+        "match": false
+      },
+      {
+        "id": "MESSY-25",
+        "text": "keyboard spilled coffee keys sticking and not registering in...",
+        "expected": "Hardware",
+        "predicted": "Hardware",
+        "confidence": 0.6197,
+        "match": true
+      },
+      {
+        "id": "MESSY-26",
+        "text": "form 16 tax certificate download gives 404 error on payroll ...",
+        "expected": "HR Support",
+        "predicted": "Hardware",
+        "confidence": 0.681,
+        "match": false
+      },
+      {
+        "id": "MESSY-27",
+        "text": "quote approval needed for 5 apple macbook pro m3 laptops for...",
+        "expected": "Purchase",
+        "predicted": "Miscellaneous",
+        "confidence": 0.6977,
+        "match": false
+      },
+      {
+        "id": "MESSY-28",
+        "text": "cant access shared mailbox and also need headfone for zoom c...",
+        "expected": "Miscellaneous",
+        "predicted": "Hardware",
+        "confidence": 0.7924,
+        "match": false
+      },
+      {
+        "id": "MESSY-29",
+        "text": "gitlab deploy token expired for kubernetes cluster sync...",
+        "expected": "Internal Project",
+        "predicted": "Access",
+        "confidence": 0.9436,
+        "match": false
+      },
+      {
+        "id": "MESSY-30",
+        "text": "ransomware suspected: files encrypted with strange extension...",
+        "expected": "Storage",
+        "predicted": "Hardware",
+        "confidence": 0.6954,
+        "match": false
+      }
+    ]
+  }
+}

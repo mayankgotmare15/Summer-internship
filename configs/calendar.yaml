@@ -1,0 +1,18 @@
+timezone: "Asia/Kolkata"
+
+business_hours:
+  # 0 = Monday, 4 = Friday
+  work_days: [0, 1, 2, 3, 4]
+  start_time: "09:00"
+  end_time: "18:00"
+
+holidays_2026:
+  - "2026-01-26" # Republic Day
+  - "2026-03-03" # Holi
+  - "2026-04-14" # Ambedkar Jayanti
+  - "2026-05-01" # May Day
+  - "2026-08-15" # Independence Day
+  - "2026-10-02" # Gandhi Jayanti
+  - "2026-10-20" # Dussehra
+  - "2026-11-08" # Diwali
+  - "2026-12-25" # Christmas

@@ -1,0 +1,212 @@
+[
+  {
+    "id": "MESSY-01",
+    "text": "pls give me admin rights on my laptop to install python",
+    "expected_category": "Administrative rights",
+    "expected_priority": "Medium",
+    "notes": "Informal phrasing, local admin request"
+  },
+  {
+    "id": "MESSY-02",
+    "text": "laptop wont turn on after the update, screen black",
+    "expected_category": "Hardware",
+    "expected_priority": "High",
+    "notes": "Missing apostrophes, hardware failure"
+  },
+  {
+    "id": "MESSY-03",
+    "text": "need a new 27 inch monitor for the new joiner starting monday",
+    "expected_category": "Purchase",
+    "expected_priority": "Medium",
+    "notes": "Procurement request with date constraint"
+  },
+  {
+    "id": "MESSY-04",
+    "text": "shared drive full, cant save files since morning, whole team blocked",
+    "expected_category": "Storage",
+    "expected_priority": "High",
+    "notes": "Quota full with whole team blocked trigger"
+  },
+  {
+    "id": "MESSY-05",
+    "text": "how do i update my bank details in the payroll portal",
+    "expected_category": "HR Support",
+    "expected_priority": "Low",
+    "notes": "Payroll self-service query"
+  },
+  {
+    "id": "MESSY-06",
+    "text": "password reset not working and account locked after 3 attempts",
+    "expected_category": "Access",
+    "expected_priority": "High",
+    "notes": "Account lockout"
+  },
+  {
+    "id": "MESSY-07",
+    "text": "request access to the project repo for the migration work",
+    "expected_category": "Internal Project",
+    "expected_priority": "Medium",
+    "notes": "Repository permission request"
+  },
+  {
+    "id": "MESSY-08",
+    "text": "outlook keeps asking password and my printer is also not working",
+    "expected_category": "Miscellaneous",
+    "expected_priority": "Medium",
+    "notes": "Multi-issue conjunction ticket"
+  },
+  {
+    "id": "MESSY-09",
+    "text": "vpn drops every 5 minutes when connected to home wifi",
+    "expected_category": "Access",
+    "expected_priority": "Medium",
+    "notes": "VPN network tunnel instability"
+  },
+  {
+    "id": "MESSY-10",
+    "text": "printer on 3rd floor paper jam and red error light blinking",
+    "expected_category": "Hardware",
+    "expected_priority": "Low",
+    "notes": "Physical printer error"
+  },
+  {
+    "id": "MESSY-11",
+    "text": "urgent: need license key for intellij idea ultimate version",
+    "expected_category": "Purchase",
+    "expected_priority": "High",
+    "notes": "Software licensing purchase"
+  },
+  {
+    "id": "MESSY-12",
+    "text": "backup restore required for deleted folder in marketing share",
+    "expected_category": "Storage",
+    "expected_priority": "High",
+    "notes": "NAS backup restoration"
+  },
+  {
+    "id": "MESSY-13",
+    "text": "mfa token app reset needed after changing to new phone device",
+    "expected_category": "Access",
+    "expected_priority": "High",
+    "notes": "MFA authenticator rebind"
+  },
+  {
+    "id": "MESSY-14",
+    "text": "annual leave balance incorrect on workday portal after system update",
+    "expected_category": "HR Support",
+    "expected_priority": "Medium",
+    "notes": "HR system record discrepancy"
+  },
+  {
+    "id": "MESSY-15",
+    "text": "need docker and kubctl installed with sudo permissions on dev machine",
+    "expected_category": "Administrative rights",
+    "expected_priority": "Medium",
+    "notes": "Developer workstation root rights"
+  },
+  {
+    "id": "MESSY-16",
+    "text": "github action runner failing with permission denied on aws staging env",
+    "expected_category": "Internal Project",
+    "expected_priority": "High",
+    "notes": "CI/CD infrastructure failure"
+  },
+  {
+    "id": "MESSY-17",
+    "text": "mouse scroll wheel broken and monitor flickering randomly",
+    "expected_category": "Hardware",
+    "expected_priority": "Low",
+    "notes": "Peripheral replacement"
+  },
+  {
+    "id": "MESSY-18",
+    "text": "reimbursement claim rejected in expenses module without explanation",
+    "expected_category": "HR Support",
+    "expected_priority": "Low",
+    "notes": "Finance/HR module workflow issue"
+  },
+  {
+    "id": "MESSY-19",
+    "text": "major outage: entire internal database cluster unreachable production down",
+    "expected_category": "Storage",
+    "expected_priority": "Critical",
+    "notes": "Emergency outage keyword trigger"
+  },
+  {
+    "id": "MESSY-20",
+    "text": "can i get ergonomic chair recommendation for back pain",
+    "expected_category": "Purchase",
+    "expected_priority": "Low",
+    "notes": "Ergonomic equipment purchase"
+  },
+  {
+    "id": "MESSY-21",
+    "text": "sso login redirect loop on salesforce login page",
+    "expected_category": "Access",
+    "expected_priority": "Medium",
+    "notes": "SAML/SSO authentication defect"
+  },
+  {
+    "id": "MESSY-22",
+    "text": "nas quota exceeded for team folder cannot export final video renders",
+    "expected_category": "Storage",
+    "expected_priority": "High",
+    "notes": "Storage capacity exhaustion"
+  },
+  {
+    "id": "MESSY-23",
+    "text": "jenkins build pipeline stuck in queue for internal analytics repo",
+    "expected_category": "Internal Project",
+    "expected_priority": "Medium",
+    "notes": "Project tooling blockage"
+  },
+  {
+    "id": "MESSY-24",
+    "text": "temp local admin needed for 2 hours to run security scanner tool",
+    "expected_category": "Administrative rights",
+    "expected_priority": "Medium",
+    "notes": "Time-bounded privilege escalation"
+  },
+  {
+    "id": "MESSY-25",
+    "text": "keyboard spilled coffee keys sticking and not registering input",
+    "expected_category": "Hardware",
+    "expected_priority": "Medium",
+    "notes": "Hardware liquid damage"
+  },
+  {
+    "id": "MESSY-26",
+    "text": "form 16 tax certificate download gives 404 error on payroll site",
+    "expected_category": "HR Support",
+    "expected_priority": "Medium",
+    "notes": "Tax document portal issue"
+  },
+  {
+    "id": "MESSY-27",
+    "text": "quote approval needed for 5 apple macbook pro m3 laptops for designers",
+    "expected_category": "Purchase",
+    "expected_priority": "Medium",
+    "notes": "Asset quote procurement"
+  },
+  {
+    "id": "MESSY-28",
+    "text": "cant access shared mailbox and also need headfone for zoom call",
+    "expected_category": "Miscellaneous",
+    "expected_priority": "Low",
+    "notes": "Disjoint multi-topic ticket"
+  },
+  {
+    "id": "MESSY-29",
+    "text": "gitlab deploy token expired for kubernetes cluster sync",
+    "expected_category": "Internal Project",
+    "expected_priority": "High",
+    "notes": "Credential expiration in project environment"
+  },
+  {
+    "id": "MESSY-30",
+    "text": "ransomware suspected: files encrypted with strange extension on file server",
+    "expected_category": "Storage",
+    "expected_priority": "Critical",
+    "notes": "Security incident keyword override"
+  }
+]

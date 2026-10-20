@@ -1,0 +1,54 @@
+"""Security, password hashing, JWT session encoding, and service token validation."""
+
+import hmac
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, Optional
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from src.app.settings import get_settings
+
+settings = get_settings()
+
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256"],
+    deprecated="auto",
+)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verifies a plain password against the stored password hash."""
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password: str) -> str:
+    """Computes secure hash for a plain password."""
+    return pwd_context.hash(password)
+
+
+def create_access_token(
+    data: Dict[str, Any],
+    expires_delta: Optional[timedelta] = None,
+) -> str:
+    """Generates an HMAC-signed JWT token with claims."""
+    to_encode = data.copy()
+    now = datetime.now(timezone.utc)
+    if expires_delta:
+        expire = now + expires_delta
+    else:
+        expire = now + timedelta(minutes=settings.jwt_expiration_minutes)
+
+    to_encode.update({"exp": expire, "iat": now})
+    return jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def decode_access_token(token: str) -> Dict[str, Any]:
+    """Decodes and validates a JWT token; returns claims payload or raises JWTError."""
+    return jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+
+
+def verify_service_token(provided_token: str, expected_token: Optional[str] = None) -> bool:
+    """Constant-time token verification for internal/CI endpoints."""
+    expected = expected_token or settings.service_token
+    if not provided_token or not expected:
+        return False
+    return hmac.compare_digest(provided_token.strip(), expected.strip())

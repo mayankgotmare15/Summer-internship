@@ -1,0 +1,30 @@
+priorities:
+  Critical:
+    first_response_minutes: 15
+    resolution_minutes: 240 # 4 hours
+    calendar: "24x7"
+    workload_weight: 4
+
+  High:
+    first_response_minutes: 60 # 1 hour
+    resolution_minutes: 480 # 8 business hours
+    calendar: "business"
+    workload_weight: 3
+
+  Medium:
+    first_response_minutes: 240 # 4 business hours
+    resolution_minutes: 1440 # 24 business hours (3 business days)
+    calendar: "business"
+    workload_weight: 2
+
+  Low:
+    first_response_minutes: 480 # 8 business hours
+    resolution_minutes: 4320 # 72 business hours (9 business days)
+    calendar: "business"
+    workload_weight: 1
+
+approval:
+  target_minutes: 480 # 1 business day
+
+auto_close:
+  after_resolved_minutes: 1440 # 3 business days

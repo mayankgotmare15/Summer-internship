@@ -1,0 +1,24 @@
+{
+  "model_name": "ticket-routing",
+  "version": "v1-baseline",
+  "run_id": "initial-baseline-run",
+  "alias": "champion",
+  "created_at": "2026-10-20T19:12:00Z",
+  "threshold": 0.65,
+  "metrics": {
+    "macro_f1": 0.8554,
+    "weighted_f1": 0.8569,
+    "test_samples": 6759,
+    "robustness_accuracy": 0.233
+  },
+  "labels": [
+    "Access",
+    "Administrative rights",
+    "HR Support",
+    "Hardware",
+    "Internal Project",
+    "Miscellaneous",
+    "Purchase"
+  ],
+  "holdout_category": "Storage"
+}

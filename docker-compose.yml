@@ -1,0 +1,50 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: routedesk-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://routedesk:routedesk_pass@db:5432/routedesk
+      - JWT_SECRET=dev-jwt-secret-key-min-32-characters-long
+      - SERVICE_TOKEN=dev-service-token-secret-12345
+      - DEMO_MODE=true
+      - MODEL_DIR=/app/artifacts/bundle
+      - TZ_BUSINESS=Asia/Kolkata
+      - LOG_LEVEL=INFO
+      - SMTP_URL=smtp://mailpit:1025
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./reports:/app/reports
+
+  db:
+    image: postgres:16-alpine
+    container_name: routedesk-db
+    environment:
+      POSTGRES_USER: routedesk
+      POSTGRES_PASSWORD: routedesk_pass
+      POSTGRES_DB: routedesk
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U routedesk -d routedesk"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: routedesk-mailpit
+    ports:
+      - "8025:8025" # Webmail viewer UI
+      - "1025:1025" # SMTP server port
+
+volumes:
+  pgdata:

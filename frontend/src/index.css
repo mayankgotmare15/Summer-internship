@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-nero: #171717;
+    --color-concrete: #594542;
+    --color-orange: #FD5323;
+    --color-san: #EEE2D8;
+    --color-paper: #F8F2ED;
+    --color-ink: #360A00;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: 'Chakra Petch', system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+}

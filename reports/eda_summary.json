@@ -1,0 +1,71 @@
+{
+  "routing_dataset": {
+    "total_records": 47837,
+    "total_categories": 8,
+    "class_distribution": {
+      "Hardware": {
+        "count": 13617,
+        "percentage": 28.47
+      },
+      "HR Support": {
+        "count": 10915,
+        "percentage": 22.82
+      },
+      "Access": {
+        "count": 7125,
+        "percentage": 14.89
+      },
+      "Miscellaneous": {
+        "count": 7060,
+        "percentage": 14.76
+      },
+      "Storage": {
+        "count": 2777,
+        "percentage": 5.81
+      },
+      "Purchase": {
+        "count": 2464,
+        "percentage": 5.15
+      },
+      "Internal Project": {
+        "count": 2119,
+        "percentage": 4.43
+      },
+      "Administrative rights": {
+        "count": 1760,
+        "percentage": 3.68
+      }
+    },
+    "character_length": {
+      "mean": 291.9,
+      "median": 175.0,
+      "p95": 926.0,
+      "min": 7,
+      "max": 7015
+    },
+    "word_count": {
+      "mean": 43.6,
+      "median": 26.0,
+      "p95": 136.0,
+      "min": 2,
+      "max": 981
+    }
+  },
+  "priority_dataset": {
+    "total_records": 16338,
+    "priority_distribution": {
+      "Medium": {
+        "count": 6618,
+        "percentage": 40.51
+      },
+      "High": {
+        "count": 6346,
+        "percentage": 38.84
+      },
+      "Low": {
+        "count": 3374,
+        "percentage": 20.65
+      }
+    }
+  }
+}

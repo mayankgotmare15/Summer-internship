@@ -1,0 +1,38 @@
+{
+  "routing": {
+    "dataset": "routing",
+    "total_records": 47837,
+    "clean_records": 47837,
+    "empty_or_short_text": 0,
+    "duplicates": 0,
+    "duplicate_rate": 0.0,
+    "schema_valid": true,
+    "schema_errors": [],
+    "classes": {
+      "Hardware": 13617,
+      "HR Support": 10915,
+      "Access": 7125,
+      "Miscellaneous": 7060,
+      "Storage": 2777,
+      "Purchase": 2464,
+      "Internal Project": 2119,
+      "Administrative rights": 1760
+    }
+  },
+  "priority": {
+    "dataset": "priority",
+    "total_records": 16338,
+    "clean_records": 16338,
+    "empty_or_short_text": 0,
+    "duplicates": 0,
+    "duplicate_rate": 0.0,
+    "schema_valid": true,
+    "schema_errors": [],
+    "classes": {
+      "Medium": 6618,
+      "High": 6346,
+      "Low": 3374
+    }
+  },
+  "overall_valid": true
+}

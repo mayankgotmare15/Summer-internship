@@ -1,0 +1,225 @@
+teams:
+  - code: "ACCESS"
+    name: "Access and Identity Team"
+    lead_email: "riya.kapoor@example.com"
+    manager_email: "rahul.verma@example.com"
+
+  - code: "HARDWARE"
+    name: "Desktop and Hardware Support"
+    lead_email: "vikram.malhotra@example.com"
+    manager_email: "rahul.verma@example.com"
+
+  - code: "STORAGE"
+    name: "Storage and Infrastructure Team"
+    lead_email: "suresh.nair@example.com"
+    manager_email: "rahul.verma@example.com"
+
+  - code: "HR"
+    name: "HR Systems Support"
+    lead_email: "ananya.sen@example.com"
+    manager_email: "rahul.verma@example.com"
+
+  - code: "PROCUREMENT"
+    name: "Procurement and Asset Team"
+    lead_email: "kavita.deshmukh@example.com"
+    manager_email: "rahul.verma@example.com"
+
+  - code: "PROJECTS"
+    name: "Project and Application Support"
+    lead_email: "rohit.gupta@example.com"
+    manager_email: "rahul.verma@example.com"
+
+  - code: "SERVICE_DESK"
+    name: "Service Desk Triage"
+    lead_email: "rahul.verma@example.com"
+    manager_email: "deepak.sharma@example.com"
+
+members:
+  # Access and Identity Team
+  - email: "priya.sharma@example.com"
+    name: "Priya Sharma"
+    team: "ACCESS"
+    role: "engineer"
+    skills: ["vpn", "mfa", "password", "active_directory", "okta"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 6
+    escalation_eligible: true
+    manager_email: "riya.kapoor@example.com"
+    delegate_email: "arjun.mehta@example.com"
+    leave: []
+
+  - email: "arjun.mehta@example.com"
+    name: "Arjun Mehta"
+    team: "ACCESS"
+    role: "engineer"
+    skills: ["mfa", "sso", "saml", "azure_ad"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 6
+    escalation_eligible: true
+    manager_email: "riya.kapoor@example.com"
+    delegate_email: "priya.sharma@example.com"
+    leave: []
+
+  - email: "neha.singh@example.com"
+    name: "Neha Singh"
+    team: "ACCESS"
+    role: "engineer"
+    skills: ["vpn", "certificates", "network_access"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 6
+    escalation_eligible: true
+    manager_email: "riya.kapoor@example.com"
+    delegate_email: "arjun.mehta@example.com"
+    leave:
+      - { start_date: "2026-10-20", end_date: "2026-10-24", note: "Annual Leave" }
+
+  - email: "riya.kapoor@example.com"
+    name: "Riya Kapoor"
+    team: "ACCESS"
+    role: "team_lead"
+    skills: ["escalation", "architecture", "security_policy"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 4
+    escalation_eligible: true
+    manager_email: "rahul.verma@example.com"
+    delegate_email: "priya.sharma@example.com"
+    leave: []
+
+  # Desktop & Hardware Support
+  - email: "amit.kumar@example.com"
+    name: "Amit Kumar"
+    team: "HARDWARE"
+    role: "engineer"
+    skills: ["laptop", "monitor", "docking_station", "hardware_repair"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 6
+    escalation_eligible: true
+    manager_email: "vikram.malhotra@example.com"
+    delegate_email: "sunita.rao@example.com"
+    leave: []
+
+  - email: "sunita.rao@example.com"
+    name: "Sunita Rao"
+    team: "HARDWARE"
+    role: "engineer"
+    skills: ["printer", "scanner", "peripherals", "macos"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 6
+    escalation_eligible: true
+    manager_email: "vikram.malhotra@example.com"
+    delegate_email: "amit.kumar@example.com"
+    leave: []
+
+  - email: "vikram.malhotra@example.com"
+    name: "Vikram Malhotra"
+    team: "HARDWARE"
+    role: "team_lead"
+    skills: ["vendor_escalation", "inventory", "hardware_logistics"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 4
+    escalation_eligible: true
+    manager_email: "rahul.verma@example.com"
+    delegate_email: "amit.kumar@example.com"
+    leave: []
+
+  # Storage and Infrastructure
+  - email: "suresh.nair@example.com"
+    name: "Suresh Nair"
+    team: "STORAGE"
+    role: "team_lead"
+    skills: ["nas", "san", "backup_restore", "quota_management", "aws_s3"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 5
+    escalation_eligible: true
+    manager_email: "rahul.verma@example.com"
+    delegate_email: null
+    leave: []
+
+  # HR Systems Support
+  - email: "ananya.sen@example.com"
+    name: "Ananya Sen"
+    team: "HR"
+    role: "team_lead"
+    skills: ["payroll", "leave_portal", "workday", "employee_records"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 5
+    escalation_eligible: true
+    manager_email: "rahul.verma@example.com"
+    delegate_email: null
+    leave: []
+
+  # Procurement and Asset Team
+  - email: "kavita.deshmukh@example.com"
+    name: "Kavita Deshmukh"
+    team: "PROCUREMENT"
+    role: "team_lead"
+    skills: ["purchase_orders", "vendor_quotes", "asset_tagging", "licensing"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 5
+    escalation_eligible: true
+    manager_email: "rahul.verma@example.com"
+    delegate_email: null
+    leave: []
+
+  # Project and Application Support
+  - email: "rohit.gupta@example.com"
+    name: "Rohit Gupta"
+    team: "PROJECTS"
+    role: "team_lead"
+    skills: ["git", "github", "jira", "ci_cd", "cloud_env"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 5
+    escalation_eligible: true
+    manager_email: "rahul.verma@example.com"
+    delegate_email: null
+    leave: []
+
+  # Service Desk L1 Triage Agents
+  - email: "tanya.bose@example.com"
+    name: "Tanya Bose"
+    team: "SERVICE_DESK"
+    role: "agent"
+    skills: ["triage", "categorization", "customer_service"]
+    shift: { start: "08:00", end: "17:00", tz: "Asia/Kolkata" }
+    daily_capacity: 15
+    escalation_eligible: false
+    manager_email: "rahul.verma@example.com"
+    delegate_email: null
+    leave: []
+
+  # Management & Approvers
+  - email: "rahul.verma@example.com"
+    name: "Rahul Verma"
+    team: "SERVICE_DESK"
+    role: "sd_manager"
+    skills: ["service_delivery", "sla_management", "e3_escalation"]
+    shift: { start: "09:00", end: "19:00", tz: "Asia/Kolkata" }
+    daily_capacity: 4
+    escalation_eligible: true
+    manager_email: "deepak.sharma@example.com"
+    delegate_email: null
+    leave: []
+
+  - email: "deepak.sharma@example.com"
+    name: "Deepak Sharma"
+    team: "SERVICE_DESK"
+    role: "delivery_manager"
+    skills: ["executive_leadership", "e4_escalation", "budget"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 2
+    escalation_eligible: true
+    manager_email: null
+    delegate_email: null
+    leave: []
+
+  - email: "meera.iyer@example.com"
+    name: "Meera Iyer"
+    team: "SERVICE_DESK"
+    role: "approver"
+    skills: ["line_manager_approval", "budget_signoff"]
+    shift: { start: "09:00", end: "18:00", tz: "Asia/Kolkata" }
+    daily_capacity: 10
+    escalation_eligible: true
+    manager_email: "deepak.sharma@example.com"
+    delegate_email: null
+    leave: []

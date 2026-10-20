@@ -1,0 +1,56 @@
+categories:
+  Access:
+    team_code: "ACCESS"
+    team_name: "Access and Identity Team"
+    requires_approval: false
+    approver_rule: null
+    description: "Password resets, account unlocks, VPN, MFA, and SSO access."
+
+  Administrative rights:
+    team_code: "ACCESS"
+    team_name: "Access and Identity Team"
+    requires_approval: true
+    approver_rule: "line_manager"
+    description: "Local admin rights, software installation permissions, root access."
+
+  Hardware:
+    team_code: "HARDWARE"
+    team_name: "Desktop and Hardware Support"
+    requires_approval: false
+    approver_rule: null
+    description: "Laptop, monitor, keyboard, printer faults, physical repairs and replacements."
+
+  Storage:
+    team_code: "STORAGE"
+    team_name: "Storage and Infrastructure Team"
+    requires_approval: false
+    approver_rule: null
+    description: "Shared-drive quotas, backup restores, server disk space, cloud storage."
+
+  HR Support:
+    team_code: "HR"
+    team_name: "HR Systems Support"
+    requires_approval: false
+    approver_rule: null
+    description: "Payroll portal, leave management system, employee data records."
+
+  Purchase:
+    team_code: "PROCUREMENT"
+    team_name: "Procurement and Asset Team"
+    requires_approval: true
+    approver_rule: "line_manager"
+    description: "Hardware orders, software license purchases, vendor quotes, asset tagging."
+
+  Internal Project:
+    team_code: "PROJECTS"
+    team_name: "Project and Application Support"
+    requires_approval: false
+    approver_rule: null
+    description: "Internal repositories, CI/CD pipelines, dev environments, migration tasks."
+
+  Miscellaneous:
+    team_code: "SERVICE_DESK"
+    team_name: "Service Desk L1 Triage"
+    requires_approval: false
+    approver_rule: null
+    description: "Ambiguous, multi-issue, or low confidence tickets for human review."

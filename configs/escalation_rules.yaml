@@ -1,0 +1,52 @@
+ladder:
+  first_response_miss:
+    action: "reassign_next"
+    max_auto_reassign: 1
+    notify: ["team_lead", "assignee"]
+    description: "Reassigns once to the next engineer; second miss escalates to team lead directly."
+
+  pct50_no_update:
+    at: 0.50
+    action: "remind"
+    notify: ["assignee"]
+    description: "Reminder to assignee when 50% of resolution time elapsed without status update."
+
+  pct75:
+    at: 0.75
+    action: "warn"
+    notify: ["assignee", "team_lead"]
+    description: "Warning to engineer and team lead that resolution SLA is at risk."
+
+  breach:
+    at: 1.00
+    action: "escalate"
+    level: "E3"
+    notify: ["sd_manager", "team_lead", "requester"]
+    description: "Breached resolution SLA. Escalates to Service Desk Manager (E3) and promises new committed ETA."
+
+  manager_timeout:
+    after_breach_minutes: 120 # 2 hours
+    action: "escalate"
+    level: "E4"
+    notify: ["delivery_manager"]
+    description: "Manager has not acted within 2 hours of SLA breach. Escalates to IT Delivery Manager (E4)."
+
+requester_escalation:
+  max_per_24h: 2
+  cooldown_minutes: 60
+  response_window_minutes:
+    default: 120 # 2 business hours
+    Critical: 30 # 30 calendar minutes
+  timeout_action: "escalate_to_target_manager"
+  fallback_target: "rahul.verma@example.com" # SD Manager
+  reasons:
+    - code: "no_response"
+      label: "No response from engineer"
+    - code: "wrong_team"
+      label: "Ticket assigned to wrong team"
+    - code: "business_critical"
+      label: "Critical business impact / blocker"
+    - code: "deadline_at_risk"
+      label: "Urgent project deadline at risk"
+    - code: "other"
+      label: "Other reason"

@@ -1,0 +1,60 @@
+seed: 42
+split:
+  train: 0.70
+  val: 0.15
+  test: 0.15
+  holdout_category: "Storage"
+
+preprocess:
+  lowercase: true
+  stopwords: "nltk_english"
+  lemmatizer: "wordnet"
+  min_len: 2
+
+labels:
+  - "Access"
+  - "Administrative rights"
+  - "HR Support"
+  - "Hardware"
+  - "Internal Project"
+  - "Miscellaneous"
+  - "Purchase"
+  - "Storage"
+
+routing:
+  model: "logreg" # logreg | linear_svm
+  tfidf:
+    ngram_range: [1, 2]
+    min_df: 2
+    max_features: 50000
+    sublinear_tf: true
+  logreg:
+    C: 4.0
+    class_weight: "balanced"
+    max_iter: 2000
+  svm:
+    C: 0.5
+    calibration: "sigmoid"
+
+priority:
+  model: "logreg"
+  tfidf:
+    ngram_range: [1, 2]
+    min_df: 3
+    max_features: 25000
+  logreg:
+    C: 1.0
+    class_weight: "balanced"
+    max_iter: 2000
+
+gate:
+  min_macro_f1: 0.80
+  max_per_class_drop: 0.05
+  max_p95_latency_ms: 50
+  min_auto_accuracy: 0.90
+
+cost_model:
+  t_minutes: 3
+  c_minutes: 15
+  r_usd: 10
+  min_auto_accuracy: 0.90

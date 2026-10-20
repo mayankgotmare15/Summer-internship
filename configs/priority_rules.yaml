@@ -1,0 +1,25 @@
+keyword_rules:
+  Critical:
+    - "outage"
+    - "server down"
+    - "production down"
+    - "data breach"
+    - "ransomware"
+    - "security incident"
+    - "all users blocked"
+    - "company wide"
+    - "entire office"
+
+  High:
+    - "blocked"
+    - "cannot work"
+    - "urgent"
+    - "vip"
+    - "deadline today"
+    - "c-level"
+    - "client demo"
+    - "whole team"
+
+flag_rules:
+  blocking_team:
+    minimum_priority: "High"
