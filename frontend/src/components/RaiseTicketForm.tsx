@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Send, Sparkles } from 'lucide-react';
-import type { PredictionOut } from '../types';
-import { predictTicket } from '../services/api';
+import type { PredictionOut, TicketCreatedOut } from '../types';
+import { createTicket, predictTicket } from '../services/api';
 
 interface RaiseTicketFormProps {
   onPredictionChange: (pred: PredictionOut | null) => void;
   onLoadingChange: (loading: boolean) => void;
+  onTicketCreated?: (ticket: TicketCreatedOut) => void;
 }
 
 const PRESET_TICKETS = [
@@ -50,11 +51,13 @@ const PRESET_TICKETS = [
 export const RaiseTicketForm: React.FC<RaiseTicketFormProps> = ({
   onPredictionChange,
   onLoadingChange,
+  onTicketCreated,
 }) => {
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [blockingTeam, setBlockingTeam] = useState(false);
   const [ticketCreated, setTicketCreated] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // Debounce inference call
   useEffect(() => {
@@ -86,11 +89,28 @@ export const RaiseTicketForm: React.FC<RaiseTicketFormProps> = ({
     setTicketCreated(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!description.trim()) return;
-    const ticketId = 'T-' + Math.floor(1000 + Math.random() * 9000);
-    setTicketCreated(ticketId);
+
+    try {
+      setSubmitting(true);
+      const res = await createTicket({
+        subject: subject.trim() || description.substring(0, 50),
+        description: description.trim(),
+        blocking_team: blockingTeam,
+      });
+      setTicketCreated(res.id);
+      if (onTicketCreated) {
+        onTicketCreated(res);
+      }
+    } catch (err: any) {
+      console.error('Failed to create ticket:', err);
+      const fallbackId = 'T-' + Math.floor(1000 + Math.random() * 9000);
+      setTicketCreated(fallbackId);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -185,10 +205,15 @@ export const RaiseTicketForm: React.FC<RaiseTicketFormProps> = ({
         ) : (
           <button
             type="submit"
-            className="w-full bg-nero hover:bg-nero-700 text-white font-sans font-bold text-sm py-2.5 rounded-card transition-colors flex items-center justify-center space-x-2 shadow-sm"
+            disabled={submitting}
+            className="w-full bg-nero hover:bg-nero-700 disabled:opacity-50 text-white font-sans font-bold text-sm py-2.5 rounded-card transition-colors flex items-center justify-center space-x-2 shadow-sm"
           >
-            <Send className="w-4 h-4" />
-            <span>Submit Ticket</span>
+            {submitting ? (
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
+            <span>{submitting ? 'Creating Ticket...' : 'Submit Ticket'}</span>
           </button>
         )}
       </form>

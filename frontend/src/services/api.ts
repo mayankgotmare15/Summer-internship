@@ -1,4 +1,13 @@
-import type { FeedbackIn, PredictionOut, UserProfile } from '../types';
+import type {
+  DirectoryMember,
+  EscalateIn,
+  FeedbackIn,
+  MessageOut,
+  PredictionOut,
+  TicketCreatedOut,
+  TicketDetailOut,
+  UserProfile,
+} from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -127,5 +136,152 @@ export async function demoLogin(role: string): Promise<UserProfile> {
       is_demo: true,
       access_token: 'demo-jwt-token',
     };
+  }
+}
+
+export async function createTicket(payload: {
+  subject: string;
+  description: string;
+  blocking_team?: boolean;
+}): Promise<TicketCreatedOut> {
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/tickets`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to create ticket' }));
+      throw new Error(err.detail || `Server returned ${res.status}`);
+    }
+    return await res.json();
+  } catch (err: any) {
+    console.warn('API ticket creation fallback active:', err);
+    // Standalone fallback
+    const id = 'T-' + Math.floor(1000 + Math.random() * 9000);
+    const now = new Date();
+    const frDue = new Date(now.getTime() + 4 * 3600 * 1000);
+    const resDue = new Date(now.getTime() + 16 * 3600 * 1000);
+    return {
+      id,
+      ticket_uuid: 'demo-' + id,
+      status: 'Assigned',
+      category: 'Access',
+      priority: payload.blocking_team ? 'High' : 'Medium',
+      decision: 'auto_route',
+      team: { code: 'ACCESS', name: 'Access and Identity Team' },
+      assignee: {
+        id: 'user-priya',
+        name: 'Priya Sharma',
+        email: 'priya.sharma@example.com',
+        role: 'engineer',
+      },
+      first_response_due: frDue.toISOString(),
+      resolution_due: resDue.toISOString(),
+      can_escalate: true,
+    };
+  }
+}
+
+export async function getTicket(id: string): Promise<TicketDetailOut> {
+  const res = await fetch(`${API_BASE}/api/v1/tickets/${encodeURIComponent(id)}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ticket ${id}: ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function postTicketMessage(
+  id: string,
+  body: string,
+  internal: boolean = false
+): Promise<MessageOut> {
+  const res = await fetch(`${API_BASE}/api/v1/tickets/${encodeURIComponent(id)}/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ body, internal }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to post message: ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function changeTicketStatus(
+  id: string,
+  toStatus: string,
+  note?: string,
+  newEta?: string
+): Promise<TicketDetailOut> {
+  const res = await fetch(`${API_BASE}/api/v1/tickets/${encodeURIComponent(id)}/status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ to_status: toStatus, note, new_eta: newEta }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to change status: ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function escalateTicket(
+  id: string,
+  payload: EscalateIn
+): Promise<{ status: string; message: string; escalation_id: string; target_name?: string }> {
+  const res = await fetch(`${API_BASE}/api/v1/tickets/${encodeURIComponent(id)}/escalate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Escalation failed' }));
+    throw new Error(err.detail || err.message || `Escalation failed with ${res.status}`);
+  }
+  return await res.json();
+}
+
+export async function getDirectoryMembers(team?: string): Promise<DirectoryMember[]> {
+  try {
+    const url = team
+      ? `${API_BASE}/api/v1/directory/members?team=${encodeURIComponent(team)}`
+      : `${API_BASE}/api/v1/directory/members`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error('Failed to fetch directory members');
+    }
+    return await res.json();
+  } catch (err) {
+    console.warn('Directory API fallback active:', err);
+    return [
+      {
+        id: 'c003fb05-1aa3-402d-a411-67ae0686d277',
+        name: 'Riya Kapoor',
+        email: 'riya.kapoor@example.com',
+        role: 'team_lead',
+        team: 'ACCESS',
+        skills: ['access', 'mfa', 'leadership'],
+        on_leave: false,
+      },
+      {
+        id: '39c0ce09-39ae-4308-a2df-cd5f8d719df6',
+        name: 'Rahul Verma',
+        email: 'rahul.verma@example.com',
+        role: 'manager',
+        team: 'SERVICE_DESK',
+        skills: ['governance', 'escalation'],
+        on_leave: false,
+      },
+      {
+        id: '94219d50-b40b-4a8d-bc19-e4a1468faa1a',
+        name: 'Neha Singh',
+        email: 'neha.singh@example.com',
+        role: 'engineer',
+        team: 'ACCESS',
+        skills: ['identity', 'okta'],
+        on_leave: true,
+        leave_note: 'Conference / PTO (Oct 20-24, 2026)',
+        delegate: 'arjun.mehta@example.com',
+      },
+    ];
   }
 }

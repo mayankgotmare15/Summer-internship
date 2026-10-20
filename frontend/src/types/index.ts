@@ -46,3 +46,85 @@ export interface UserProfile {
   is_demo: boolean;
   access_token?: string;
 }
+
+export interface MemberRef {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+export interface TicketCreatedOut {
+  id: string;
+  ticket_uuid: string;
+  status: string;
+  category: string;
+  priority: string;
+  decision: 'auto_route' | 'human_review';
+  assignee?: MemberRef | null;
+  team: TeamRef;
+  first_response_due?: string | null;
+  resolution_due?: string | null;
+  awaiting_approval_from?: MemberRef | null;
+  review_promise_by?: string | null;
+  can_escalate: boolean;
+}
+
+export interface MessageOut {
+  id: string;
+  author_name?: string | null;
+  kind: string;
+  body: string;
+  created_at: string;
+}
+
+export interface EscalationEligibility {
+  allowed: boolean;
+  used_last_24h: number;
+  max_per_24h: number;
+  next_allowed_at?: string | null;
+  blocked_reason?: string | null;
+}
+
+export interface TicketDetailOut {
+  id: string;
+  ticket_uuid: string;
+  subject: string;
+  description: string;
+  category: string;
+  priority: string;
+  priority_source: string;
+  status: string;
+  decision: string;
+  review_reason?: string | null;
+  team: TeamRef;
+  assignee?: MemberRef | null;
+  is_escalated: boolean;
+  escalation_level: string;
+  first_response_due?: string | null;
+  resolution_due?: string | null;
+  first_responded_at?: string | null;
+  clock_state?: string | null;
+  messages: MessageOut[];
+  can_escalate: boolean;
+  escalation_eligibility: EscalationEligibility;
+  created_at: string;
+}
+
+export interface DirectoryMember {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  team: string;
+  skills: string[];
+  on_leave: boolean;
+  leave_note?: string | null;
+  delegate?: string | null;
+}
+
+export interface EscalateIn {
+  target_user_id: string;
+  reason_code: 'no_response' | 'wrong_team' | 'business_critical' | 'deadline_at_risk' | 'other';
+  note: string;
+}

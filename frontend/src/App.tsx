@@ -4,8 +4,10 @@ import { HumanReviewQueue } from './components/HumanReviewQueue';
 import { Navbar } from './components/Navbar';
 import { PredictionPanel } from './components/PredictionPanel';
 import { RaiseTicketForm } from './components/RaiseTicketForm';
+import { TicketConfirmationModal } from './components/TicketConfirmationModal';
+import { TicketDetailModal } from './components/TicketDetailModal';
 import { demoLogin } from './services/api';
-import type { PredictionOut, UserProfile } from './types';
+import type { PredictionOut, TicketCreatedOut, UserProfile } from './types';
 
 const INITIAL_USER: UserProfile = {
   id: 'usr-demo-req',
@@ -21,6 +23,9 @@ export function App() {
   const [activeTab, setActiveTab] = useState<'intake' | 'triage' | 'health'>('intake');
   const [prediction, setPrediction] = useState<PredictionOut | null>(null);
   const [loading, setLoading] = useState(false);
+  const [createdTicket, setCreatedTicket] = useState<TicketCreatedOut | null>(null);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [searchTicketId, setSearchTicketId] = useState('');
 
   const intakeRef = useRef<HTMLDivElement>(null);
 
@@ -66,9 +71,35 @@ export function App() {
                   Active Persona: <strong className="text-ink">{currentUser.name}</strong> • Role: <span className="uppercase font-mono font-bold text-orange">{currentUser.role}</span>
                 </p>
               </div>
-              <div className="flex items-center space-x-2 text-xs font-mono text-muted-light">
-                <span className="w-2 h-2 rounded-full bg-status-success"></span>
-                <span>Inference API Connected</span>
+              <div className="flex flex-wrap items-center gap-3">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (searchTicketId.trim()) {
+                      setSelectedTicketId(searchTicketId.trim().toUpperCase());
+                    }
+                  }}
+                  className="flex items-center gap-1.5"
+                >
+                  <input
+                    type="text"
+                    placeholder="Track Ticket (e.g. T-1001)"
+                    value={searchTicketId}
+                    onChange={(e) => setSearchTicketId(e.target.value)}
+                    className="px-3 py-1.5 bg-san/80 border border-line-light rounded-lg text-xs font-mono text-ink placeholder-muted-light focus:outline-none focus:ring-1 focus:ring-orange"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 bg-nero hover:bg-nero-700 text-white rounded-lg text-xs font-medium transition"
+                  >
+                    Track
+                  </button>
+                </form>
+
+                <div className="flex items-center space-x-2 text-xs font-mono text-muted-light pl-2 border-l border-line-light">
+                  <span className="w-2 h-2 rounded-full bg-status-success animate-pulse"></span>
+                  <span>FastAPI Connected</span>
+                </div>
               </div>
             </div>
 
@@ -78,6 +109,7 @@ export function App() {
                 <RaiseTicketForm
                   onPredictionChange={setPrediction}
                   onLoadingChange={setLoading}
+                  onTicketCreated={(t) => setCreatedTicket(t)}
                 />
               </div>
 
@@ -94,6 +126,27 @@ export function App() {
           </div>
         )}
       </main>
+
+      {/* Ticket Confirmation Modal (PRD 4B.1) */}
+      {createdTicket && (
+        <TicketConfirmationModal
+          ticket={createdTicket}
+          onClose={() => setCreatedTicket(null)}
+          onTrack={(tId) => {
+            setCreatedTicket(null);
+            setSelectedTicketId(tId);
+          }}
+        />
+      )}
+
+      {/* Ticket Detail & Status Modal (PRD 4B.3 & 4B.6) */}
+      {selectedTicketId && (
+        <TicketDetailModal
+          ticketId={selectedTicketId}
+          currentUser={currentUser}
+          onClose={() => setSelectedTicketId(null)}
+        />
+      )}
 
       {/* Production Footer */}
       <footer className="bg-nero text-san border-t border-nero-700 py-8 px-4 text-xs font-mono text-center space-y-2 mt-auto">

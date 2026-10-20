@@ -1,7 +1,14 @@
-"""Time abstraction protocol, SystemClock, and FakeClock for workflow testing."""
-
 from datetime import datetime, timezone, timedelta
-from typing import Protocol
+from typing import Optional, Protocol
+
+
+def ensure_utc(dt: Optional[datetime]) -> Optional[datetime]:
+    """Ensures datetime is timezone-aware in UTC (fixes sqlite naive datetime comparisons)."""
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
 
 
 class Clock(Protocol):
@@ -40,3 +47,12 @@ class FakeClock:
         delta = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
         self._current_time += delta
         return self._current_time
+
+    def advance_minutes(self, minutes: int) -> datetime:
+        return self.advance(minutes=minutes)
+
+    def advance_hours(self, hours: int) -> datetime:
+        return self.advance(hours=hours)
+
+    def advance_days(self, days: int) -> datetime:
+        return self.advance(days=days)
