@@ -1,122 +1,119 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useRef, useState } from 'react';
+import { HeroLanding } from './components/HeroLanding';
+import { HumanReviewQueue } from './components/HumanReviewQueue';
+import { Navbar } from './components/Navbar';
+import { PredictionPanel } from './components/PredictionPanel';
+import { RaiseTicketForm } from './components/RaiseTicketForm';
+import { demoLogin } from './services/api';
+import type { PredictionOut, UserProfile } from './types';
 
-function App() {
-  const [count, setCount] = useState(0)
+const INITIAL_USER: UserProfile = {
+  id: 'usr-demo-req',
+  email: 'requester@example.com',
+  name: 'Aarav Patel (Requester)',
+  role: 'requester',
+  department: 'Product & Engineering',
+  is_demo: true,
+};
+
+export function App() {
+  const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USER);
+  const [activeTab, setActiveTab] = useState<'intake' | 'triage' | 'health'>('intake');
+  const [prediction, setPrediction] = useState<PredictionOut | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const intakeRef = useRef<HTMLDivElement>(null);
+
+  const handleRoleSelect = async (role: string) => {
+    try {
+      const user = await demoLogin(role);
+      setCurrentUser(user);
+      if (role === 'agent') {
+        setActiveTab('triage');
+      } else {
+        setActiveTab('intake');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const scrollToExplore = () => {
+    intakeRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="min-h-screen bg-san/30 text-ink flex flex-col font-sans">
+      {/* Navbar with Role Switcher */}
+      <Navbar
+        currentUser={currentUser}
+        onSelectRole={handleRoleSelect}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
-      <div className="ticks"></div>
+      {/* Hero Section */}
+      <HeroLanding onExploreClick={scrollToExplore} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {/* Main Content Workspace */}
+      <main ref={intakeRef} id="intake-workspace" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {activeTab === 'intake' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-line-light pb-4">
+              <div>
+                <h2 className="text-xl font-bold text-ink">Interactive Ticket Intake &amp; Classification</h2>
+                <p className="text-xs text-muted-light">
+                  Active Persona: <strong className="text-ink">{currentUser.name}</strong> • Role: <span className="uppercase font-mono font-bold text-orange">{currentUser.role}</span>
+                </p>
+              </div>
+              <div className="flex items-center space-x-2 text-xs font-mono text-muted-light">
+                <span className="w-2 h-2 rounded-full bg-status-success"></span>
+                <span>Inference API Connected</span>
+              </div>
+            </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+            {/* Split Grid: Raise Form Left, Live Prediction Right */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className="lg:col-span-7">
+                <RaiseTicketForm
+                  onPredictionChange={setPrediction}
+                  onLoadingChange={setLoading}
+                />
+              </div>
+
+              <div className="lg:col-span-5 sticky top-20">
+                <PredictionPanel prediction={prediction} loading={loading} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'triage' && (
+          <div className="bg-paper border border-line-light rounded-panel p-6 shadow-card">
+            <HumanReviewQueue />
+          </div>
+        )}
+      </main>
+
+      {/* Production Footer */}
+      <footer className="bg-nero text-san border-t border-nero-700 py-8 px-4 text-xs font-mono text-center space-y-2 mt-auto">
+        <p className="text-muted-dark">
+          RouteDesk IT Support Auto-Routing System • 1-Month MLOps Production Stack
+        </p>
+        <div className="flex justify-center space-x-6 text-orange">
+          <a href="http://localhost:8000/docs" target="_blank" rel="noreferrer" className="hover:underline">
+            FastAPI Swagger Docs (8000)
+          </a>
+          <span>•</span>
+          <a href="http://localhost:8501" target="_blank" rel="noreferrer" className="hover:underline">
+            Streamlit ML Admin Console (8501)
+          </a>
+          <span>•</span>
+          <span>Docker Bake: champion:v1-baseline</span>
+        </div>
+      </footer>
+    </div>
+  );
 }
 
-export default App
+export default App;

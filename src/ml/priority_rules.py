@@ -2,7 +2,7 @@
 
 import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 import yaml
 
 PRIORITY_RANKS = {
@@ -76,3 +76,17 @@ class PriorityRules:
             "priority": final_priority,
             "source": source if final_priority != base_priority else "model",
         }
+
+    def apply(
+        self,
+        model_priority: str,
+        text: str,
+        flags: Optional[Dict[str, Any]] = None,
+    ) -> Any:
+        from collections import namedtuple
+        flags = flags or {}
+        blocking = flags.get("blocking_team", False)
+        res = self.evaluate(model_priority, text, blocking_team=blocking)
+        Result = namedtuple("PriorityRuleResult", ["priority", "source"])
+        return Result(priority=res["priority"], source=res["source"])
+

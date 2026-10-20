@@ -22,6 +22,24 @@ services:
       - ./artifacts:/app/artifacts
       - ./reports:/app/reports
 
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: routedesk-ui
+    command: ["streamlit", "run", "ui/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+    depends_on:
+      - api
+    volumes:
+      - ./ui:/app/ui
+      - ./reports:/app/reports
+      - ./artifacts:/app/artifacts
+      - ./configs:/app/configs
+
   db:
     image: postgres:16-alpine
     container_name: routedesk-db

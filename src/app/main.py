@@ -31,6 +31,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount domain routers
+from src.app.modules.identity.router import router as identity_router
+from src.app.modules.inference.router import router as inference_router
+
+app.include_router(inference_router, prefix="/api/v1")
+app.include_router(inference_router)  # PRD root aliases (/predict, /model-info, /feedback)
+app.include_router(identity_router, prefix="/api/v1")
+app.include_router(identity_router)
+
 
 @app.exception_handler(DomainError)
 async def domain_error_handler(request: Request, exc: DomainError) -> JSONResponse:

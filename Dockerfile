@@ -35,11 +35,14 @@ ENV PYTHONUNBUFFERED=1 \
     PORT=8000 \
     MODEL_DIR=/app/artifacts/bundle
 
-# Copy application source and configurations
+# Copy application source, configurations, models and reports
 COPY --chown=appuser:appgroup src/ /app/src/
 COPY --chown=appuser:appgroup configs/ /app/configs/
 COPY --chown=appuser:appgroup models/ /app/models/
-COPY --chown=appuser:appgroup pyproject.toml alembic.ini* /app/
+COPY --chown=appuser:appgroup artifacts/bundle/ /app/artifacts/bundle/
+COPY --chown=appuser:appgroup reports/ /app/reports/
+COPY --chown=appuser:appgroup ui/ /app/ui/
+COPY --chown=appuser:appgroup pyproject.toml /app/
 
 # Create runtime directories with appropriate permissions
 RUN mkdir -p /app/local_db /app/artifacts/bundle /app/reports && \
