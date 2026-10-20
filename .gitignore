@@ -90,6 +90,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Uploads & Temp Attachments
+uploads/
+/uploads/*
+!uploads/.gitkeep
+
 # OS & IDEs
 .DS_Store
 Thumbs.db
@@ -97,3 +102,4 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+

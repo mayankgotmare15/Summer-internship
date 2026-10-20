@@ -56,9 +56,23 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
 
+    # Mobile App & Digital Asset Links
+    android_package_name: str = "com.routedesk.app"
+    android_sha256_cert_fingerprints: str = "14:6D:E9:7D:0F:52:AB:E8:85:4F:2E:9B:04:6E:FE:39:51:75:15:B6:79:91:80:45:0B:22:9A:44:2A:B2:7D:34"
+    android_min_supported_version_code: int = 1
+    android_latest_version_code: int = 1
+    status_level: str = "ok"
+    status_message: str = "All systems operational"
+    upload_dir: str = "./uploads"
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def android_cert_fingerprints_list(self) -> list[str]:
+        return [fp.strip() for fp in self.android_sha256_cert_fingerprints.split(",") if fp.strip()]
+
 
 
 @lru_cache(maxsize=1)

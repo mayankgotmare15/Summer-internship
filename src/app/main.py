@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 
 from src.app.errors import DomainError, ErrorOut
 from src.app.lifespan import lifespan
+from src.app.modules.identity.router import devices_router
 from src.app.modules.identity.router import router as identity_router
 from src.app.modules.inference.router import router as inference_router
 from src.app.modules.tickets.router import router as tickets_router
@@ -40,8 +41,51 @@ app.include_router(inference_router, prefix="/api/v1")
 app.include_router(inference_router)  # PRD root aliases (/predict, /model-info, /feedback)
 app.include_router(identity_router, prefix="/api/v1")
 app.include_router(identity_router)
+app.include_router(devices_router, prefix="/api/v1")
+app.include_router(devices_router)
 app.include_router(tickets_router, prefix="/api/v1")
 app.include_router(tickets_router)
+
+
+@app.get("/.well-known/assetlinks.json", tags=["Mobile App Links"])
+async def get_assetlinks() -> list[dict[str, Any]]:
+    """Serves Android Digital Asset Links statement for App Links deep linking."""
+    return [
+        {
+            "relation": ["delegate_permission/common.handle_all_urls"],
+            "target": {
+                "namespace": "android_app",
+                "package_name": settings.android_package_name,
+                "sha256_cert_fingerprints": settings.android_cert_fingerprints_list,
+            },
+        }
+    ]
+
+
+@app.get("/app-config", tags=["App Configuration"])
+@app.get("/api/v1/app-config", tags=["App Configuration"])
+async def get_app_config() -> dict[str, Any]:
+    """Client runtime configuration, feature flags, version gates, and system status banner."""
+    return {
+        "android": {
+            "min_supported_version_code": settings.android_min_supported_version_code,
+            "latest_version_code": settings.android_latest_version_code,
+        },
+        "status": {
+            "level": settings.status_level,
+            "message": settings.status_message,
+        },
+        "features": {
+            "attachments": True,
+            "chat_intake": True,
+            "sso": False,
+        },
+        "business_calendar": {
+            "timezone": settings.tz_business,
+            "hours": "Mon-Fri 09:00-18:00",
+        },
+    }
+
 
 
 @app.exception_handler(DomainError)

@@ -23,7 +23,8 @@ class TicketCreateIn(BaseModel):
     subject: str = Field(..., min_length=3, max_length=200)
     description: str = Field(..., min_length=1, max_length=5000)
     blocking_team: bool = Field(default=False)
-    channel: Literal["portal", "chat", "email_sim"] = "portal"
+    channel: Literal["portal", "chat", "email_sim", "android"] = "portal"
+
 
 
 class TicketCreatedOut(BaseModel):
@@ -50,6 +51,16 @@ class MessageOut(BaseModel):
     created_at: datetime
 
 
+class AttachmentOut(BaseModel):
+    id: uuid.UUID
+    ticket_id: uuid.UUID
+    uploader_id: uuid.UUID
+    filename: str
+    content_type: str
+    size_bytes: int
+    created_at: datetime
+
+
 class TicketDetailOut(BaseModel):
     id: str  # public_id
     ticket_uuid: uuid.UUID
@@ -70,9 +81,11 @@ class TicketDetailOut(BaseModel):
     first_responded_at: datetime | None = None
     clock_state: str | None = None
     messages: list[MessageOut] = Field(default_factory=list)
+    attachments: list[AttachmentOut] = Field(default_factory=list)
     can_escalate: bool = True
     escalation_eligibility: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime
+
 
 
 class StatusChangeIn(BaseModel):

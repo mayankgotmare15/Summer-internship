@@ -1,6 +1,8 @@
 """Security, password hashing, JWT session encoding, and service token validation."""
 
+import hashlib
 import hmac
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -57,3 +59,14 @@ def verify_service_token(provided_token: str, expected_token: str | None = None)
     if not provided_token or not expected:
         return False
     return hmac.compare_digest(provided_token.strip(), expected.strip())
+
+
+def generate_opaque_token(nbytes: int = 32) -> str:
+    """Generates a secure cryptographically random URL-safe token."""
+    return secrets.token_urlsafe(nbytes)
+
+
+def hash_token(token: str) -> str:
+    """Computes SHA-256 hex digest of a token string for safe database storage."""
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+

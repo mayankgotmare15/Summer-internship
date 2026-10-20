@@ -44,6 +44,14 @@ class UnauthorizedError(DomainError):
         super().__init__(message, code=code, status_code=401)
 
 
+class BadRequestError(DomainError):
+    def __init__(
+        self, message: str = "Bad request", code: str = "BAD_REQUEST", field: str | None = None
+    ):
+        super().__init__(message, code=code, status_code=400, field=field)
+
+
+
 class ForbiddenError(DomainError):
     def __init__(
         self, message: str = "Action forbidden for caller role", code: str = "FORBIDDEN_ROLE"

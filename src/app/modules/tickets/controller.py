@@ -1,14 +1,18 @@
 """Ticket controller handling creation, assignment, lifecycle state transitions, messages, and escalation."""
 
 import hashlib
+import io
+import json
+import os
 import uuid
 from datetime import datetime, timedelta
 from typing import Any
 
 import structlog
+from PIL import Image
 from sqlalchemy.orm import Session
 
-from src.app.errors import NotFoundError
+from src.app.errors import BadRequestError, NotFoundError
 from src.app.modules.assignment.service import AssignmentService
 from src.app.modules.directory.service import DirectoryService
 from src.app.modules.escalation.service import EscalationService
@@ -16,6 +20,7 @@ from src.app.modules.inference.controller import TEAM_NAMES, InferenceController
 from src.app.modules.inference.schemas import PredictionIn
 from src.app.modules.sla.service import SlaService
 from src.app.modules.tickets.schemas import (
+    AttachmentOut,
     EscalateIn,
     EscalationRespondIn,
     MemberRef,
@@ -27,10 +32,13 @@ from src.app.modules.tickets.schemas import (
     TicketCreateIn,
     TicketDetailOut,
 )
+from src.app.settings import get_settings
 from src.core.clock import Clock, ensure_utc
 from src.core.ids import generate_public_id
 from src.db.models.assignment import Assignment
+from src.db.models.attachment import Attachment
 from src.db.models.escalation import Approval
+from src.db.models.idempotency import IdempotencyKey
 from src.db.models.notification import Notification
 from src.db.models.sla import SlaClock
 from src.db.models.ticket import Ticket, TicketMessage
@@ -40,6 +48,25 @@ logger = structlog.get_logger()
 
 # Categories that mandate an approval stage before assignment (PRD 4A.2 & 4B.4)
 APPROVAL_CATEGORIES = {"Administrative rights", "Purchase"}
+
+
+def strip_exif(content_type: str, file_bytes: bytes) -> bytes:
+    """Strips GPS and camera metadata from image files."""
+    ct = content_type.lower()
+    if ct in ["image/jpeg", "image/png", "image/webp"]:
+        try:
+            image = Image.open(io.BytesIO(file_bytes))
+            out_buf = io.BytesIO()
+            fmt = "JPEG" if "jpeg" in ct else ("PNG" if "png" in ct else "WEBP")
+            if fmt == "JPEG" and image.mode in ("RGBA", "P"):
+                image = image.convert("RGB")
+            image.save(out_buf, format=fmt)
+            return out_buf.getvalue()
+        except Exception as exc:
+            logger.warning("Failed to strip EXIF from image", error=str(exc))
+            return file_bytes
+    return file_bytes
+
 
 
 class TicketController:
@@ -67,6 +94,7 @@ class TicketController:
         requester_email: str,
         db: Session,
         clock: Clock,
+        idempotency_key: str | None = None,
     ) -> TicketCreatedOut:
         # 1. Resolve requester
         requester = db.query(User).filter(User.email == requester_email.lower()).first()
@@ -83,6 +111,22 @@ class TicketController:
                 db.commit()
                 db.refresh(requester)
 
+        req_hash = hashlib.sha256(
+            f"{payload.subject}:{payload.description}:{payload.channel}:{payload.blocking_team}".encode()
+        ).hexdigest()
+
+        if idempotency_key and requester:
+            existing_key = (
+                db.query(IdempotencyKey)
+                .filter(
+                    IdempotencyKey.user_id == requester.id,
+                    IdempotencyKey.key == idempotency_key,
+                )
+                .first()
+            )
+            if existing_key:
+                return TicketCreatedOut(**json.loads(existing_key.response_body))
+
         full_text = f"{payload.subject}\n{payload.description}"
         text_hash = hashlib.sha256(full_text.encode("utf-8")).hexdigest()
         public_id = generate_public_id(db=db)
@@ -95,6 +139,7 @@ class TicketController:
             db=db,
             actor_id=requester.id,
         )
+
 
         team_code = pred_res.routed_team.code
         team_record = self._resolve_team_record(team_code, db)
@@ -219,7 +264,7 @@ class TicketController:
             name=TEAM_NAMES.get(team_record.code, team_record.name),
         )
 
-        return TicketCreatedOut(
+        result = TicketCreatedOut(
             id=public_id,
             ticket_uuid=ticket.id,
             status=ticket.status,
@@ -234,6 +279,20 @@ class TicketController:
             review_promise_by=review_promise,
             can_escalate=ticket_status in ["Assigned", "In progress"],
         )
+
+        if idempotency_key and requester:
+            ik = IdempotencyKey(
+                user_id=requester.id,
+                key=idempotency_key,
+                request_hash=req_hash,
+                response_status=201,
+                response_body=result.model_dump_json(),
+            )
+            db.add(ik)
+            db.commit()
+
+        return result
+
 
     def get_ticket(self, identifier: str, db: Session, clock: Clock) -> TicketDetailOut:
         """Finds ticket by public_id (e.g. T-1042) or UUID."""
@@ -288,6 +347,26 @@ class TicketController:
                 )
             )
 
+        # Attachments
+        raw_atts = (
+            db.query(Attachment)
+            .filter(Attachment.ticket_id == ticket.id)
+            .order_by(Attachment.created_at.asc())
+            .all()
+        )
+        attachments_out = [
+            AttachmentOut(
+                id=a.id,
+                ticket_id=a.ticket_id,
+                uploader_id=a.uploader_id,
+                filename=a.filename,
+                content_type=a.content_type,
+                size_bytes=a.size_bytes,
+                created_at=ensure_utc(a.created_at),
+            )
+            for a in raw_atts
+        ]
+
         eligibility = self.escalation_service.get_eligibility(
             ticket, ticket.requester_id, db, clock
         )
@@ -312,10 +391,12 @@ class TicketController:
             first_responded_at=ensure_utc(ticket.first_responded_at),
             clock_state=sla_clock.state if sla_clock else None,
             messages=messages_out,
+            attachments=attachments_out,
             can_escalate=eligibility["allowed"],
             escalation_eligibility=eligibility,
             created_at=ensure_utc(ticket.created_at),
         )
+
 
     def list_tickets(
         self,
@@ -404,6 +485,7 @@ class TicketController:
         author_id: uuid.UUID | None,
         db: Session,
         clock: Clock,
+        idempotency_key: str | None = None,
     ) -> MessageOut:
         ticket = (
             db.query(Ticket)
@@ -412,6 +494,22 @@ class TicketController:
         )
         if not ticket:
             raise NotFoundError("Ticket not found")
+
+        req_hash = hashlib.sha256(
+            f"{identifier}:{payload.body}:{payload.internal}".encode()
+        ).hexdigest()
+
+        if idempotency_key and author_id:
+            existing_key = (
+                db.query(IdempotencyKey)
+                .filter(
+                    IdempotencyKey.user_id == author_id,
+                    IdempotencyKey.key == idempotency_key,
+                )
+                .first()
+            )
+            if existing_key:
+                return MessageOut(**json.loads(existing_key.response_body))
 
         now_dt = clock.now()
         msg = TicketMessage(
@@ -437,13 +535,27 @@ class TicketController:
             if u:
                 author_name = u.name
 
-        return MessageOut(
+        result = MessageOut(
             id=msg.id,
             author_name=author_name,
             kind=msg.kind,
             body=msg.body,
             created_at=msg.created_at,
         )
+
+        if idempotency_key and author_id:
+            ik = IdempotencyKey(
+                user_id=author_id,
+                key=idempotency_key,
+                request_hash=req_hash,
+                response_status=201,
+                response_body=result.model_dump_json(),
+            )
+            db.add(ik)
+            db.commit()
+
+        return result
+
 
     def escalate_ticket(
         self,
@@ -501,3 +613,110 @@ class TicketController:
             "status": esc.status,
             "new_eta": esc.new_eta.isoformat() if esc.new_eta else None,
         }
+
+    def upload_attachment(
+        self,
+        identifier: str,
+        file_bytes: bytes,
+        filename: str,
+        content_type: str,
+        user_id: uuid.UUID,
+        db: Session,
+        clock: Clock,
+    ) -> AttachmentOut:
+        """B6: Validates, strips EXIF, stores file to disk, and records ticket attachment."""
+        ticket = (
+            db.query(Ticket)
+            .filter((Ticket.public_id == identifier.upper()) | (Ticket.id == identifier))
+            .first()
+        )
+        if not ticket:
+            raise NotFoundError("Ticket not found")
+
+        allowed_types = {"image/jpeg", "image/png", "image/webp", "application/pdf"}
+        if content_type.lower() not in allowed_types:
+            raise BadRequestError(
+                f"Unsupported file type '{content_type}'. Allowed types: JPEG, PNG, WebP, PDF.",
+                code="UNSUPPORTED_MEDIA_TYPE",
+            )
+
+        max_bytes = 10 * 1024 * 1024  # 10 MB
+        if len(file_bytes) > max_bytes:
+            raise BadRequestError(
+                "File size exceeds maximum allowed limit of 10 MB.",
+                code="ATTACHMENT_TOO_LARGE",
+            )
+
+        count = db.query(Attachment).filter(Attachment.ticket_id == ticket.id).count()
+        if count >= 5:
+            raise BadRequestError(
+                "Maximum limit of 5 attachments per ticket reached.",
+                code="MAX_ATTACHMENTS_EXCEEDED",
+            )
+
+        clean_bytes = strip_exif(content_type, file_bytes)
+
+        settings = get_settings()
+        upload_dir = os.path.join(settings.upload_dir, str(ticket.id))
+        os.makedirs(upload_dir, exist_ok=True)
+
+        att_id = uuid.uuid4()
+        safe_name = os.path.basename(filename).replace(" ", "_")
+        storage_path = os.path.join(upload_dir, f"{att_id}_{safe_name}")
+
+        with open(storage_path, "wb") as f:
+            f.write(clean_bytes)
+
+        now_dt = clock.now()
+        attachment = Attachment(
+            id=att_id,
+            ticket_id=ticket.id,
+            uploader_id=user_id,
+            filename=safe_name,
+            content_type=content_type,
+            size_bytes=len(clean_bytes),
+            storage_path=storage_path,
+            created_at=now_dt,
+        )
+        db.add(attachment)
+        db.commit()
+        db.refresh(attachment)
+
+        return AttachmentOut(
+            id=attachment.id,
+            ticket_id=attachment.ticket_id,
+            uploader_id=attachment.uploader_id,
+            filename=attachment.filename,
+            content_type=attachment.content_type,
+            size_bytes=attachment.size_bytes,
+            created_at=ensure_utc(attachment.created_at),
+        )
+
+    def get_attachment(
+        self,
+        identifier: str,
+        attachment_id: uuid.UUID,
+        db: Session,
+    ) -> tuple[Attachment, str]:
+        """Retrieves attachment record and verified storage path on disk."""
+        ticket = (
+            db.query(Ticket)
+            .filter((Ticket.public_id == identifier.upper()) | (Ticket.id == identifier))
+            .first()
+        )
+        if not ticket:
+            raise NotFoundError("Ticket not found")
+
+        attachment = (
+            db.query(Attachment)
+            .filter(Attachment.id == attachment_id, Attachment.ticket_id == ticket.id)
+            .first()
+        )
+        if not attachment:
+            raise NotFoundError("Attachment not found")
+
+        if not os.path.exists(attachment.storage_path):
+            raise NotFoundError("Attachment file not found on storage disk")
+
+        return attachment, attachment.storage_path
+

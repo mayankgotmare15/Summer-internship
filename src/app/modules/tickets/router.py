@@ -1,14 +1,16 @@
-"""FastAPI router for tickets, assignments, messages, escalations, and directory."""
+"""FastAPI router for tickets, assignments, messages, escalations, directory, and attachments."""
 
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, Header, Query, status
+from fastapi import APIRouter, Depends, File, Header, Query, UploadFile, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-from src.app.deps import get_clock
+from src.app.deps import get_clock, get_current_user_id
 from src.app.modules.tickets.controller import TicketController
 from src.app.modules.tickets.schemas import (
+    AttachmentOut,
     EscalateIn,
     EscalationRespondIn,
     MessageIn,
@@ -19,29 +21,10 @@ from src.app.modules.tickets.schemas import (
     TicketDetailOut,
 )
 from src.core.clock import Clock
-from src.core.security import decode_access_token
-from src.db.models.user import User
 from src.db.session import get_db
 
 router = APIRouter(prefix="", tags=["Ticket Lifecycle & Escalation"])
 controller = TicketController()
-
-
-def get_current_user_id(
-    authorization: str | None = Header(None), db: Session = Depends(get_db)
-) -> uuid.UUID:
-    """Helper to extract user ID from auth header, or default to demo user."""
-    if authorization and authorization.startswith("Bearer "):
-        token = authorization.split(" ")[1]
-        try:
-            claims = decode_access_token(token)
-            return uuid.UUID(claims.get("sub"))
-        except Exception:
-            pass
-
-    # Default to demo requester for quick tests
-    demo_u = db.query(User).filter(User.role == "requester").first()
-    return demo_u.id if demo_u else uuid.uuid4()
 
 
 @router.post(
@@ -52,10 +35,13 @@ def get_current_user_id(
 )
 def create_ticket(
     payload: TicketCreateIn,
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
     db: Session = Depends(get_db),
     clock: Clock = Depends(get_clock),
 ) -> TicketCreatedOut:
-    return controller.create_ticket(payload, "requester@example.com", db, clock)
+    return controller.create_ticket(
+        payload, "requester@example.com", db, clock, idempotency_key=idempotency_key
+    )
 
 
 @router.get(
@@ -105,16 +91,63 @@ def change_status(
     "/tickets/{identifier}/messages",
     response_model=MessageOut,
     status_code=status.HTTP_201_CREATED,
-    summary="Post message to ticket discussion thread",
+    summary="Post message to ticket discussion thread (supports Idempotency-Key)",
 )
 def post_message(
     identifier: str,
     payload: MessageIn,
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
     user_id: uuid.UUID = Depends(get_current_user_id),
     db: Session = Depends(get_db),
     clock: Clock = Depends(get_clock),
 ) -> MessageOut:
-    return controller.post_message(identifier, payload, user_id, db, clock)
+    return controller.post_message(
+        identifier, payload, user_id, db, clock, idempotency_key=idempotency_key
+    )
+
+
+@router.post(
+    "/tickets/{identifier}/attachments",
+    response_model=AttachmentOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload file attachment (max 10MB, images & PDF)",
+)
+async def upload_attachment(
+    identifier: str,
+    file: UploadFile = File(...),
+    user_id: uuid.UUID = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+    clock: Clock = Depends(get_clock),
+) -> AttachmentOut:
+    file_bytes = await file.read()
+    content_type = file.content_type or "application/octet-stream"
+    filename = file.filename or "attachment"
+    return controller.upload_attachment(
+        identifier=identifier,
+        file_bytes=file_bytes,
+        filename=filename,
+        content_type=content_type,
+        user_id=user_id,
+        db=db,
+        clock=clock,
+    )
+
+
+@router.get(
+    "/tickets/{identifier}/attachments/{attachment_id}",
+    summary="Download or stream ticket file attachment",
+)
+def get_attachment(
+    identifier: str,
+    attachment_id: uuid.UUID,
+    db: Session = Depends(get_db),
+) -> FileResponse:
+    att, path = controller.get_attachment(identifier, attachment_id, db)
+    return FileResponse(
+        path=path,
+        media_type=att.content_type,
+        filename=att.filename,
+    )
 
 
 @router.post(
