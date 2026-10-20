@@ -1,0 +1,8 @@
+{
+  "threshold": 0.69,
+  "auto_route_rate": 0.6109,
+  "auto_route_accuracy": 0.9581,
+  "net_hours_saved_monthly": 120.73,
+  "net_cost_saved_usd_monthly": 1207.3,
+  "meets_accuracy_target": true
+}
