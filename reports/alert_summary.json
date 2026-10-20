@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-10-20T18:18:01.451463+00:00",
+  "status": "ALERT_BREACHED",
+  "sample_count": 150,
+  "is_healthy": false,
+  "breach_count": 4,
+  "breaches": [
+    "Low-confidence rate 67.3% exceeds threshold of 25.0%",
+    "Agent override rate 100.0% exceeds threshold of 15.0%",
+    "Category distribution shift 0.2565 exceeds threshold of 0.1500",
+    "Evidently detected statistically significant dataset feature drift"
+  ],
+  "thresholds": {
+    "max_low_conf_rate": 0.25,
+    "max_override_rate": 0.15,
+    "max_cat_drift_score": 0.15
+  },
+  "observed_metrics": {
+    "low_confidence_rate": 0.6733,
+    "override_rate": 1.0,
+    "category_drift_score": 0.2565,
+    "dataset_drift_detected": true
+  },
+  "recommended_action": "retrain_challenger"
+}

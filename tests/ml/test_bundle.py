@@ -36,4 +36,5 @@ def test_bundle_smoke_inputs_pass():
             "Internal Project",
             "Miscellaneous",
             "Purchase",
+            "Storage",
         ]

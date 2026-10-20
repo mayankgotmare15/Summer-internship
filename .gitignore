@@ -39,6 +39,8 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 reports/coverage/
+reports/monitoring_data/
+reports/*.html
 
 # Data & DVC (tracked via .dvc files, not git directly)
 /data/raw/*

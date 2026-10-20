@@ -1,0 +1,57 @@
+{
+  "drill_title": "End-to-End Monitoring, Drift Detection, and Automated Retraining Drill",
+  "executed_at": "2026-10-20T18:27:00Z",
+  "summary": "Demonstrated full operational lifecycle from unobserved category decay to automated retraining and recovery without manual intervention.",
+  "phases": {
+    "stage_1_baseline": {
+      "model_version": "v1-baseline",
+      "traffic_scenario": "normal",
+      "tickets_evaluated": 150,
+      "low_confidence_rate": 0.28,
+      "override_rate": 0.0,
+      "category_drift_score": 0.054,
+      "status": "HEALTHY",
+      "notes": "Model operates within normal parameters across 7 trained categories."
+    },
+    "stage_2_drift_injection": {
+      "model_version": "v1-baseline",
+      "traffic_scenario": "holdout_storage",
+      "tickets_evaluated": 150,
+      "low_confidence_rate": 0.6733,
+      "override_rate": 1.0,
+      "category_drift_score": 0.2565,
+      "status": "ALERT_BREACHED",
+      "breaches": [
+        "Low-confidence rate 67.3% exceeds threshold 25.0%",
+        "Agent override rate 100.0% exceeds threshold 15.0%",
+        "Category distribution shift 0.2565 exceeds threshold 0.1500",
+        "Evidently detected statistically significant dataset feature drift"
+      ],
+      "recommended_action": "retrain_challenger"
+    },
+    "stage_3_retraining": {
+      "challenger_version": "v2-retrained",
+      "training_pool_samples": 33485,
+      "categories_count": 8,
+      "new_category_added": "Storage",
+      "macro_f1_champion": 0.8554,
+      "macro_f1_challenger": 0.868,
+      "optimal_threshold": 0.68,
+      "auto_route_rate": 0.6087,
+      "auto_route_accuracy": 0.95,
+      "p95_latency_ms": 1.84,
+      "gate_status": "PASSED",
+      "promotion_result": "PROMOTED_TO_CHAMPION"
+    },
+    "stage_4_recovery": {
+      "model_version": "v2-retrained",
+      "traffic_scenario": "holdout_storage_replayed",
+      "tickets_evaluated": 150,
+      "storage_recognition_rate": 0.92,
+      "low_confidence_rate": 0.2267,
+      "override_rate": 0.0,
+      "status": "RECOVERED",
+      "notes": "Low-confidence rate normalized from 67.3% to 22.7%, override rate dropped to 0%, and Storage category successfully classified."
+    }
+  }
+}

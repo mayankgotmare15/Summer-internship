@@ -1,16 +1,16 @@
 {
   "model_name": "ticket-routing",
-  "version": "v1-baseline",
-  "run_id": "run_732106d3",
+  "version": "v2-retrained",
+  "run_id": "run_d201aa2d",
   "alias": "champion",
-  "promoted_at": "2026-10-20T13:50:38.595835+00:00",
-  "threshold": 0.69,
+  "promoted_at": "2026-10-20T18:23:28.145072+00:00",
+  "threshold": 0.68,
   "metrics": {
-    "macro_f1": 0.8554,
-    "weighted_f1": 0.8569,
-    "auto_route_rate": 0.6109,
-    "auto_route_accuracy": 0.9581,
-    "p95_latency_ms": 2.01
+    "macro_f1": 0.868,
+    "weighted_f1": 0.8649,
+    "auto_route_rate": 0.6087,
+    "auto_route_accuracy": 0.95,
+    "p95_latency_ms": 1.84
   },
   "labels": [
     "Access",
@@ -19,7 +19,8 @@
     "Hardware",
     "Internal Project",
     "Miscellaneous",
-    "Purchase"
+    "Purchase",
+    "Storage"
   ],
   "preprocess_fingerprint": "861e7d2b66bb0c2d",
   "gate_status": "PASSED"

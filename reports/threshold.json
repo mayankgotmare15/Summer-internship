@@ -1,8 +1,12 @@
 {
-  "threshold": 0.69,
-  "auto_route_rate": 0.6109,
-  "auto_route_accuracy": 0.9581,
-  "net_hours_saved_monthly": 120.73,
-  "net_cost_saved_usd_monthly": 1207.3,
-  "meets_accuracy_target": true
+  "threshold": 0.68,
+  "target_accuracy": 0.9,
+  "optimal_metrics": {
+    "threshold": 0.68,
+    "auto_route_rate": 0.6087,
+    "auto_route_accuracy": 0.9602,
+    "net_hours_saved_monthly": 121.89,
+    "net_cost_saved_usd_monthly": 1218.9,
+    "meets_accuracy_target": true
+  }
 }

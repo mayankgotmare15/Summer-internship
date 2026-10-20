@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,8 +21,12 @@ def load_model(model_path: Path):
     return sio.load(model_path, trusted=untrusted)
 
 
-def main() -> None:
-    params = load_params()
+def sweep_thresholds(
+    model: Any,
+    df_val: pd.DataFrame,
+    params: dict,
+) -> dict[str, Any]:
+    """Sweeps confidence thresholds tau in [0.50, 0.95] and finds optimal threshold subject to min accuracy."""
     cost_cfg = params.get("cost_model", {})
     t_min = cost_cfg.get("t_minutes", 3)
     c_min = cost_cfg.get("c_minutes", 15)
@@ -29,22 +34,11 @@ def main() -> None:
     min_acc = cost_cfg.get("min_auto_accuracy", 0.90)
     monthly_tickets = 5000
 
-    val_path = Path("data/features/val.parquet")
-    model_path = Path("artifacts/routing/model.skops")
-    reports_dir = Path("reports")
-    reports_dir.mkdir(parents=True, exist_ok=True)
-
-    print(f"Loading validation set from {val_path}...")
-    df_val = pd.read_parquet(val_path)
     text_col = "text_clean" if "text_clean" in df_val.columns else "text"
     X_val = df_val[text_col].fillna("").tolist()
     y_val = df_val["category"].tolist()
-
-    print(f"Loading routing model from {model_path}...")
-    model = load_model(model_path)
     classes = list(model.classes_)
 
-    print("Computing prediction probabilities on validation split...")
     probs = model.predict_proba(X_val)
     top_indices = probs.argmax(axis=1)
     max_probs = probs.max(axis=1)
@@ -70,8 +64,6 @@ def main() -> None:
         else:
             acc = 1.0
 
-        # PRD Section 12 Net Minutes formula:
-        # Net Minutes = N * a * [ t - (1 - p) * c ]
         net_minutes_per_ticket = auto_rate * (t_min - (1.0 - acc) * c_min)
         net_hours_saved = round(float((monthly_tickets * net_minutes_per_ticket) / 60.0), 2)
         net_cost_saved = round(float(net_hours_saved * r_usd), 2)
@@ -86,7 +78,6 @@ def main() -> None:
             }
         )
 
-        # Selection rule: maximize net hours saved subject to accuracy >= min_auto_accuracy
         if acc >= min_acc and net_hours_saved > max_hours_saved:
             max_hours_saved = net_hours_saved
             best_threshold = t_val
@@ -99,7 +90,6 @@ def main() -> None:
                 "meets_accuracy_target": True,
             }
 
-    # If no threshold reached 90%, fallback to highest accuracy threshold
     if not best_stats:
         best_row = max(records, key=lambda r: (r["auto_route_accuracy"], r["net_hours_saved"]))
         best_threshold = best_row["threshold"]
@@ -112,7 +102,35 @@ def main() -> None:
             "meets_accuracy_target": False,
         }
 
-    df_sweep = pd.DataFrame(records)
+    return {
+        "optimal_threshold": best_threshold,
+        "optimal_row": best_stats,
+        "records": records,
+        "df_sweep": pd.DataFrame(records),
+    }
+
+
+def main() -> None:
+    params = load_params()
+    min_acc = params.get("cost_model", {}).get("min_auto_accuracy", 0.90)
+
+    val_path = Path("data/features/val.parquet")
+    if not val_path.exists():
+        val_path = Path("data/processed/val.parquet")
+
+    model_path = Path("artifacts/routing/model.skops")
+    reports_dir = Path("reports")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"Loading validation set from {val_path}...")
+    df_val = pd.read_parquet(val_path)
+    model = load_model(model_path)
+
+    sweep_res = sweep_thresholds(model=model, df_val=df_val, params=params)
+    df_sweep = sweep_res["df_sweep"]
+    best_threshold = sweep_res["optimal_threshold"]
+    best_stats = sweep_res["optimal_row"]
+
     csv_path = reports_dir / "sweep.csv"
     df_sweep.to_csv(csv_path, index=False)
     print(f"Saved sweep metrics to {csv_path}")

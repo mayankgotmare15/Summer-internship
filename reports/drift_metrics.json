@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-10-20T18:26:41.200778+00:00",
+  "sample_count": 150,
+  "reference_count": 6759,
+  "active_threshold": 0.68,
+  "low_confidence_rate": 0.2267,
+  "low_confidence_count": 34,
+  "override_rate": 0.0,
+  "override_count": 0,
+  "category_drift_score": 0.92,
+  "dataset_drift_detected": true,
+  "drifted_features_share": 0.0,
+  "category_distribution_ref": {
+    "Hardware": 0.3023,
+    "HR Support": 0.2422,
+    "Access": 0.1582,
+    "Miscellaneous": 0.1567,
+    "Purchase": 0.0546,
+    "Internal Project": 0.047,
+    "Administrative rights": 0.0391
+  },
+  "category_distribution_curr": {
+    "Storage": 0.92,
+    "Hardware": 0.0267,
+    "HR Support": 0.0267,
+    "Miscellaneous": 0.0133,
+    "Access": 0.0133
+  }
+}

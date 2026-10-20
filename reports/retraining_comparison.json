@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-10-20T18:21:58.446888+00:00",
+  "run_id": "run_d201aa2d",
+  "champion": {
+    "version": "v1-baseline",
+    "threshold": 0.69,
+    "classes": [
+      "Access",
+      "Administrative rights",
+      "HR Support",
+      "Hardware",
+      "Internal Project",
+      "Miscellaneous",
+      "Purchase"
+    ],
+    "macro_f1": 0.8554,
+    "auto_route_rate": 0.6109
+  },
+  "challenger": {
+    "version": "v2-retrained",
+    "threshold": 0.68,
+    "classes": [
+      "Access",
+      "Administrative rights",
+      "HR Support",
+      "Hardware",
+      "Internal Project",
+      "Miscellaneous",
+      "Purchase",
+      "Storage"
+    ],
+    "macro_f1": 0.868,
+    "auto_route_rate": 0.6087,
+    "auto_route_accuracy": 0.95,
+    "p95_latency_ms": 1.84
+  },
+  "gate_status": "PASSED",
+  "gate_reasons": []
+}
