@@ -1,13 +1,14 @@
 """Application lifespan events (startup and shutdown management)."""
 
 import os
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
-from fastapi import FastAPI
+
 import structlog
+from fastapi import FastAPI
+
 from src.app.settings import get_settings
 from src.db.seed import run_seed
-from src.db.session import init_db
 from src.ml.store import ModelStore
 
 logger = structlog.get_logger()

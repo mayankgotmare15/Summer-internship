@@ -6,10 +6,11 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import sklearn
 import skops.io as sio
-import yaml
+
 from src.ml.preprocess import get_preprocess_fingerprint, preprocess_text
 
 SAMPLE_TEST_INPUTS = [
@@ -38,7 +39,9 @@ SAMPLE_TEST_INPUTS = [
 
 def get_git_sha() -> str:
     try:
-        res = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True)
+        res = subprocess.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+        )
         return res.stdout.strip()[:8]
     except Exception:
         return "local-dev"
@@ -56,20 +59,28 @@ def package_bundle(
     threshold_path = Path("reports/threshold.json")
     threshold_val = 0.65
     if threshold_path.exists():
-        with open(threshold_path, "r", encoding="utf-8") as f:
+        with open(threshold_path, encoding="utf-8") as f:
             t_data = json.load(f)
             threshold_val = t_data.get("threshold", 0.65)
 
     metrics_path = Path("reports/metrics.json")
     metrics_data = {}
     if metrics_path.exists():
-        with open(metrics_path, "r", encoding="utf-8") as f:
+        with open(metrics_path, encoding="utf-8") as f:
             metrics_data = json.load(f).get("routing", {})
 
-    labels = metrics_data.get("labels", [
-        "Access", "Administrative rights", "HR Support", "Hardware",
-        "Internal Project", "Miscellaneous", "Purchase"
-    ])
+    labels = metrics_data.get(
+        "labels",
+        [
+            "Access",
+            "Administrative rights",
+            "HR Support",
+            "Hardware",
+            "Internal Project",
+            "Miscellaneous",
+            "Purchase",
+        ],
+    )
 
     # 2. Copy skops model files
     routing_src = artifacts_dir / "routing" / "model.skops"
@@ -111,17 +122,19 @@ def package_bundle(
     with open(manifest_file, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
 
-    print(f"Bundle packaged successfully at {bundle_dir} (version={version_tag}, fingerprint={manifest['preprocess_fingerprint']})")
+    print(
+        f"Bundle packaged successfully at {bundle_dir} (version={version_tag}, fingerprint={manifest['preprocess_fingerprint']})"
+    )
     return bundle_dir
 
 
-def verify_bundle(bundle_dir: Path = Path("artifacts/bundle")) -> Dict[str, Any]:
+def verify_bundle(bundle_dir: Path = Path("artifacts/bundle")) -> dict[str, Any]:
     """Verifies bundle integrity: checks fingerprint, deserializes models, and tests sample inputs."""
     manifest_file = bundle_dir / "manifest.json"
     if not manifest_file.exists():
         raise FileNotFoundError(f"Bundle manifest not found at {manifest_file}")
 
-    with open(manifest_file, "r", encoding="utf-8") as f:
+    with open(manifest_file, encoding="utf-8") as f:
         manifest = json.load(f)
 
     # Prevent training/serving skew: verify fingerprint matches current codebase
@@ -142,18 +155,20 @@ def verify_bundle(bundle_dir: Path = Path("artifacts/bundle")) -> Dict[str, Any]
 
     # Execute sample predictions
     sample_file = bundle_dir / "sample_inputs.json"
-    with open(sample_file, "r", encoding="utf-8") as f:
+    with open(sample_file, encoding="utf-8") as f:
         samples = json.load(f)
 
     smoke_results = []
     for s in samples:
         clean = preprocess_text(s["text"])
         pred = model.predict([clean])[0]
-        smoke_results.append({
-            "text": s["text"],
-            "predicted": pred,
-            "expected": s["expected_category"],
-        })
+        smoke_results.append(
+            {
+                "text": s["text"],
+                "predicted": pred,
+                "expected": s["expected_category"],
+            }
+        )
 
     return {
         "status": "valid",
@@ -166,6 +181,7 @@ def verify_bundle(bundle_dir: Path = Path("artifacts/bundle")) -> Dict[str, Any]
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="Package or verify model bundle.")
     parser.add_argument("--action", choices=["package", "verify"], default="package")
     parser.add_argument("--version", type=str, default="v1-baseline")

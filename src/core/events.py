@@ -1,13 +1,15 @@
 """Domain events and in-process EventBus for decoupled module communication."""
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Type
+from typing import Any
 
 
 @dataclass
 class DomainEvent:
     """Base class for all domain events."""
+
     occurred_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     @property
@@ -22,16 +24,16 @@ class EventBus:
     """In-process event bus supporting in-transaction and after-commit handler execution."""
 
     def __init__(self) -> None:
-        self._in_tx_handlers: Dict[Type[DomainEvent], List[HandlerFunc]] = {}
-        self._after_commit_handlers: Dict[Type[DomainEvent], List[HandlerFunc]] = {}
+        self._in_tx_handlers: dict[type[DomainEvent], list[HandlerFunc]] = {}
+        self._after_commit_handlers: dict[type[DomainEvent], list[HandlerFunc]] = {}
 
-    def subscribe_in_tx(self, event_type: Type[DomainEvent], handler: HandlerFunc) -> None:
+    def subscribe_in_tx(self, event_type: type[DomainEvent], handler: HandlerFunc) -> None:
         """Subscribes handler that executes inside the active DB transaction."""
         if event_type not in self._in_tx_handlers:
             self._in_tx_handlers[event_type] = []
         self._in_tx_handlers[event_type].append(handler)
 
-    def subscribe_after_commit(self, event_type: Type[DomainEvent], handler: HandlerFunc) -> None:
+    def subscribe_after_commit(self, event_type: type[DomainEvent], handler: HandlerFunc) -> None:
         """Subscribes handler that executes strictly after transaction commit."""
         if event_type not in self._after_commit_handlers:
             self._after_commit_handlers[event_type] = []

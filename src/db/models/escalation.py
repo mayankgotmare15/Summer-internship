@@ -1,11 +1,12 @@
 """SQLAlchemy models for escalations and ticket approvals."""
 
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import datetime
+
 from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
-from src.db.base import Base, GUID, TimestampMixin
+
+from src.db.base import GUID, Base, TimestampMixin
 
 
 class Escalation(Base, TimestampMixin):
@@ -22,10 +23,18 @@ class Escalation(Base, TimestampMixin):
         nullable=False,
         index=True,
     )
-    kind: Mapped[str] = mapped_column(String(20), default="requester", nullable=False)  # requester | auto
-    level: Mapped[str] = mapped_column(String(10), default="E2", nullable=False)  # E1 | E2 | E3 | E4
-    raised_by: Mapped[uuid.UUID] = mapped_column(GUID, ForeignKey("users.id"), nullable=False, index=True)
-    target_user_id: Mapped[uuid.UUID] = mapped_column(GUID, ForeignKey("users.id"), nullable=False, index=True)
+    kind: Mapped[str] = mapped_column(
+        String(20), default="requester", nullable=False
+    )  # requester | auto
+    level: Mapped[str] = mapped_column(
+        String(10), default="E2", nullable=False
+    )  # E1 | E2 | E3 | E4
+    raised_by: Mapped[uuid.UUID] = mapped_column(
+        GUID, ForeignKey("users.id"), nullable=False, index=True
+    )
+    target_user_id: Mapped[uuid.UUID] = mapped_column(
+        GUID, ForeignKey("users.id"), nullable=False, index=True
+    )
     reason_code: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
@@ -37,14 +46,20 @@ class Escalation(Base, TimestampMixin):
         nullable=False,
         index=True,
     )  # pending | accepted | reassigned | declined | timed_out | superseded
-    response_due: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
-    responded_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    responder_id: Mapped[Optional[uuid.UUID]] = mapped_column(GUID, ForeignKey("users.id"), nullable=True)
-    outcome: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    outcome_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    new_assignee_id: Mapped[Optional[uuid.UUID]] = mapped_column(GUID, ForeignKey("users.id"), nullable=True)
-    new_eta: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    parent_id: Mapped[Optional[uuid.UUID]] = mapped_column(GUID, nullable=True)
+    response_due: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
+    responded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    responder_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID, ForeignKey("users.id"), nullable=True
+    )
+    outcome: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    outcome_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    new_assignee_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID, ForeignKey("users.id"), nullable=True
+    )
+    new_eta: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    parent_id: Mapped[uuid.UUID | None] = mapped_column(GUID, nullable=True)
 
 
 class Approval(Base, TimestampMixin):
@@ -62,8 +77,12 @@ class Approval(Base, TimestampMixin):
         nullable=False,
         index=True,
     )
-    approver_id: Mapped[uuid.UUID] = mapped_column(GUID, ForeignKey("users.id"), nullable=False, index=True)
-    status: Mapped[str] = mapped_column(String(50), default="pending", nullable=False)  # pending | approved | rejected
-    reason: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    approver_id: Mapped[uuid.UUID] = mapped_column(
+        GUID, ForeignKey("users.id"), nullable=False, index=True
+    )
+    status: Mapped[str] = mapped_column(
+        String(50), default="pending", nullable=False
+    )  # pending | approved | rejected
+    reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
     due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    decided_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

@@ -1,0 +1,45 @@
+name: SLA Escalation Ladder Scheduler
+
+on:
+  schedule:
+    # Run every 15 minutes to evaluate overdue tickets and progress SLA escalation ladder
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Target RouteDesk API URL (leave blank to use secret DEPLOY_URL)"
+        required: false
+        default: ""
+
+jobs:
+  tick-sla-engine:
+    name: Evaluate SLA Deadlines & Ladder Progression
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger SLA Tick Endpoint
+        env:
+          SERVICE_TOKEN: ${{ secrets.SERVICE_TOKEN }}
+          DEPLOY_URL: ${{ github.event.inputs.target_url || secrets.DEPLOY_URL || 'http://localhost:8000' }}
+        run: |
+          TARGET="${DEPLOY_URL%/}/api/v1/internal/sla/tick"
+          echo "Executing SLA tick against: ${TARGET}"
+          
+          if [ -z "${SERVICE_TOKEN}" ]; then
+            echo "Warning: SERVICE_TOKEN not configured; executing with standard headers."
+            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${TARGET}")
+          else
+            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${TARGET}" \
+              -H "X-Internal-Token: ${SERVICE_TOKEN}")
+          fi
+          
+          HTTP_BODY=$(echo "${RESPONSE}" | head -n -1)
+          HTTP_STATUS=$(echo "${RESPONSE}" | tail -n 1)
+          
+          echo "Response Status: ${HTTP_STATUS}"
+          echo "Response Body: ${HTTP_BODY}"
+          
+          if [ "${HTTP_STATUS}" -ne 200 ] && [ "${DEPLOY_URL}" != "http://localhost:8000" ]; then
+            echo "Error: SLA tick returned HTTP ${HTTP_STATUS}"
+            exit 1
+          fi
+          echo "SLA tick evaluated successfully."

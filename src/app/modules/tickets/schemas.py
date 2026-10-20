@@ -2,7 +2,8 @@
 
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -32,18 +33,18 @@ class TicketCreatedOut(BaseModel):
     category: str
     priority: str
     decision: Literal["auto_route", "human_review"]
-    assignee: Optional[MemberRef] = None
+    assignee: MemberRef | None = None
     team: TeamRef
-    first_response_due: Optional[datetime] = None
-    resolution_due: Optional[datetime] = None
-    awaiting_approval_from: Optional[MemberRef] = None
-    review_promise_by: Optional[datetime] = None
+    first_response_due: datetime | None = None
+    resolution_due: datetime | None = None
+    awaiting_approval_from: MemberRef | None = None
+    review_promise_by: datetime | None = None
     can_escalate: bool = True
 
 
 class MessageOut(BaseModel):
     id: uuid.UUID
-    author_name: Optional[str]
+    author_name: str | None
     kind: str
     body: str
     created_at: datetime
@@ -59,25 +60,25 @@ class TicketDetailOut(BaseModel):
     priority_source: str
     status: str
     decision: str
-    review_reason: Optional[str] = None
+    review_reason: str | None = None
     team: TeamRef
-    assignee: Optional[MemberRef] = None
+    assignee: MemberRef | None = None
     is_escalated: bool
     escalation_level: str
-    first_response_due: Optional[datetime] = None
-    resolution_due: Optional[datetime] = None
-    first_responded_at: Optional[datetime] = None
-    clock_state: Optional[str] = None
-    messages: List[MessageOut] = Field(default_factory=list)
+    first_response_due: datetime | None = None
+    resolution_due: datetime | None = None
+    first_responded_at: datetime | None = None
+    clock_state: str | None = None
+    messages: list[MessageOut] = Field(default_factory=list)
     can_escalate: bool = True
-    escalation_eligibility: Dict[str, Any] = Field(default_factory=dict)
+    escalation_eligibility: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime
 
 
 class StatusChangeIn(BaseModel):
     to_status: Literal["In progress", "Waiting on requester", "Resolved", "Closed", "Assigned"]
-    note: Optional[str] = None
-    new_eta: Optional[datetime] = None
+    note: str | None = None
+    new_eta: datetime | None = None
 
 
 class MessageIn(BaseModel):
@@ -87,12 +88,14 @@ class MessageIn(BaseModel):
 
 class EscalateIn(BaseModel):
     target_user_id: uuid.UUID
-    reason_code: Literal["no_response", "wrong_team", "business_critical", "deadline_at_risk", "other"]
+    reason_code: Literal[
+        "no_response", "wrong_team", "business_critical", "deadline_at_risk", "other"
+    ]
     note: str = Field(..., min_length=10, max_length=500)
 
 
 class EscalationRespondIn(BaseModel):
     action: Literal["accept", "reassign", "decline"]
-    new_eta: Optional[datetime] = None
-    reassign_to_id: Optional[uuid.UUID] = None
-    reason_note: Optional[str] = None
+    new_eta: datetime | None = None
+    reassign_to_id: uuid.UUID | None = None
+    reason_note: str | None = None

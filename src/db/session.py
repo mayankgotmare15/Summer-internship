@@ -1,8 +1,10 @@
 """SQLAlchemy database engine and session factory."""
 
-from typing import Generator
+from collections.abc import Generator
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
+
 from src.app.settings import get_settings
 from src.db.base import Base
 

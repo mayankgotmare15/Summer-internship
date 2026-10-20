@@ -4,22 +4,24 @@ import json
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any, Tuple
+from typing import Any
+
 import yaml
-from src.ml.bundle import verify_bundle, get_git_sha
+
+from src.ml.bundle import get_git_sha, verify_bundle
 
 
 def load_params() -> dict:
-    with open("configs/params.yaml", "r", encoding="utf-8") as f:
+    with open("configs/params.yaml", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
 
 def evaluate_gate(
-    candidate_metrics: Dict[str, Any],
-    champion_metrics: Dict[str, Any] | None,
-    gate_params: Dict[str, Any],
+    candidate_metrics: dict[str, Any],
+    champion_metrics: dict[str, Any] | None,
+    gate_params: dict[str, Any],
     p95_latency_ms: float,
-) -> Tuple[bool, list[str]]:
+) -> tuple[bool, list[str]]:
     """Evaluates candidate model against production quality gate rules."""
     reasons = []
     passed = True
@@ -30,11 +32,16 @@ def evaluate_gate(
     min_acc = gate_params.get("min_auto_accuracy", 0.90)
 
     cand_f1 = candidate_metrics.get("macro_f1", 0.0)
+    cand_acc = candidate_metrics.get("auto_accuracy")
 
-    # 1. Absolute Macro-F1 threshold
+    # 1. Absolute Macro-F1 threshold & Auto-accuracy threshold
     if cand_f1 < min_macro_f1:
         passed = False
         reasons.append(f"Macro-F1 {cand_f1:.4f} < minimum required {min_macro_f1:.4f}")
+
+    if cand_acc is not None and cand_acc < min_acc:
+        passed = False
+        reasons.append(f"Auto-accuracy {cand_acc:.4f} < minimum required {min_acc:.4f}")
 
     # 2. Comparison with live champion if present
     if champion_metrics and "macro_f1" in champion_metrics:
@@ -42,7 +49,9 @@ def evaluate_gate(
         # Allow equality or better
         if cand_f1 < (champ_f1 - 0.01):
             passed = False
-            reasons.append(f"Candidate Macro-F1 {cand_f1:.4f} regressed from Champion {champ_f1:.4f}")
+            reasons.append(
+                f"Candidate Macro-F1 {cand_f1:.4f} regressed from Champion {champ_f1:.4f}"
+            )
 
         # Per-class regression check: no class drops > 5 points
         cand_classes = candidate_metrics.get("per_class", {})
@@ -54,7 +63,9 @@ def evaluate_gate(
                 drop = f1_old - f1_new
                 if drop > max_drop:
                     passed = False
-                    reasons.append(f"Class '{cls_name}' regressed by {drop:.4f} > allowed {max_drop}")
+                    reasons.append(
+                        f"Class '{cls_name}' regressed by {drop:.4f} > allowed {max_drop}"
+                    )
 
     # 3. p95 Latency check
     if p95_latency_ms > max_latency:
@@ -91,16 +102,17 @@ def main() -> None:
     bundle_status = verify_bundle(bundle_dir)
 
     # 2. Load metrics and threshold
-    with open(reports_dir / "metrics.json", "r", encoding="utf-8") as f:
+    with open(reports_dir / "metrics.json", encoding="utf-8") as f:
         metrics_all = json.load(f)
     cand_routing_metrics = metrics_all.get("routing", {})
 
-    with open(reports_dir / "threshold.json", "r", encoding="utf-8") as f:
+    with open(reports_dir / "threshold.json", encoding="utf-8") as f:
         threshold_info = json.load(f)
 
     # 3. Measure p95 latency on test sample
     import pandas as pd
     import skops.io as sio
+
     test_df = pd.read_parquet("data/features/test.parquet")
     sample_texts = test_df["text_clean"].head(500).tolist()
     untrusted = sio.get_untrusted_types(file=bundle_dir / "routing.skops")
@@ -111,7 +123,7 @@ def main() -> None:
     # 4. Load champion metrics
     champ_metrics = None
     if champion_path.exists():
-        with open(champion_path, "r", encoding="utf-8") as f:
+        with open(champion_path, encoding="utf-8") as f:
             champ_data = json.load(f)
             champ_metrics = champ_data.get("metrics")
 

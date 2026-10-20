@@ -1,7 +1,7 @@
 """Application configuration settings using Pydantic Settings."""
 
 from functools import lru_cache
-from typing import List
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -29,7 +29,7 @@ class Settings(BaseSettings):
         description="HMAC secret for JWT cookie sessions",
     )
     jwt_algorithm: str = "HS256"
-    jwt_expiration_minutes: int = 480 # 8 hours
+    jwt_expiration_minutes: int = 480  # 8 hours
     service_token: str = Field(
         default="dev-service-token-secret-for-github-actions",
         description="Static token for internal and CI/CD cron endpoints",
@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
 
     @property
-    def cors_origin_list(self) -> List[str]:
+    def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 

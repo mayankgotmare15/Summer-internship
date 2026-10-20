@@ -1,9 +1,10 @@
 """FastAPI router for model inference, batch prediction, model info, and feedback."""
 
-from typing import Any, Dict
+from typing import Any
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from src.app.deps import get_clock
+
 from src.app.modules.inference.controller import InferenceController
 from src.app.modules.inference.schemas import (
     BatchPredictionIn,
@@ -78,7 +79,7 @@ def record_feedback(
     status_code=status.HTTP_200_OK,
     summary="Hot-reload active champion model bundle from disk",
 )
-def reload_model() -> Dict[str, Any]:
+def reload_model() -> dict[str, Any]:
     """Reloads model bundle from storage and swaps active predictor atomically."""
     ok = controller.store.reload()
     return {

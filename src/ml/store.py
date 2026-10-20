@@ -3,9 +3,11 @@
 import json
 from pathlib import Path
 from threading import Lock
-from typing import Any, Dict, Optional
+from typing import Any, Optional
+
 import skops.io as sio
 import structlog
+
 from src.app.errors import ModelUnavailableError
 from src.app.settings import get_settings
 from src.ml.predictor import Predictor
@@ -20,17 +22,17 @@ class ModelStore:
     _instance: Optional["ModelStore"] = None
     _lock = Lock()
 
-    def __init__(self, bundle_dir: Optional[Path] = None) -> None:
+    def __init__(self, bundle_dir: Path | None = None) -> None:
         self.settings = get_settings()
         self.bundle_dir = bundle_dir or Path(self.settings.model_dir)
-        self._predictor: Optional[Predictor] = None
-        self._manifest: Dict[str, Any] = {}
+        self._predictor: Predictor | None = None
+        self._manifest: dict[str, Any] = {}
         self._ready: bool = False
-        self._loaded_at: Optional[str] = None
+        self._loaded_at: str | None = None
         self._mutex = Lock()
 
     @classmethod
-    def get_instance(cls, bundle_dir: Optional[Path] = None) -> "ModelStore":
+    def get_instance(cls, bundle_dir: Path | None = None) -> "ModelStore":
         with cls._lock:
             if cls._instance is None:
                 cls._instance = cls(bundle_dir)
@@ -40,15 +42,17 @@ class ModelStore:
     def is_ready(self) -> bool:
         return self._ready and self._predictor is not None
 
-    def get_manifest(self) -> Dict[str, Any]:
+    def get_manifest(self) -> dict[str, Any]:
         return self._manifest
 
     def get_predictor(self) -> Predictor:
         if not self.is_ready or self._predictor is None:
-            raise ModelUnavailableError("Active model is not loaded or is currently in degraded mode")
+            raise ModelUnavailableError(
+                "Active model is not loaded or is currently in degraded mode"
+            )
         return self._predictor
 
-    def load_bundle(self, bundle_dir: Optional[Path] = None) -> bool:
+    def load_bundle(self, bundle_dir: Path | None = None) -> bool:
         """Loads and verifies model bundle from disk."""
         target_dir = bundle_dir or self.bundle_dir
         logger.info("Attempting to load model bundle", bundle_dir=str(target_dir))
@@ -65,7 +69,7 @@ class ModelStore:
             return False
 
         try:
-            with open(manifest_path, "r", encoding="utf-8") as f:
+            with open(manifest_path, encoding="utf-8") as f:
                 manifest = json.load(f)
 
             # Prevent training/serving skew (PRD FR-03 & 04-ml-services.md 1.3)
@@ -104,6 +108,7 @@ class ModelStore:
 
             # Warmup: run a sample prediction to initialize text tokenizers & caches
             from datetime import datetime, timezone
+
             _ = new_predictor.predict("warmup test ticket for vpn connection failure")
 
             with self._mutex:

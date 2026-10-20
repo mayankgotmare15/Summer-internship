@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -10,7 +11,7 @@ import yaml
 
 
 def load_params() -> dict:
-    with open("configs/params.yaml", "r", encoding="utf-8") as f:
+    with open("configs/params.yaml", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
 
@@ -75,13 +76,15 @@ def main() -> None:
         net_hours_saved = round(float((monthly_tickets * net_minutes_per_ticket) / 60.0), 2)
         net_cost_saved = round(float(net_hours_saved * r_usd), 2)
 
-        records.append({
-            "threshold": t_val,
-            "auto_route_rate": auto_rate,
-            "auto_route_accuracy": acc,
-            "net_hours_saved": net_hours_saved,
-            "net_cost_saved_usd": net_cost_saved,
-        })
+        records.append(
+            {
+                "threshold": t_val,
+                "auto_route_rate": auto_rate,
+                "auto_route_accuracy": acc,
+                "net_hours_saved": net_hours_saved,
+                "net_cost_saved_usd": net_cost_saved,
+            }
+        )
 
         # Selection rule: maximize net hours saved subject to accuracy >= min_auto_accuracy
         if acc >= min_acc and net_hours_saved > max_hours_saved:
@@ -118,12 +121,23 @@ def main() -> None:
     fig, ax1 = plt.subplots(figsize=(10, 6))
     ax2 = ax1.twinx()
 
-    ax1.plot(df_sweep["threshold"], df_sweep["auto_route_accuracy"] * 100, "b-", label="Auto Accuracy (%)")
-    ax1.plot(df_sweep["threshold"], df_sweep["auto_route_rate"] * 100, "g--", label="Auto-Route Rate (%)")
-    ax1.axhline(min_acc * 100, color="r", linestyle=":", label=f"Accuracy Target ({int(min_acc*100)}%)")
+    ax1.plot(
+        df_sweep["threshold"],
+        df_sweep["auto_route_accuracy"] * 100,
+        "b-",
+        label="Auto Accuracy (%)",
+    )
+    ax1.plot(
+        df_sweep["threshold"], df_sweep["auto_route_rate"] * 100, "g--", label="Auto-Route Rate (%)"
+    )
+    ax1.axhline(
+        min_acc * 100, color="r", linestyle=":", label=f"Accuracy Target ({int(min_acc * 100)}%)"
+    )
     ax1.axvline(best_threshold, color="k", linestyle="-.", label=f"Optimal Thr ({best_threshold})")
 
-    ax2.plot(df_sweep["threshold"], df_sweep["net_hours_saved"], "m-.", label="Net Hours Saved / Month")
+    ax2.plot(
+        df_sweep["threshold"], df_sweep["net_hours_saved"], "m-.", label="Net Hours Saved / Month"
+    )
 
     ax1.set_xlabel("Confidence Threshold (tau)")
     ax1.set_ylabel("Rate / Accuracy (%)")
@@ -149,7 +163,9 @@ def main() -> None:
     print(f" - Optimal Threshold (tau*): {best_stats['threshold']}")
     print(f" - Auto-Route Rate:         {best_stats['auto_route_rate']:.1%}")
     print(f" - Accuracy on Auto-Routed: {best_stats['auto_route_accuracy']:.1%}")
-    print(f" - Net Agent Hours Saved:   {best_stats['net_hours_saved_monthly']} hrs/month (~${best_stats['net_cost_saved_usd_monthly']}/mo)")
+    print(
+        f" - Net Agent Hours Saved:   {best_stats['net_hours_saved_monthly']} hrs/month (~${best_stats['net_cost_saved_usd_monthly']}/mo)"
+    )
 
 
 if __name__ == "__main__":

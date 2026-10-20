@@ -2,10 +2,12 @@
 
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
-from sqlalchemy import DateTime, ForeignKey, JSON, String
+from typing import Any
+
+from sqlalchemy import JSON, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
-from src.db.base import Base, GUID, TimestampMixin
+
+from src.db.base import GUID, Base, TimestampMixin
 
 
 class Assignment(Base, TimestampMixin):
@@ -38,15 +40,15 @@ class Assignment(Base, TimestampMixin):
         String(50),
         nullable=False,
     )  # auto | agent_triage | lead_reassign | first_response_miss | escalation_accept | escalation_reassign | escalation_decline | fallback_lead
-    assigned_by: Mapped[Optional[uuid.UUID]] = mapped_column(
+    assigned_by: Mapped[uuid.UUID | None] = mapped_column(
         GUID,
         ForeignKey("users.id"),
         nullable=True,
     )
-    rule_trace: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict)
+    rule_trace: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
-    ended_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

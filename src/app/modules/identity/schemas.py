@@ -1,7 +1,7 @@
 """Schemas for user authentication and identity."""
 
 import uuid
-from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -19,9 +19,9 @@ class UserOut(BaseModel):
     email: str
     name: str
     role: str
-    department: Optional[str] = None
+    department: str | None = None
     is_demo: bool = False
-    access_token: Optional[str] = None
+    access_token: str | None = None
 
 
 class TokenPayload(BaseModel):

@@ -3,23 +3,25 @@
 import argparse
 import os
 from pathlib import Path
+
 import joblib
 import pandas as pd
+import skops.io as sio
+import yaml
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-import skops.io as sio
-import yaml
 
 try:
     import mlflow
+
     MLFLOW_AVAILABLE = True
 except ImportError:
     MLFLOW_AVAILABLE = False
 
 
 def load_params() -> dict:
-    with open("configs/params.yaml", "r", encoding="utf-8") as f:
+    with open("configs/params.yaml", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
 
@@ -40,21 +42,29 @@ def train_routing_model(params: dict, features_dir: Path, artifacts_dir: Path) -
     y_train = df_train["category"].tolist()
 
     print(f"Fitting routing pipeline on {len(X_train):,} samples...")
-    pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(
-            ngram_range=tuple(tfidf_cfg.get("ngram_range", [1, 2])),
-            min_df=tfidf_cfg.get("min_df", 2),
-            max_features=tfidf_cfg.get("max_features", 50000),
-            sublinear_tf=tfidf_cfg.get("sublinear_tf", True),
-        )),
-        ("classifier", LogisticRegression(
-            C=logreg_cfg.get("C", 4.0),
-            class_weight=logreg_cfg.get("class_weight", "balanced"),
-            max_iter=logreg_cfg.get("max_iter", 2000),
-            random_state=seed,
-            n_jobs=-1,
-        )),
-    ])
+    pipeline = Pipeline(
+        [
+            (
+                "tfidf",
+                TfidfVectorizer(
+                    ngram_range=tuple(tfidf_cfg.get("ngram_range", [1, 2])),
+                    min_df=tfidf_cfg.get("min_df", 2),
+                    max_features=tfidf_cfg.get("max_features", 50000),
+                    sublinear_tf=tfidf_cfg.get("sublinear_tf", True),
+                ),
+            ),
+            (
+                "classifier",
+                LogisticRegression(
+                    C=logreg_cfg.get("C", 4.0),
+                    class_weight=logreg_cfg.get("class_weight", "balanced"),
+                    max_iter=logreg_cfg.get("max_iter", 2000),
+                    random_state=seed,
+                    n_jobs=-1,
+                ),
+            ),
+        ]
+    )
 
     pipeline.fit(X_train, y_train)
 
@@ -90,20 +100,28 @@ def train_priority_model(params: dict, interim_dir: Path, artifacts_dir: Path) -
     y = df_priority["priority"].tolist()
 
     print(f"Fitting priority pipeline on {len(X):,} samples...")
-    pipeline = Pipeline([
-        ("tfidf", TfidfVectorizer(
-            ngram_range=tuple(tfidf_cfg.get("ngram_range", [1, 2])),
-            min_df=tfidf_cfg.get("min_df", 3),
-            max_features=tfidf_cfg.get("max_features", 25000),
-        )),
-        ("classifier", LogisticRegression(
-            C=logreg_cfg.get("C", 1.0),
-            class_weight=logreg_cfg.get("class_weight", "balanced"),
-            max_iter=logreg_cfg.get("max_iter", 2000),
-            random_state=seed,
-            n_jobs=-1,
-        )),
-    ])
+    pipeline = Pipeline(
+        [
+            (
+                "tfidf",
+                TfidfVectorizer(
+                    ngram_range=tuple(tfidf_cfg.get("ngram_range", [1, 2])),
+                    min_df=tfidf_cfg.get("min_df", 3),
+                    max_features=tfidf_cfg.get("max_features", 25000),
+                ),
+            ),
+            (
+                "classifier",
+                LogisticRegression(
+                    C=logreg_cfg.get("C", 1.0),
+                    class_weight=logreg_cfg.get("class_weight", "balanced"),
+                    max_iter=logreg_cfg.get("max_iter", 2000),
+                    random_state=seed,
+                    n_jobs=-1,
+                ),
+            ),
+        ]
+    )
 
     pipeline.fit(X, y)
 

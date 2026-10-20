@@ -2,7 +2,8 @@
 
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import yaml
 
 PRIORITY_RANKS = {
@@ -17,20 +18,31 @@ REVERSE_RANKS = {v: k for k, v in PRIORITY_RANKS.items()}
 
 class PriorityRules:
     def __init__(self, rules_path: Path = Path("configs/priority_rules.yaml")):
-        self.critical_keywords: List[str] = [
-            "outage", "server down", "production down", "data breach",
-            "ransomware", "security incident", "all users blocked", "company wide"
+        self.critical_keywords: list[str] = [
+            "outage",
+            "server down",
+            "production down",
+            "data breach",
+            "ransomware",
+            "security incident",
+            "all users blocked",
+            "company wide",
         ]
-        self.high_keywords: List[str] = [
-            "blocked", "cannot work", "urgent", "vip", "deadline today",
-            "client demo", "whole team"
+        self.high_keywords: list[str] = [
+            "blocked",
+            "cannot work",
+            "urgent",
+            "vip",
+            "deadline today",
+            "client demo",
+            "whole team",
         ]
         self._load_rules(rules_path)
 
     def _load_rules(self, rules_path: Path) -> None:
         if rules_path.exists():
             try:
-                with open(rules_path, "r", encoding="utf-8") as f:
+                with open(rules_path, encoding="utf-8") as f:
                     cfg = yaml.safe_load(f) or {}
                 kw = cfg.get("keyword_rules", {})
                 if "Critical" in kw:
@@ -45,10 +57,10 @@ class PriorityRules:
         base_priority: str,
         text: str,
         blocking_team: bool = False,
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """Evaluates priority rules. Can only raise priority, never lower it."""
         text_lower = text.lower()
-        current_rank = PRIORITY_RANKS.get(base_priority, 2) # Default Medium
+        current_rank = PRIORITY_RANKS.get(base_priority, 2)  # Default Medium
         raised_rank = current_rank
         source = "model"
 
@@ -81,12 +93,12 @@ class PriorityRules:
         self,
         model_priority: str,
         text: str,
-        flags: Optional[Dict[str, Any]] = None,
+        flags: dict[str, Any] | None = None,
     ) -> Any:
         from collections import namedtuple
+
         flags = flags or {}
         blocking = flags.get("blocking_team", False)
         res = self.evaluate(model_priority, text, blocking_team=blocking)
         Result = namedtuple("PriorityRuleResult", ["priority", "source"])
         return Result(priority=res["priority"], source=res["source"])
-

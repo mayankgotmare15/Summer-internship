@@ -3,6 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 from typing import Any
+
 from sqlalchemy import DateTime, String, TypeDecorator
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -39,6 +40,7 @@ class GUID(TypeDecorator):
 
 class Base(DeclarativeBase):
     """Base declarative class for all SQLAlchemy entities."""
+
     pass
 
 

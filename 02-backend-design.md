@@ -246,61 +246,71 @@ Only the contracts other parts depend on are shown. All timestamps are ISO 8601 
 
 ```python
 class PredictionOut(BaseModel):
-    category: Category                 # enum of the 8 dataset categories
-    category_confidence: float         # 0..1
+    category: Category  # enum of the 8 dataset categories
+    category_confidence: float  # 0..1
     top_categories: list[ScoredLabel]  # top 3, for the review screen
-    priority: Priority                 # Low | Medium | High | Critical
+    priority: Priority  # Low | Medium | High | Critical
     priority_confidence: float
     priority_source: Literal["model", "rule", "agent"]
     decision: Literal["auto_route", "human_review"]
-    review_reason: ReviewReason | None # low_confidence | multi_issue | miscellaneous | model_unavailable
-    routed_team: TeamRef               # resolver team, or Service Desk for human_review
+    review_reason: (
+        ReviewReason | None
+    )  # low_confidence | multi_issue | miscellaneous | model_unavailable
+    routed_team: TeamRef  # resolver team, or Service Desk for human_review
     threshold: float
-    model_version: str                 # e.g. "routing:7"
+    model_version: str  # e.g. "routing:7"
     priority_model_version: str
     prediction_id: UUID
 
+
 class TicketCreateIn(BaseModel):
     subject: constr(min_length=3, max_length=200)
-    description: constr(min_length=1, max_length=5000)   # PRD NFR limit
-    blocking_team: bool = False                          # feeds priority_rules
+    description: constr(min_length=1, max_length=5000)  # PRD NFR limit
+    blocking_team: bool = False  # feeds priority_rules
     channel: Literal["portal", "chat", "email_sim"] = "portal"
 
-class TicketCreatedOut(BaseModel):          # the PRD 4B.1 confirmation
-    id: str                                 # "T-1042"
+
+class TicketCreatedOut(BaseModel):  # the PRD 4B.1 confirmation
+    id: str  # "T-1042"
     status: TicketStatus
     category: Category
     priority: Priority
     decision: Literal["auto_route", "human_review"]
-    assignee: MemberRef | None              # None while in human review or awaiting approval
+    assignee: MemberRef | None  # None while in human review or awaiting approval
     team: TeamRef
     first_response_due: datetime | None
     resolution_due: datetime | None
     awaiting_approval_from: MemberRef | None
-    review_promise_by: datetime | None      # human_review: owner named within 30 min
+    review_promise_by: datetime | None  # human_review: owner named within 30 min
     can_escalate: bool
+
 
 class EscalateIn(BaseModel):
     target_user_id: UUID
-    reason_code: Literal["no_response", "wrong_team", "business_critical", "deadline_at_risk", "other"]
+    reason_code: Literal[
+        "no_response", "wrong_team", "business_critical", "deadline_at_risk", "other"
+    ]
     note: constr(min_length=10, max_length=500)
+
 
 class EscalationRespondIn(BaseModel):
     action: Literal["accept", "reassign", "decline"]
-    new_eta: datetime | None = None         # required for accept and reassign
-    reassign_to: UUID | None = None         # required for reassign
-    reason: constr(max_length=500) | None   # required for decline
+    new_eta: datetime | None = None  # required for accept and reassign
+    reassign_to: UUID | None = None  # required for reassign
+    reason: constr(max_length=500) | None  # required for decline
 
-class EscalationEligibility(BaseModel):     # embedded in GET /tickets/{id}
+
+class EscalationEligibility(BaseModel):  # embedded in GET /tickets/{id}
     allowed: bool
     used_last_24h: int
     max_per_24h: int
-    next_allowed_at: datetime | None        # cooldown end
+    next_allowed_at: datetime | None  # cooldown end
     blocked_reason: Literal["ticket_closed", "rate_limit", "cooldown"] | None
 
-class ErrorOut(BaseModel):                  # every 4xx/5xx
-    code: str                               # stable machine code, e.g. "ESCALATION_COOLDOWN"
-    message: str                            # human sentence the UI can show
+
+class ErrorOut(BaseModel):  # every 4xx/5xx
+    code: str  # stable machine code, e.g. "ESCALATION_COOLDOWN"
+    message: str  # human sentence the UI can show
     field: str | None = None
     details: dict | None = None
     request_id: str

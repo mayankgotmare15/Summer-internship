@@ -1,10 +1,11 @@
 """Database seeding script for teams and demo users from roster.yaml."""
 
 from pathlib import Path
-from typing import Any, Dict
+
 import structlog
 import yaml
 from sqlalchemy.orm import Session
+
 from src.core.security import hash_password
 from src.db.models.user import Team, User
 from src.db.session import SessionLocal, init_db
@@ -56,7 +57,7 @@ def seed_teams(db: Session, roster_path: Path = Path("configs/roster.yaml")) -> 
         logger.warning("Roster file not found, skipping team seeding", path=str(roster_path))
         return
 
-    with open(roster_path, "r", encoding="utf-8") as f:
+    with open(roster_path, encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
 
     teams_data = data.get("teams", [])
@@ -95,7 +96,7 @@ def seed_demo_users(db: Session, roster_path: Path = Path("configs/roster.yaml")
 
     # 2. Seed all members from roster.yaml
     if roster_path.exists():
-        with open(roster_path, "r", encoding="utf-8") as f:
+        with open(roster_path, encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
         members_data = data.get("members", [])
         for m in members_data:
@@ -124,7 +125,6 @@ def run_seed() -> None:
         seed_teams(db)
         seed_demo_users(db)
     logger.info("Database initialized and demo seeds loaded successfully")
-
 
 
 if __name__ == "__main__":

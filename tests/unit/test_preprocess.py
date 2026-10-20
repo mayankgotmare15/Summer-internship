@@ -1,6 +1,6 @@
 """Unit tests for shared preprocessing, normalization, lemmatization, and fingerprinting."""
 
-from src.ml.preprocess import clean_text, preprocess_text, get_preprocess_fingerprint
+from src.ml.preprocess import clean_text, get_preprocess_fingerprint, preprocess_text
 
 
 def test_clean_text_lowercasing_and_punctuation():

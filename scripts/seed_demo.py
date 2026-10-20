@@ -1,11 +1,12 @@
 """Database seeder for teams, categories, members, and initial settings."""
 
-import yaml
 from pathlib import Path
+
+import yaml
 
 
 def load_yaml(filepath: str) -> dict:
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
 
@@ -22,7 +23,7 @@ def verify_seeds() -> None:
     members = roster.get("members", [])
     priorities = sla.get("priorities", {})
 
-    print(f"Verified seed files:")
+    print("Verified seed files:")
     print(f" - {len(categories)} categories")
     print(f" - {len(teams)} resolver teams")
     print(f" - {len(members)} roster members")

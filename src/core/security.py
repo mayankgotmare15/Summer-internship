@@ -2,9 +2,11 @@
 
 import hmac
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional
-from jose import JWTError, jwt
+from typing import Any
+
+from jose import jwt
 from passlib.context import CryptContext
+
 from src.app.settings import get_settings
 
 settings = get_settings()
@@ -29,8 +31,8 @@ hash_password = get_password_hash
 
 
 def create_access_token(
-    data: Dict[str, Any],
-    expires_delta: Optional[timedelta] = None,
+    data: dict[str, Any],
+    expires_delta: timedelta | None = None,
 ) -> str:
     """Generates an HMAC-signed JWT token with claims."""
     to_encode = data.copy()
@@ -44,12 +46,12 @@ def create_access_token(
     return jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
-def decode_access_token(token: str) -> Dict[str, Any]:
+def decode_access_token(token: str) -> dict[str, Any]:
     """Decodes and validates a JWT token; returns claims payload or raises JWTError."""
     return jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
 
 
-def verify_service_token(provided_token: str, expected_token: Optional[str] = None) -> bool:
+def verify_service_token(provided_token: str, expected_token: str | None = None) -> bool:
     """Constant-time token verification for internal/CI endpoints."""
     expected = expected_token or settings.service_token
     if not provided_token or not expected:

@@ -1,11 +1,12 @@
 """FastAPI router for tickets, assignments, messages, escalations, and directory."""
 
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from fastapi import APIRouter, Depends, Header, Query, status
 from sqlalchemy.orm import Session
+
 from src.app.deps import get_clock
-from src.app.errors import UnauthorizedError
 from src.app.modules.tickets.controller import TicketController
 from src.app.modules.tickets.schemas import (
     EscalateIn,
@@ -26,7 +27,9 @@ router = APIRouter(prefix="", tags=["Ticket Lifecycle & Escalation"])
 controller = TicketController()
 
 
-def get_current_user_id(authorization: Optional[str] = Header(None), db: Session = Depends(get_db)) -> uuid.UUID:
+def get_current_user_id(
+    authorization: str | None = Header(None), db: Session = Depends(get_db)
+) -> uuid.UUID:
     """Helper to extract user ID from auth header, or default to demo user."""
     if authorization and authorization.startswith("Bearer "):
         token = authorization.split(" ")[1]
@@ -57,14 +60,14 @@ def create_ticket(
 
 @router.get(
     "/tickets",
-    response_model=List[TicketDetailOut],
+    response_model=list[TicketDetailOut],
     status_code=status.HTTP_200_OK,
     summary="List tickets filtered by view (all, mine, review_queue, my_queue)",
 )
 def list_tickets(
     view: str = Query("all", description="View filter: all, mine, review_queue, my_queue"),
     db: Session = Depends(get_db),
-) -> List[TicketDetailOut]:
+) -> list[TicketDetailOut]:
     return controller.list_tickets(view, db)
 
 
@@ -125,7 +128,7 @@ def escalate_ticket(
     user_id: uuid.UUID = Depends(get_current_user_id),
     db: Session = Depends(get_db),
     clock: Clock = Depends(get_clock),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     return controller.escalate_ticket(identifier, payload, user_id, db, clock)
 
 
@@ -140,7 +143,7 @@ def respond_to_escalation(
     user_id: uuid.UUID = Depends(get_current_user_id),
     db: Session = Depends(get_db),
     clock: Clock = Depends(get_clock),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     return controller.respond_to_escalation(escalation_id, payload, user_id, db, clock)
 
 
@@ -151,9 +154,9 @@ def respond_to_escalation(
 )
 def search_directory(
     q: str = Query("", description="Search term for name, team, skills"),
-    team: Optional[str] = Query(None, description="Resolver team filter"),
+    team: str | None = Query(None, description="Resolver team filter"),
     clock: Clock = Depends(get_clock),
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     return controller.directory_service.search_members(query=q, for_team=team, at_dt=clock.now())
 
 
@@ -165,6 +168,6 @@ def search_directory(
 def sla_tick(
     db: Session = Depends(get_db),
     clock: Clock = Depends(get_clock),
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     actions = controller.sla_service.evaluate_ladder(db, clock)
     return {"status": "ok", "actions": actions}

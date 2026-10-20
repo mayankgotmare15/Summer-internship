@@ -1,7 +1,7 @@
 """Data ingestion stage: loads raw datasets and standardizes schemas into interim parquet."""
 
-import os
 from pathlib import Path
+
 import pandas as pd
 
 

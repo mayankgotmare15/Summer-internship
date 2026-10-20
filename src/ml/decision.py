@@ -3,29 +3,32 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import yaml
 
-RE_CONJUNCTION = re.compile(r"\b(and also|and my|and our|plus|along with|as well as)\b", re.IGNORECASE)
+RE_CONJUNCTION = re.compile(
+    r"\b(and also|and my|and our|plus|along with|as well as)\b", re.IGNORECASE
+)
 
 
 @dataclass
 class DecisionResult:
     decision: str  # "auto_route" | "human_review"
-    review_reason: Optional[str]  # "low_confidence" | "multi_issue" | "miscellaneous" | "model_unavailable"
+    review_reason: str | None  # "low_confidence" | "multi_issue" | "miscellaneous" | "model_unavailable"
     routed_team: str  # team code, e.g. "ACCESS", "SERVICE_DESK"
     threshold: float
 
 
 class DecisionPolicy:
     def __init__(self, routing_map_path: Path = Path("configs/routing_map.yaml")):
-        self.routing_map: Dict[str, str] = {}
+        self.routing_map: dict[str, str] = {}
         self._load_routing_map(routing_map_path)
 
     def _load_routing_map(self, path: Path) -> None:
         if path.exists():
             try:
-                with open(path, "r", encoding="utf-8") as f:
+                with open(path, encoding="utf-8") as f:
                     data = yaml.safe_load(f) or {}
                 cats = data.get("categories", {})
                 for cat_name, info in cats.items():
@@ -37,7 +40,7 @@ class DecisionPolicy:
         self,
         predicted_category: str,
         confidence: float,
-        top_categories: List[Dict[str, Any]],
+        top_categories: list[dict[str, Any]],
         text: str,
         threshold: float = 0.69,
         model_available: bool = True,

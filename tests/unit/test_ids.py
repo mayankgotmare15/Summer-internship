@@ -1,7 +1,8 @@
 """Unit tests for UUID and public ticket ID generation."""
 
 import uuid
-from src.core.ids import generate_uuid, generate_public_id
+
+from src.core.ids import generate_public_id, generate_uuid
 
 
 def test_generate_uuid():

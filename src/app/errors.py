@@ -1,27 +1,30 @@
 """Domain exception hierarchy and standard error response schemas."""
 
-from typing import Any, Dict, Optional
+from typing import Any
+
 from pydantic import BaseModel
 
 
 class ErrorOut(BaseModel):
     """Standard error response payload across all 4xx/5xx responses."""
+
     code: str
     message: str
-    field: Optional[str] = None
-    details: Optional[Dict[str, Any]] = None
+    field: str | None = None
+    details: dict[str, Any] | None = None
     request_id: str = ""
 
 
 class DomainError(Exception):
     """Base exception for all domain and business rule violations."""
+
     def __init__(
         self,
         message: str,
         code: str = "INTERNAL_ERROR",
         status_code: int = 500,
-        field: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        field: str | None = None,
+        details: dict[str, Any] | None = None,
     ):
         super().__init__(message)
         self.message = message
@@ -32,7 +35,7 @@ class DomainError(Exception):
 
 
 class NotFoundError(DomainError):
-    def __init__(self, message: str = "Resource not found", field: Optional[str] = None):
+    def __init__(self, message: str = "Resource not found", field: str | None = None):
         super().__init__(message, code="NOT_FOUND", status_code=404, field=field)
 
 
@@ -42,7 +45,9 @@ class UnauthorizedError(DomainError):
 
 
 class ForbiddenError(DomainError):
-    def __init__(self, message: str = "Action forbidden for caller role", code: str = "FORBIDDEN_ROLE"):
+    def __init__(
+        self, message: str = "Action forbidden for caller role", code: str = "FORBIDDEN_ROLE"
+    ):
         super().__init__(message, code=code, status_code=403)
 
 
@@ -57,7 +62,7 @@ class StaleVersionError(DomainError):
 
 
 class EscalationGuardrailError(DomainError):
-    def __init__(self, code: str, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, code: str, message: str, details: dict[str, Any] | None = None):
         super().__init__(message, code=code, status_code=422, details=details)
 
 

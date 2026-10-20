@@ -35,13 +35,16 @@ ENV PYTHONUNBUFFERED=1 \
     PORT=8000 \
     MODEL_DIR=/app/artifacts/bundle
 
-# Copy application source, configurations, models and reports
+# Copy application source, configurations, models, migrations and reports
 COPY --chown=appuser:appgroup src/ /app/src/
 COPY --chown=appuser:appgroup configs/ /app/configs/
 COPY --chown=appuser:appgroup models/ /app/models/
 COPY --chown=appuser:appgroup artifacts/bundle/ /app/artifacts/bundle/
 COPY --chown=appuser:appgroup reports/ /app/reports/
 COPY --chown=appuser:appgroup ui/ /app/ui/
+COPY --chown=appuser:appgroup scripts/ /app/scripts/
+COPY --chown=appuser:appgroup alembic/ /app/alembic/
+COPY --chown=appuser:appgroup alembic.ini /app/
 COPY --chown=appuser:appgroup pyproject.toml /app/
 
 # Create runtime directories with appropriate permissions
@@ -53,6 +56,6 @@ USER appuser
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
 CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]

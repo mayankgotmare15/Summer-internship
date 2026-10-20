@@ -7,11 +7,12 @@
 """
 
 import uuid
+from collections.abc import Generator
 from datetime import datetime, timedelta, timezone
-from typing import Generator
+
 import pytest
 from fastapi.testclient import TestClient
-from src.app.deps import get_clock
+
 from src.app.errors import EscalationGuardrailError
 from src.app.main import app
 from src.app.modules.assignment.service import AssignmentService
@@ -20,8 +21,6 @@ from src.app.modules.escalation.service import EscalationService
 from src.app.modules.sla.service import SlaService
 from src.app.modules.tickets.controller import TicketController
 from src.app.modules.tickets.schemas import (
-    EscalateIn,
-    EscalationRespondIn,
     MessageIn,
     StatusChangeIn,
     TicketCreateIn,
@@ -244,8 +243,8 @@ def test_requester_escalation_guardrails(fake_clock: FakeClock) -> None:
         assignee = db.query(User).filter(User.email == "priya.sharma@example.com").first()
         lead = db.query(User).filter(User.email == "riya.kapoor@example.com").first()
         neha = db.query(User).filter(User.email == "neha.singh@example.com").first()
-        access_team = db.query(User).first()
         from src.db.models.user import Team
+
         team_rec = db.query(Team).filter(Team.code == "ACCESS").first()
 
         ticket = Ticket(
@@ -270,21 +269,39 @@ def test_requester_escalation_guardrails(fake_clock: FakeClock) -> None:
         # 1. Target Self Guardrail
         with pytest.raises(EscalationGuardrailError) as exc_self:
             esc_service.raise_escalation(
-                ticket.id, requester.id, requester.id, "business_critical", "note with 10 chars", db, fake_clock
+                ticket.id,
+                requester.id,
+                requester.id,
+                "business_critical",
+                "note with 10 chars",
+                db,
+                fake_clock,
             )
         assert exc_self.value.code == "ESCALATION_TARGET_SELF"
 
         # 2. Target Owner Guardrail
         with pytest.raises(EscalationGuardrailError) as exc_owner:
             esc_service.raise_escalation(
-                ticket.id, requester.id, assignee.id, "business_critical", "note with 10 chars", db, fake_clock
+                ticket.id,
+                requester.id,
+                assignee.id,
+                "business_critical",
+                "note with 10 chars",
+                db,
+                fake_clock,
             )
         assert exc_owner.value.code == "ESCALATION_TARGET_OWNER"
 
         # 3. Target On Leave Guardrail (Neha Singh is on leave Oct 20-24)
         with pytest.raises(EscalationGuardrailError) as exc_leave:
             esc_service.raise_escalation(
-                ticket.id, requester.id, neha.id, "business_critical", "note with 10 chars", db, fake_clock
+                ticket.id,
+                requester.id,
+                neha.id,
+                "business_critical",
+                "note with 10 chars",
+                db,
+                fake_clock,
             )
         assert exc_leave.value.code == "ESCALATION_TARGET_ON_LEAVE"
         assert exc_leave.value.details["delegate"] == "arjun.mehta@example.com"
@@ -310,7 +327,13 @@ def test_requester_escalation_guardrails(fake_clock: FakeClock) -> None:
         # 5. Immediate Second Escalation triggers Cooldown Guardrail
         with pytest.raises(EscalationGuardrailError) as exc_cooldown:
             esc_service.raise_escalation(
-                ticket.id, requester.id, lead.id, "other", "Another escalation immediately", db, fake_clock
+                ticket.id,
+                requester.id,
+                lead.id,
+                "other",
+                "Another escalation immediately",
+                db,
+                fake_clock,
             )
         assert exc_cooldown.value.code == "ESCALATION_COOLDOWN"
 
@@ -318,7 +341,13 @@ def test_requester_escalation_guardrails(fake_clock: FakeClock) -> None:
         fake_clock.advance_minutes(65)
         manager = db.query(User).filter(User.email == "rahul.verma@example.com").first()
         esc2 = esc_service.raise_escalation(
-            ticket.id, requester.id, manager.id, "business_critical", "Second escalation after cooldown", db, fake_clock
+            ticket.id,
+            requester.id,
+            manager.id,
+            "business_critical",
+            "Second escalation after cooldown",
+            db,
+            fake_clock,
         )
         assert esc2.status == "pending"
 
@@ -326,7 +355,13 @@ def test_requester_escalation_guardrails(fake_clock: FakeClock) -> None:
         fake_clock.advance_minutes(65)
         with pytest.raises(EscalationGuardrailError) as exc_rate:
             esc_service.raise_escalation(
-                ticket.id, requester.id, lead.id, "other", "Third attempt in 24 hours", db, fake_clock
+                ticket.id,
+                requester.id,
+                lead.id,
+                "other",
+                "Third attempt in 24 hours",
+                db,
+                fake_clock,
             )
         assert exc_rate.value.code == "ESCALATION_RATE_LIMIT"
 

@@ -1,18 +1,17 @@
 """SLA management: target calculations, clock pause/resume, and automatic escalation ladder."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import structlog
 import yaml
 from sqlalchemy.orm import Session
+
 from src.core.business_calendar import BusinessCalendar
 from src.core.clock import Clock, ensure_utc
-from src.db.models.assignment import Assignment
-from src.db.models.notification import Notification
 from src.db.models.sla import EtaChange, SlaClock, SlaEvent
 from src.db.models.ticket import Ticket
-from src.db.models.user import User
 
 logger = structlog.get_logger()
 
@@ -29,9 +28,9 @@ class SlaService:
         self.rules_cfg = self._load_yaml(rules_path)
         self.calendar = BusinessCalendar.from_yaml()
 
-    def _load_yaml(self, path: Path) -> Dict[str, Any]:
+    def _load_yaml(self, path: Path) -> dict[str, Any]:
         if path.exists():
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 return yaml.safe_load(f) or {}
         return {}
 
@@ -41,11 +40,14 @@ class SlaService:
         start_time: datetime,
     ) -> tuple[datetime, datetime, str]:
         """Returns (first_response_due, resolution_due, calendar_type)."""
-        prio_info = self.sla_cfg.get("priorities", {}).get(priority, {
-            "first_response_minutes": 240,
-            "resolution_minutes": 1440,
-            "calendar": "business",
-        })
+        prio_info = self.sla_cfg.get("priorities", {}).get(
+            priority,
+            {
+                "first_response_minutes": 240,
+                "resolution_minutes": 1440,
+                "calendar": "business",
+            },
+        )
 
         cal_type = prio_info.get("calendar", "business")
         fr_mins = prio_info.get("first_response_minutes", 240)
@@ -80,7 +82,7 @@ class SlaService:
         db.commit()
         return clock_record
 
-    def pause_clock(self, ticket: Ticket, db: Session, clock: Clock) -> Optional[SlaClock]:
+    def pause_clock(self, ticket: Ticket, db: Session, clock: Clock) -> SlaClock | None:
         clock_rec = db.query(SlaClock).filter(SlaClock.ticket_id == ticket.id).first()
         if not clock_rec or clock_rec.state != "running":
             return clock_rec
@@ -90,7 +92,7 @@ class SlaService:
         db.commit()
         return clock_rec
 
-    def resume_clock(self, ticket: Ticket, db: Session, clock: Clock) -> Optional[SlaClock]:
+    def resume_clock(self, ticket: Ticket, db: Session, clock: Clock) -> SlaClock | None:
         clock_rec = db.query(SlaClock).filter(SlaClock.ticket_id == ticket.id).first()
         if not clock_rec or clock_rec.state != "paused" or not clock_rec.paused_at:
             return clock_rec
@@ -130,7 +132,7 @@ class SlaService:
             ticket.first_responded_at = clock.now()
             db.commit()
 
-    def evaluate_ladder(self, db: Session, clock: Clock) -> List[Dict[str, Any]]:
+    def evaluate_ladder(self, db: Session, clock: Clock) -> list[dict[str, Any]]:
         """Idempotent ladder evaluator. Scans active clocks and fires scheduled ladder steps."""
         now_dt = ensure_utc(clock.now())
         active_clocks = db.query(SlaClock).filter(SlaClock.state == "running").all()
@@ -170,11 +172,13 @@ class SlaService:
                     # Reassign ticket or notify team lead
                     ticket.is_escalated = True
                     ticket.escalation_level = "E2"
-                    actions_taken.append({
-                        "ticket_id": str(ticket.id),
-                        "public_id": ticket.public_id,
-                        "action": "first_response_miss",
-                    })
+                    actions_taken.append(
+                        {
+                            "ticket_id": str(ticket.id),
+                            "public_id": ticket.public_id,
+                            "action": "first_response_miss",
+                        }
+                    )
 
             # Calculate resolution progress ratio
             if c.calendar == "24x7":
@@ -232,11 +236,11 @@ class SlaService:
         self,
         c: SlaClock,
         rule_key: str,
-        detail: Dict[str, Any],
+        detail: dict[str, Any],
         db: Session,
-        actions_list: List[Dict[str, Any]],
+        actions_list: list[dict[str, Any]],
         ticket: Ticket,
-        escalate_level: Optional[str] = None,
+        escalate_level: str | None = None,
     ) -> None:
         existing = (
             db.query(SlaEvent)
@@ -259,9 +263,11 @@ class SlaService:
                 ticket.is_escalated = True
                 ticket.escalation_level = escalate_level
 
-            actions_list.append({
-                "ticket_id": str(ticket.id),
-                "public_id": ticket.public_id,
-                "rule_key": rule_key,
-                "escalate_level": escalate_level,
-            })
+            actions_list.append(
+                {
+                    "ticket_id": str(ticket.id),
+                    "public_id": ticket.public_id,
+                    "rule_key": rule_key,
+                    "escalate_level": escalate_level,
+                }
+            )

@@ -2,8 +2,10 @@
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import numpy as np
+
 from src.ml.preprocess import preprocess_text
 
 
@@ -11,15 +13,15 @@ from src.ml.preprocess import preprocess_text
 class RawPrediction:
     category: str
     category_confidence: float
-    top_categories: List[Dict[str, Any]]
-    probabilities: Dict[str, float]
+    top_categories: list[dict[str, Any]]
+    probabilities: dict[str, float]
     priority: str
     priority_confidence: float
-    priority_probabilities: Dict[str, float]
+    priority_probabilities: dict[str, float]
     model_version: str
     priority_model_version: str
     latency_ms: int
-    top_keywords: List[str] = field(default_factory=list)
+    top_keywords: list[str] = field(default_factory=list)
 
 
 class Predictor:
@@ -29,7 +31,7 @@ class Predictor:
         self,
         routing_pipeline: Any,
         priority_pipeline: Any,
-        manifest: Dict[str, Any],
+        manifest: dict[str, Any],
     ) -> None:
         self.routing_pipeline = routing_pipeline
         self.priority_pipeline = priority_pipeline
@@ -37,7 +39,7 @@ class Predictor:
         self.routing_version = manifest.get("version", "v1-baseline")
         self.priority_version = manifest.get("priority_version", "v1-priority")
 
-    def explain(self, clean_text: str, predicted_category: str, top_n: int = 5) -> List[str]:
+    def explain(self, clean_text: str, predicted_category: str, top_n: int = 5) -> list[str]:
         """Extracts top explanatory features for the predicted class using TF-IDF weights and coefficients."""
         try:
             tfidf = self.routing_pipeline.named_steps.get("tfidf")
@@ -88,12 +90,14 @@ class Predictor:
         routing_classes = list(self.routing_pipeline.classes_)
 
         cat_prob_map = {
-            cls_name: float(routing_probs[idx])
-            for idx, cls_name in enumerate(routing_classes)
+            cls_name: float(routing_probs[idx]) for idx, cls_name in enumerate(routing_classes)
         }
         # Sort classes descending by probability
         sorted_cats = sorted(
-            [{"category": cls_name, "score": cat_prob_map[cls_name]} for cls_name in routing_classes],
+            [
+                {"category": cls_name, "score": cat_prob_map[cls_name]}
+                for cls_name in routing_classes
+            ],
             key=lambda x: x["score"],
             reverse=True,
         )

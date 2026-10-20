@@ -2,10 +2,10 @@
 
 import json
 from pathlib import Path
+
 import pandas as pd
 import pandera.pandas as pa
-from pandera.pandas import Column, Check, DataFrameSchema
-
+from pandera.pandas import Check, Column, DataFrameSchema
 
 EXPECTED_CATEGORIES = {
     "Access",
@@ -20,15 +20,31 @@ EXPECTED_CATEGORIES = {
 
 EXPECTED_PRIORITIES = {"Low", "Medium", "High", "Critical"}
 
-routing_schema = DataFrameSchema({
-    "text": Column(str, [Check(lambda s: s.str.len() >= 5, error="Text too short (<5 chars)")], nullable=False),
-    "category": Column(str, [Check.isin(EXPECTED_CATEGORIES, error="Unknown category label")], nullable=False),
-})
+routing_schema = DataFrameSchema(
+    {
+        "text": Column(
+            str,
+            [Check(lambda s: s.str.len() >= 5, error="Text too short (<5 chars)")],
+            nullable=False,
+        ),
+        "category": Column(
+            str, [Check.isin(EXPECTED_CATEGORIES, error="Unknown category label")], nullable=False
+        ),
+    }
+)
 
-priority_schema = DataFrameSchema({
-    "text": Column(str, [Check(lambda s: s.str.len() >= 5, error="Text too short (<5 chars)")], nullable=False),
-    "priority": Column(str, [Check.isin(EXPECTED_PRIORITIES, error="Unknown priority label")], nullable=False),
-})
+priority_schema = DataFrameSchema(
+    {
+        "text": Column(
+            str,
+            [Check(lambda s: s.str.len() >= 5, error="Text too short (<5 chars)")],
+            nullable=False,
+        ),
+        "priority": Column(
+            str, [Check.isin(EXPECTED_PRIORITIES, error="Unknown priority label")], nullable=False
+        ),
+    }
+)
 
 
 def validate_dataset(df: pd.DataFrame, schema: DataFrameSchema, name: str) -> dict:
@@ -90,8 +106,12 @@ def main() -> None:
         json.dump(report, f, indent=2)
 
     print(f"Validation report saved to {report_path}:")
-    print(f" - Routing: {routing_report['clean_records']:,} clean rows (valid={routing_report['schema_valid']})")
-    print(f" - Priority: {priority_report['clean_records']:,} clean rows (valid={priority_report['schema_valid']})")
+    print(
+        f" - Routing: {routing_report['clean_records']:,} clean rows (valid={routing_report['schema_valid']})"
+    )
+    print(
+        f" - Priority: {priority_report['clean_records']:,} clean rows (valid={priority_report['schema_valid']})"
+    )
 
 
 if __name__ == "__main__":

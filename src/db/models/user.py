@@ -1,10 +1,11 @@
 """SQLAlchemy ORM models for users and teams."""
 
 import uuid
-from typing import Optional
+
 from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column
-from src.db.base import Base, GUID, TimestampMixin
+
+from src.db.base import GUID, Base, TimestampMixin
 
 
 class Team(Base, TimestampMixin):
@@ -17,8 +18,8 @@ class Team(Base, TimestampMixin):
     )
     code: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    lead_email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    manager_email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    lead_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    manager_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
 
 class User(Base, TimestampMixin):
@@ -36,6 +37,6 @@ class User(Base, TimestampMixin):
         String(50),
         nullable=False,
     )  # requester | agent | engineer | team_lead | manager | admin
-    department: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    department: Mapped[str | None] = mapped_column(String(100), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_demo: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

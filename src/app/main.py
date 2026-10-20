@@ -1,13 +1,17 @@
 """Main entrypoint for RouteDesk FastAPI backend service."""
 
-from typing import Any, Dict
+from typing import Any
+
+import structlog
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import structlog
 
 from src.app.errors import DomainError, ErrorOut
 from src.app.lifespan import lifespan
+from src.app.modules.identity.router import router as identity_router
+from src.app.modules.inference.router import router as inference_router
+from src.app.modules.tickets.router import router as tickets_router
 from src.app.settings import get_settings
 
 logger = structlog.get_logger()
@@ -32,10 +36,6 @@ app.add_middleware(
 )
 
 # Mount domain routers
-from src.app.modules.identity.router import router as identity_router
-from src.app.modules.inference.router import router as inference_router
-from src.app.modules.tickets.router import router as tickets_router
-
 app.include_router(inference_router, prefix="/api/v1")
 app.include_router(inference_router)  # PRD root aliases (/predict, /model-info, /feedback)
 app.include_router(identity_router, prefix="/api/v1")
@@ -62,7 +62,7 @@ async def domain_error_handler(request: Request, exc: DomainError) -> JSONRespon
 
 
 @app.get("/health", status_code=status.HTTP_200_OK, tags=["System Health"])
-async def health_check() -> Dict[str, Any]:
+async def health_check() -> dict[str, Any]:
     """Liveness probe: verifies web server process is running."""
     return {
         "status": "ok",

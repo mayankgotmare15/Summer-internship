@@ -1,8 +1,8 @@
-from datetime import datetime, timezone, timedelta
-from typing import Optional, Protocol
+from datetime import datetime, timedelta, timezone
+from typing import Protocol
 
 
-def ensure_utc(dt: Optional[datetime]) -> Optional[datetime]:
+def ensure_utc(dt: datetime | None) -> datetime | None:
     """Ensures datetime is timezone-aware in UTC (fixes sqlite naive datetime comparisons)."""
     if dt is None:
         return None
@@ -13,18 +13,20 @@ def ensure_utc(dt: Optional[datetime]) -> Optional[datetime]:
 
 class Clock(Protocol):
     """Protocol for time abstraction."""
-    def now(self) -> datetime:
-        ...
+
+    def now(self) -> datetime: ...
 
 
 class SystemClock:
     """Real system clock providing current UTC datetime."""
+
     def now(self) -> datetime:
         return datetime.now(timezone.utc)
 
 
 class FakeClock:
     """Controllable clock for deterministic testing of SLA ladders and timers."""
+
     def __init__(self, initial_time: datetime | None = None):
         self._current_time = initial_time or datetime(2026, 10, 20, 9, 0, 0, tzinfo=timezone.utc)
 

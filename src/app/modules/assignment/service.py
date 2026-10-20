@@ -1,13 +1,15 @@
 """Assignment engine implementing PRD Section 4B.2: shifts, leave, skills, workload, and capacity."""
 
 import re
-from typing import Any, Dict, List, Optional, Tuple
-from sqlalchemy.orm import Session
+from typing import Any
+
 import structlog
+from sqlalchemy.orm import Session
+
 from src.app.modules.directory.service import DirectoryService
 from src.core.clock import Clock
 from src.db.models.ticket import Ticket
-from src.db.models.user import Team, User
+from src.db.models.user import User
 
 logger = structlog.get_logger()
 
@@ -22,10 +24,10 @@ PRIORITY_WEIGHTS = {
 class AssignmentService:
     """Selects the named engineer for a ticket using multi-factor constraint optimization."""
 
-    def __init__(self, directory_service: Optional[DirectoryService] = None) -> None:
+    def __init__(self, directory_service: DirectoryService | None = None) -> None:
         self.directory = directory_service or DirectoryService()
 
-    def get_candidate_workload(self, user_id: Any, db: Session) -> Tuple[int, int]:
+    def get_candidate_workload(self, user_id: Any, db: Session) -> tuple[int, int]:
         """Calculates (open_ticket_count, weighted_workload) for an engineer."""
         open_tickets = (
             db.query(Ticket)
@@ -46,15 +48,15 @@ class AssignmentService:
         ticket_text: str,
         db: Session,
         clock: Clock,
-    ) -> Tuple[User, Dict[str, Any]]:
+    ) -> tuple[User, dict[str, Any]]:
         """Executes Section 4B.2: filters available engineers, matches skills, checks workload, falls back to Lead."""
         now_dt = clock.now()
         text_lower = ticket_text.lower()
 
-        team_info = self.directory.get_team(team_code)
+        self.directory.get_team(team_code)
         members = self.directory.team_members.get(team_code, [])
 
-        trace: Dict[str, Any] = {
+        trace: dict[str, Any] = {
             "team_code": team_code,
             "priority": priority,
             "candidates_evaluated": [],
@@ -66,12 +68,14 @@ class AssignmentService:
         for m in members:
             on_leave, note, delegate = self.directory.is_on_leave(m, now_dt)
             if on_leave:
-                trace["candidates_evaluated"].append({
-                    "email": m["email"],
-                    "status": "excluded_on_leave",
-                    "note": note,
-                    "delegate": delegate,
-                })
+                trace["candidates_evaluated"].append(
+                    {
+                        "email": m["email"],
+                        "status": "excluded_on_leave",
+                        "note": note,
+                        "delegate": delegate,
+                    }
+                )
                 continue
 
             # Fetch DB user record
@@ -130,7 +134,9 @@ class AssignmentService:
             selected_user, selected_info = eligible[0]
             trace["selected_assignee"] = selected_info
             trace["reason"] = (
-                "skill_match_and_capacity" if selected_info["skill_score"] > 0 else "lowest_weighted_workload"
+                "skill_match_and_capacity"
+                if selected_info["skill_score"] > 0
+                else "lowest_weighted_workload"
             )
             return selected_user, trace
 

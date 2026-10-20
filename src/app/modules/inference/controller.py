@@ -2,9 +2,10 @@
 
 import hashlib
 import uuid
-from typing import Any, Dict, List, Optional
+
 import structlog
 from sqlalchemy.orm import Session
+
 from src.app.errors import DomainError, ModelUnavailableError
 from src.app.modules.inference.repository import InferenceRepository
 from src.app.modules.inference.schemas import (
@@ -27,7 +28,7 @@ from src.ml.store import ModelStore
 logger = structlog.get_logger()
 
 # Team name mapping
-TEAM_NAMES: Dict[str, str] = {
+TEAM_NAMES: dict[str, str] = {
     "ACCESS": "Access and Identity Team",
     "HARDWARE": "Desktop and Hardware Support",
     "STORAGE": "Storage and Infrastructure Team",
@@ -50,7 +51,7 @@ class InferenceController:
         self,
         payload: PredictionIn,
         db: Session,
-        actor_id: Optional[uuid.UUID] = None,
+        actor_id: uuid.UUID | None = None,
     ) -> PredictionOut:
         # Validate text constraints
         raw_text = payload.text.strip()
@@ -159,7 +160,7 @@ class InferenceController:
         )
 
     def predict_batch(self, payload: BatchPredictionIn, db: Session) -> BatchPredictionOut:
-        results: List[PredictionOut] = []
+        results: list[PredictionOut] = []
         for item in payload.items:
             res = self.predict(item, db)
             results.append(res)
@@ -187,7 +188,7 @@ class InferenceController:
         self,
         payload: FeedbackIn,
         db: Session,
-        actor_id: Optional[uuid.UUID] = None,
+        actor_id: uuid.UUID | None = None,
     ) -> FeedbackOut:
         repo = InferenceRepository(db)
         feedback_id = uuid.uuid4()
@@ -205,6 +206,7 @@ class InferenceController:
         )
         saved = repo.save_feedback(feedback_entity)
         from datetime import timezone
+
         return FeedbackOut(
             id=saved.id,
             status="recorded",

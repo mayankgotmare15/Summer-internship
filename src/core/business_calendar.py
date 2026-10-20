@@ -1,8 +1,8 @@
 """Business calendar calculations for business-hours SLA time elapsed and target deadlines."""
 
-from datetime import datetime, date, time, timedelta, timezone
-from typing import List, Set
 import zoneinfo
+from datetime import date, datetime, time, timedelta, timezone
+
 import yaml
 
 
@@ -16,13 +16,13 @@ class BusinessCalendar:
     def __init__(
         self,
         tz_name: str = "Asia/Kolkata",
-        work_days: List[int] | None = None,
+        work_days: list[int] | None = None,
         start_time: time = time(9, 0),
         end_time: time = time(18, 0),
-        holidays: Set[date] | None = None,
+        holidays: set[date] | None = None,
     ):
         self.tz = zoneinfo.ZoneInfo(tz_name)
-        self.work_days = work_days if work_days is not None else [0, 1, 2, 3, 4] # Mon-Fri
+        self.work_days = work_days if work_days is not None else [0, 1, 2, 3, 4]  # Mon-Fri
         self.start_time = start_time
         self.end_time = end_time
         self.holidays = holidays or set()
@@ -30,7 +30,7 @@ class BusinessCalendar:
     @classmethod
     def from_yaml(cls, path: str = "configs/calendar.yaml") -> "BusinessCalendar":
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
             tz_name = data.get("timezone", "Asia/Kolkata")
             bh = data.get("business_hours", {})
@@ -103,7 +103,9 @@ class BusinessCalendar:
             current_date = current.date()
             if not self.is_work_day(current_date):
                 # Roll forward to start of next day
-                current = datetime.combine(current_date + timedelta(days=1), self.start_time, tzinfo=self.tz)
+                current = datetime.combine(
+                    current_date + timedelta(days=1), self.start_time, tzinfo=self.tz
+                )
                 continue
 
             work_start = datetime.combine(current_date, self.start_time, tzinfo=self.tz)
@@ -112,7 +114,9 @@ class BusinessCalendar:
             if current < work_start:
                 current = work_start
             elif current >= work_end:
-                current = datetime.combine(current_date + timedelta(days=1), self.start_time, tzinfo=self.tz)
+                current = datetime.combine(
+                    current_date + timedelta(days=1), self.start_time, tzinfo=self.tz
+                )
                 continue
 
             available_seconds = int((work_end - current).total_seconds())
@@ -121,7 +125,9 @@ class BusinessCalendar:
                 remaining = 0
             else:
                 remaining -= available_seconds
-                current = datetime.combine(current_date + timedelta(days=1), self.start_time, tzinfo=self.tz)
+                current = datetime.combine(
+                    current_date + timedelta(days=1), self.start_time, tzinfo=self.tz
+                )
 
         # Return converted back to UTC
         return current.astimezone(timezone.utc)

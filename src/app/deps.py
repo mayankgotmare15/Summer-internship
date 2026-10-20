@@ -1,7 +1,9 @@
 """Dependency injection providers for FastAPI routes."""
 
 from typing import Annotated
+
 from fastapi import Depends
+
 from src.app.settings import Settings, get_settings
 from src.core.clock import Clock, SystemClock
 

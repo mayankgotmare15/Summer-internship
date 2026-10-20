@@ -1,6 +1,7 @@
 """Unit tests for time abstraction protocol and FakeClock."""
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+
 from src.core.clock import FakeClock, SystemClock
 
 

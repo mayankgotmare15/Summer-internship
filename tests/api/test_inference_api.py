@@ -1,10 +1,12 @@
 """FastAPI integration and unit tests for inference, batch serving, feedback, and auth."""
 
 import time
-from typing import Generator
+from collections.abc import Generator
+
 import numpy as np
 import pytest
 from fastapi.testclient import TestClient
+
 from src.app.main import app
 
 

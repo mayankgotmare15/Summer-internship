@@ -1,10 +1,10 @@
 import threading
 import uuid
-from typing import Optional
+
 from sqlalchemy.orm import Session
 
 _counter_lock = threading.Lock()
-_ticket_counter: Optional[int] = None
+_ticket_counter: int | None = None
 
 
 def generate_uuid() -> uuid.UUID:
@@ -12,7 +12,7 @@ def generate_uuid() -> uuid.UUID:
     return uuid.uuid4()
 
 
-def generate_public_id(prefix: str = "T", db: Optional[Session] = None) -> str:
+def generate_public_id(prefix: str = "T", db: Session | None = None) -> str:
     """Generate human-friendly ticket IDs like T-1042 guaranteed to be unique."""
     global _ticket_counter
     with _counter_lock:
@@ -21,6 +21,7 @@ def generate_public_id(prefix: str = "T", db: Optional[Session] = None) -> str:
             if db is not None:
                 try:
                     from src.db.models.ticket import Ticket
+
                     rows = db.query(Ticket.public_id).all()
                     nums = []
                     for (pid,) in rows:
@@ -39,6 +40,7 @@ def generate_public_id(prefix: str = "T", db: Optional[Session] = None) -> str:
             if db is not None:
                 try:
                     from src.db.models.ticket import Ticket
+
                     existing = db.query(Ticket.id).filter(Ticket.public_id == candidate).first()
                     if existing:
                         continue

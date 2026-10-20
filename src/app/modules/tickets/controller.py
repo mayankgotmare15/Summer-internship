@@ -2,11 +2,13 @@
 
 import hashlib
 import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timedelta
+from typing import Any
+
 import structlog
 from sqlalchemy.orm import Session
-from src.app.errors import DomainError, NotFoundError
+
+from src.app.errors import NotFoundError
 from src.app.modules.assignment.service import AssignmentService
 from src.app.modules.directory.service import DirectoryService
 from src.app.modules.escalation.service import EscalationService
@@ -87,7 +89,9 @@ class TicketController:
 
         # 2. Run inference & decision logic
         pred_res = self.inference_controller.predict(
-            PredictionIn(text=full_text, blocking_team=payload.blocking_team, source="ticket_create"),
+            PredictionIn(
+                text=full_text, blocking_team=payload.blocking_team, source="ticket_create"
+            ),
             db=db,
             actor_id=requester.id,
         )
@@ -98,11 +102,11 @@ class TicketController:
         now_dt = clock.now()
         ticket_id = uuid.uuid4()
 
-        assigned_user: Optional[User] = None
-        first_resp_due: Optional[datetime] = None
-        resol_due: Optional[datetime] = None
-        review_promise: Optional[datetime] = None
-        awaiting_approval: Optional[MemberRef] = None
+        assigned_user: User | None = None
+        first_resp_due: datetime | None = None
+        resol_due: datetime | None = None
+        review_promise: datetime | None = None
+        awaiting_approval: MemberRef | None = None
 
         # 3. Decision branches
         if pred_res.decision == "auto_route":
@@ -284,7 +288,9 @@ class TicketController:
                 )
             )
 
-        eligibility = self.escalation_service.get_eligibility(ticket, ticket.requester_id, db, clock)
+        eligibility = self.escalation_service.get_eligibility(
+            ticket, ticket.requester_id, db, clock
+        )
 
         return TicketDetailOut(
             id=ticket.public_id,
@@ -315,9 +321,9 @@ class TicketController:
         self,
         view: str,
         db: Session,
-        user_email: Optional[str] = None,
+        user_email: str | None = None,
         limit: int = 50,
-    ) -> List[TicketDetailOut]:
+    ) -> list[TicketDetailOut]:
         q = db.query(Ticket)
         if view == "review_queue":
             q = q.filter(Ticket.status == "New", Ticket.decision == "human_review")
@@ -331,8 +337,8 @@ class TicketController:
                 q = q.filter(Ticket.assignee_id == u.id)
 
         tickets = q.order_by(Ticket.created_at.desc()).limit(limit).all()
-        clock = self.inference_controller.store.settings  # default
         from src.core.clock import SystemClock
+
         sys_clock = SystemClock()
 
         return [self.get_ticket(str(t.id), db, sys_clock) for t in tickets]
@@ -341,13 +347,15 @@ class TicketController:
         self,
         identifier: str,
         payload: StatusChangeIn,
-        actor_id: Optional[uuid.UUID],
+        actor_id: uuid.UUID | None,
         db: Session,
         clock: Clock,
     ) -> TicketDetailOut:
-        ticket = db.query(Ticket).filter(
-            (Ticket.public_id == identifier.upper()) | (Ticket.id == identifier)
-        ).first()
+        ticket = (
+            db.query(Ticket)
+            .filter((Ticket.public_id == identifier.upper()) | (Ticket.id == identifier))
+            .first()
+        )
         if not ticket:
             raise NotFoundError("Ticket not found")
 
@@ -369,7 +377,11 @@ class TicketController:
                 ticket.closed_at = now_dt
 
         # If engineer responds for the first time
-        if not ticket.first_responded_at and old_status == "Assigned" and payload.to_status == "In progress":
+        if (
+            not ticket.first_responded_at
+            and old_status == "Assigned"
+            and payload.to_status == "In progress"
+        ):
             self.sla_service.record_first_response(ticket, db, clock)
 
         if payload.note:
@@ -389,13 +401,15 @@ class TicketController:
         self,
         identifier: str,
         payload: MessageIn,
-        author_id: Optional[uuid.UUID],
+        author_id: uuid.UUID | None,
         db: Session,
         clock: Clock,
     ) -> MessageOut:
-        ticket = db.query(Ticket).filter(
-            (Ticket.public_id == identifier.upper()) | (Ticket.id == identifier)
-        ).first()
+        ticket = (
+            db.query(Ticket)
+            .filter((Ticket.public_id == identifier.upper()) | (Ticket.id == identifier))
+            .first()
+        )
         if not ticket:
             raise NotFoundError("Ticket not found")
 
@@ -438,10 +452,12 @@ class TicketController:
         requester_id: uuid.UUID,
         db: Session,
         clock: Clock,
-    ) -> Dict[str, Any]:
-        ticket = db.query(Ticket).filter(
-            (Ticket.public_id == identifier.upper()) | (Ticket.id == identifier)
-        ).first()
+    ) -> dict[str, Any]:
+        ticket = (
+            db.query(Ticket)
+            .filter((Ticket.public_id == identifier.upper()) | (Ticket.id == identifier))
+            .first()
+        )
         if not ticket:
             raise NotFoundError("Ticket not found")
 
@@ -468,7 +484,7 @@ class TicketController:
         responder_id: uuid.UUID,
         db: Session,
         clock: Clock,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         esc = self.escalation_service.respond(
             escalation_id=escalation_id,
             responder_id=responder_id,

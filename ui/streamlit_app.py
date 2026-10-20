@@ -3,7 +3,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+
 import pandas as pd
 import requests
 import streamlit as st
@@ -21,7 +21,7 @@ st.markdown(
     """
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap');
-        
+
         .main .block-container {
             padding-top: 1.5rem;
             padding-bottom: 2rem;
@@ -117,14 +117,18 @@ st.sidebar.caption(f"Connected Backend: `{API_URL}`")
 # ---------------------------------------------------------
 if nav_page == "Inference Playground":
     st.header("⚡ Live Inference Playground & Triage")
-    st.caption("Submit ticket text to test scikit-learn dual classification, threshold policies, and priority overrides.")
+    st.caption(
+        "Submit ticket text to test scikit-learn dual classification, threshold policies, and priority overrides."
+    )
 
     col_input, col_preset = st.columns([2, 1])
 
     with col_preset:
         chosen_sample = st.selectbox("Curated Benchmark Presets:", SAMPLE_TICKETS)
         preset_text = "" if chosen_sample.startswith("---") else chosen_sample
-        blocking_team = st.checkbox("Flag: Blocking whole team / Outage", value="whole team blocked" in preset_text)
+        blocking_team = st.checkbox(
+            "Flag: Blocking whole team / Outage", value="whole team blocked" in preset_text
+        )
 
     with col_input:
         ticket_text = st.text_area(
@@ -139,11 +143,17 @@ if nav_page == "Inference Playground":
         if not ticket_text.strip():
             st.error("Please enter ticket text before running inference.")
         else:
-            with st.spinner("Executing pipeline (preprocess → vectorizer → dual predict → decision engine)..."):
+            with st.spinner(
+                "Executing pipeline (preprocess → vectorizer → dual predict → decision engine)..."
+            ):
                 try:
                     resp = requests.post(
                         f"{API_URL}/api/v1/predict",
-                        json={"text": ticket_text, "blocking_team": blocking_team, "source": "console"},
+                        json={
+                            "text": ticket_text,
+                            "blocking_team": blocking_team,
+                            "source": "console",
+                        },
                         timeout=5,
                     )
                     if resp.status_code == 200:
@@ -151,9 +161,11 @@ if nav_page == "Inference Playground":
                         st.session_state["last_prediction"] = pred
                     else:
                         st.error(f"Inference error ({resp.status_code}): {resp.text}")
-                except Exception as e:
+                except Exception:
                     # Fallback to local ModelStore if API server is not running
-                    st.warning("FastAPI server offline; running direct inference via local ModelStore...")
+                    st.warning(
+                        "FastAPI server offline; running direct inference via local ModelStore..."
+                    )
                     try:
                         from src.ml.decision import DecisionPolicy
                         from src.ml.priority_rules import PriorityRules
@@ -166,8 +178,16 @@ if nav_page == "Inference Playground":
                         raw = predictor.predict(ticket_text)
                         policy = DecisionPolicy()
                         rules = PriorityRules()
-                        dec = policy.evaluate(raw.category, raw.category_confidence, raw.top_categories, ticket_text, threshold=0.69)
-                        prio = rules.apply(raw.priority, ticket_text, flags={"blocking_team": blocking_team})
+                        dec = policy.evaluate(
+                            raw.category,
+                            raw.category_confidence,
+                            raw.top_categories,
+                            ticket_text,
+                            threshold=0.69,
+                        )
+                        prio = rules.apply(
+                            raw.priority, ticket_text, flags={"blocking_team": blocking_team}
+                        )
                         pred = {
                             "category": raw.category,
                             "category_confidence": raw.category_confidence,
@@ -199,10 +219,20 @@ if nav_page == "Inference Playground":
         m1.metric("Predicted Category", pred["category"], delta=conf_pct)
 
         is_auto = pred["decision"] == "auto_route"
-        m2.metric("Decision Engine", "Auto-Route" if is_auto else "Human Review", delta="Confident" if is_auto else f"Reason: {pred['review_reason']}")
+        m2.metric(
+            "Decision Engine",
+            "Auto-Route" if is_auto else "Human Review",
+            delta="Confident" if is_auto else f"Reason: {pred['review_reason']}",
+        )
 
-        m3.metric("Assigned Resolver Team", pred["routed_team"]["name"], delta=f"Code: {pred['routed_team']['code']}")
-        m4.metric("Calculated Priority", pred["priority"], delta=f"Source: {pred['priority_source']}")
+        m3.metric(
+            "Assigned Resolver Team",
+            pred["routed_team"]["name"],
+            delta=f"Code: {pred['routed_team']['code']}",
+        )
+        m4.metric(
+            "Calculated Priority", pred["priority"], delta=f"Source: {pred['priority_source']}"
+        )
 
         col_left, col_right = st.columns([1, 1])
 
@@ -219,23 +249,63 @@ if nav_page == "Inference Playground":
                 st.write("Keywords that influenced the model prediction:")
                 st.write(" • " + " • ".join([f"`{kw}`" for kw in pred["top_keywords"]]))
 
-            st.caption(f"Inference Latency: **{pred.get('latency_ms', 0)} ms** | Active Model Version: `{pred.get('model_version', 'v1')}`")
+            st.caption(
+                f"Inference Latency: **{pred.get('latency_ms', 0)} ms** | Active Model Version: `{pred.get('model_version', 'v1')}`"
+            )
 
         with col_right:
             st.markdown("#### ✏️ Human Triage & Feedback Correction")
-            st.write("If the model's routing was incorrect, submit an agent correction to improve the model:")
+            st.write(
+                "If the model's routing was incorrect, submit an agent correction to improve the model:"
+            )
             with st.form("feedback_form"):
                 corrected_cat = st.selectbox(
                     "Correct Category:",
-                    ["Access", "Administrative rights", "Hardware", "HR Support", "Internal Project", "Miscellaneous", "Purchase", "Storage"],
-                    index=["Access", "Administrative rights", "Hardware", "HR Support", "Internal Project", "Miscellaneous", "Purchase", "Storage"].index(pred["category"]) if pred["category"] in ["Access", "Administrative rights", "Hardware", "HR Support", "Internal Project", "Miscellaneous", "Purchase", "Storage"] else 0,
+                    [
+                        "Access",
+                        "Administrative rights",
+                        "Hardware",
+                        "HR Support",
+                        "Internal Project",
+                        "Miscellaneous",
+                        "Purchase",
+                        "Storage",
+                    ],
+                    index=[
+                        "Access",
+                        "Administrative rights",
+                        "Hardware",
+                        "HR Support",
+                        "Internal Project",
+                        "Miscellaneous",
+                        "Purchase",
+                        "Storage",
+                    ].index(pred["category"])
+                    if pred["category"]
+                    in [
+                        "Access",
+                        "Administrative rights",
+                        "Hardware",
+                        "HR Support",
+                        "Internal Project",
+                        "Miscellaneous",
+                        "Purchase",
+                        "Storage",
+                    ]
+                    else 0,
                 )
-                corrected_prio = st.selectbox("Correct Priority:", ["Low", "Medium", "High", "Critical"], index=1)
-                feedback_notes = st.text_input("Triage Correction Note:", value="Agent override in triage")
+                corrected_prio = st.selectbox(
+                    "Correct Priority:", ["Low", "Medium", "High", "Critical"], index=1
+                )
+                feedback_notes = st.text_input(
+                    "Triage Correction Note:", value="Agent override in triage"
+                )
                 submitted = st.form_submit_button("Submit Model Feedback", type="secondary")
                 if submitted:
                     fb_data = {
-                        "prediction_id": pred.get("prediction_id") if pred.get("prediction_id") != "local-run" else None,
+                        "prediction_id": pred.get("prediction_id")
+                        if pred.get("prediction_id") != "local-run"
+                        else None,
                         "kind": "agent_correction",
                         "predicted_category": pred["category"],
                         "corrected_category": corrected_cat,
@@ -244,12 +314,16 @@ if nav_page == "Inference Playground":
                         "notes": feedback_notes,
                     }
                     try:
-                        fb_resp = requests.post(f"{API_URL}/api/v1/feedback", json=fb_data, timeout=3)
+                        fb_resp = requests.post(
+                            f"{API_URL}/api/v1/feedback", json=fb_data, timeout=3
+                        )
                         if fb_resp.status_code == 201:
-                            st.success("✅ Feedback successfully logged! Retraining pipeline will consume this correction.")
+                            st.success(
+                                "✅ Feedback successfully logged! Retraining pipeline will consume this correction."
+                            )
                         else:
                             st.warning(f"Feedback logged with status: {fb_resp.status_code}")
-                    except Exception as ex:
+                    except Exception:
                         st.info("Feedback captured locally in demonstration session.")
 
 # ---------------------------------------------------------
@@ -263,7 +337,11 @@ elif nav_page == "Overview & Health":
         health_resp = requests.get(f"{API_URL}/health", timeout=3)
         ready_resp = requests.get(f"{API_URL}/ready", timeout=3)
         api_up = health_resp.status_code == 200
-        ready_status = ready_resp.json().get("status", "unknown") if ready_resp.status_code in [200, 503] else "down"
+        ready_status = (
+            ready_resp.json().get("status", "unknown")
+            if ready_resp.status_code in [200, 503]
+            else "down"
+        )
     except Exception:
         api_up = False
         ready_status = "unreachable"
@@ -287,13 +365,21 @@ elif nav_page == "Overview & Health":
 # ---------------------------------------------------------
 elif nav_page == "Threshold & Cost Curve":
     st.header("📈 Threshold Sweep & Cost-Benefit Analysis")
-    st.caption("Sweep across confidence threshold $\\tau \\in [0.50, 0.95]$ optimizing net agent hours saved (PRD Section 12).")
+    st.caption(
+        "Sweep across confidence threshold $\\tau \\in [0.50, 0.95]$ optimizing net agent hours saved (PRD Section 12)."
+    )
 
     sweep_csv_path = Path("reports/sweep.csv")
     if sweep_csv_path.exists():
         df_sweep = pd.read_csv(sweep_csv_path)
 
-        tau_slider = st.slider("Inspect Confidence Threshold (\\tau):", min_value=0.50, max_value=0.95, value=0.69, step=0.01)
+        tau_slider = st.slider(
+            "Inspect Confidence Threshold (\\tau):",
+            min_value=0.50,
+            max_value=0.95,
+            value=0.69,
+            step=0.01,
+        )
         row = df_sweep.iloc[(df_sweep["threshold"] - tau_slider).abs().argsort()[:1]].iloc[0]
 
         s1, s2, s3, s4 = st.columns(4)
@@ -315,7 +401,7 @@ elif nav_page == "Model Registry & Quality Gate":
 
     manifest_path = Path("artifacts/bundle/manifest.json")
     if manifest_path.exists():
-        with open(manifest_path, "r", encoding="utf-8") as f:
+        with open(manifest_path, encoding="utf-8") as f:
             manifest = json.load(f)
 
         q1, q2, q3, q4 = st.columns(4)
@@ -325,7 +411,9 @@ elif nav_page == "Model Registry & Quality Gate":
         q4.metric("Test Set Size", f"{manifest['metrics'].get('test_samples', 6759):,} tickets")
 
         st.markdown("#### Quality Gate Evaluation Status")
-        st.success("✅ **Gate Passed**: Macro-F1 0.8554 ≥ 0.80 | Auto Accuracy 95.8% ≥ 90% | P95 Latency 29 ms ≤ 50 ms budget")
+        st.success(
+            "✅ **Gate Passed**: Macro-F1 0.8554 ≥ 0.80 | Auto Accuracy 95.8% ≥ 90% | P95 Latency 29 ms ≤ 50 ms budget"
+        )
 
         st.markdown("#### Preprocessing Integrity")
         st.code(f"SHA-256 Fingerprint: {manifest.get('preprocess_fingerprint')}", language="text")

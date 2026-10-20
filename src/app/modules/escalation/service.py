@@ -1,12 +1,14 @@
 """Escalation service: requester-chosen escalation, guardrails, response handling, and audit trails."""
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import structlog
 import yaml
 from sqlalchemy.orm import Session
+
 from src.app.errors import DomainError, EscalationGuardrailError, NotFoundError
 from src.app.modules.directory.service import DirectoryService
 from src.app.modules.sla.service import SlaService
@@ -16,7 +18,7 @@ from src.db.models.audit import AuditLog
 from src.db.models.escalation import Escalation
 from src.db.models.feedback import Feedback
 from src.db.models.sla import EtaChange, SlaClock
-from src.db.models.ticket import Ticket, TicketMessage
+from src.db.models.ticket import Ticket
 from src.db.models.user import Team, User
 
 logger = structlog.get_logger()
@@ -27,22 +29,24 @@ class EscalationService:
 
     def __init__(
         self,
-        directory_service: Optional[DirectoryService] = None,
-        sla_service: Optional[SlaService] = None,
+        directory_service: DirectoryService | None = None,
+        sla_service: SlaService | None = None,
         rules_path: Path = Path("configs/escalation_rules.yaml"),
     ) -> None:
         self.directory = directory_service or DirectoryService()
         self.sla_service = sla_service or SlaService()
         self.rules = self._load_rules(rules_path)
 
-    def _load_rules(self, path: Path) -> Dict[str, Any]:
+    def _load_rules(self, path: Path) -> dict[str, Any]:
         if path.exists():
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
                 return data.get("requester_escalation", {})
         return {}
 
-    def get_eligibility(self, ticket: Ticket, requester_id: uuid.UUID, db: Session, clock: Clock) -> Dict[str, Any]:
+    def get_eligibility(
+        self, ticket: Ticket, requester_id: uuid.UUID, db: Session, clock: Clock
+    ) -> dict[str, Any]:
         """Calculates 24-hour rate limit and cooldown status for ticket escalation."""
         now_dt = ensure_utc(clock.now())
         since_24h = now_dt - timedelta(hours=24)
@@ -56,9 +60,7 @@ class EscalationService:
             .order_by(Escalation.created_at.desc())
             .all()
         )
-        recent_escalations = [
-            e for e in all_escalations if ensure_utc(e.created_at) >= since_24h
-        ]
+        recent_escalations = [e for e in all_escalations if ensure_utc(e.created_at) >= since_24h]
 
         used_last_24h = len(recent_escalations)
         max_per_24h = self.rules.get("max_per_24h", 2)
@@ -78,7 +80,9 @@ class EscalationService:
                 "allowed": False,
                 "used_last_24h": used_last_24h,
                 "max_per_24h": max_per_24h,
-                "next_allowed_at": (ensure_utc(recent_escalations[-1].created_at) + timedelta(hours=24)).isoformat(),
+                "next_allowed_at": (
+                    ensure_utc(recent_escalations[-1].created_at) + timedelta(hours=24)
+                ).isoformat(),
                 "blocked_reason": "rate_limit",
             }
 
@@ -121,20 +125,28 @@ class EscalationService:
         if not eligibility["allowed"]:
             reason = eligibility["blocked_reason"]
             if reason == "rate_limit":
-                raise EscalationGuardrailError("ESCALATION_RATE_LIMIT", "Maximum 2 escalations per 24 hours exceeded")
+                raise EscalationGuardrailError(
+                    "ESCALATION_RATE_LIMIT", "Maximum 2 escalations per 24 hours exceeded"
+                )
             if reason == "cooldown":
                 raise EscalationGuardrailError(
                     "ESCALATION_COOLDOWN",
                     f"Please wait for cooldown to expire at {eligibility['next_allowed_at']}",
                     details={"next_allowed_at": eligibility["next_allowed_at"]},
                 )
-            raise EscalationGuardrailError("ESCALATION_NOT_ALLOWED", "Ticket cannot be escalated in its current status")
+            raise EscalationGuardrailError(
+                "ESCALATION_NOT_ALLOWED", "Ticket cannot be escalated in its current status"
+            )
 
         # 2. Self and owner guardrails
         if raised_by_id == target_user_id:
-            raise EscalationGuardrailError("ESCALATION_TARGET_SELF", "You cannot escalate a ticket to yourself")
+            raise EscalationGuardrailError(
+                "ESCALATION_TARGET_SELF", "You cannot escalate a ticket to yourself"
+            )
         if ticket.assignee_id and ticket.assignee_id == target_user_id:
-            raise EscalationGuardrailError("ESCALATION_TARGET_OWNER", "Target user already owns this ticket")
+            raise EscalationGuardrailError(
+                "ESCALATION_TARGET_OWNER", "Target user already owns this ticket"
+            )
 
         # 3. Target eligibility and leave check
         target_user = db.query(User).filter(User.id == target_user_id).first()
@@ -160,7 +172,9 @@ class EscalationService:
 
         # 4. Calculate response deadline (PRD 4B.6)
         is_critical = ticket.priority == "Critical"
-        res_window_mins = 30 if is_critical else self.rules.get("response_window_minutes", {}).get("default", 120)
+        res_window_mins = (
+            30 if is_critical else self.rules.get("response_window_minutes", {}).get("default", 120)
+        )
         response_due = self.sla_service.calendar.add_business_seconds(now_dt, res_window_mins * 60)
 
         # 5. Create Escalation record
@@ -216,9 +230,9 @@ class EscalationService:
         escalation_id: uuid.UUID,
         responder_id: uuid.UUID,
         action: str,  # accept | reassign | decline
-        new_eta: Optional[datetime],
-        reassign_to_id: Optional[uuid.UUID],
-        reason_note: Optional[str],
+        new_eta: datetime | None,
+        reassign_to_id: uuid.UUID | None,
+        reason_note: str | None,
         db: Session,
         clock: Clock,
     ) -> Escalation:
@@ -226,7 +240,9 @@ class EscalationService:
         if not esc:
             raise NotFoundError("Escalation record not found")
         if esc.status != "pending":
-            raise DomainError("Escalation already responded", code="ESCALATION_ALREADY_RESPONDED", status_code=409)
+            raise DomainError(
+                "Escalation already responded", code="ESCALATION_ALREADY_RESPONDED", status_code=409
+            )
 
         ticket = db.query(Ticket).filter(Ticket.id == esc.ticket_id).first()
         now_dt = clock.now()
@@ -297,7 +313,11 @@ class EscalationService:
 
         elif action == "decline":
             # Returns ticket to Team Lead with reason
-            team_lead = self.directory.get_team_lead(ticket.category)  # lookup
+            team_lead = self.directory.get_team_lead(ticket.category)
+            if team_lead:
+                lead_user = db.query(User).filter(User.email == team_lead["email"].lower()).first()
+                if lead_user:
+                    ticket.assigned_agent_id = lead_user.id
             ticket.status = "Assigned"
 
         # Audit

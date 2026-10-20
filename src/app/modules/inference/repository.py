@@ -1,8 +1,9 @@
 """Database repository for predictions and feedback queries."""
 
 import uuid
-from typing import List, Optional
+
 from sqlalchemy.orm import Session
+
 from src.db.models.feedback import Feedback
 from src.db.models.prediction import Prediction
 
@@ -19,7 +20,7 @@ class InferenceRepository:
         self.db.refresh(prediction)
         return prediction
 
-    def get_prediction_by_id(self, prediction_id: uuid.UUID) -> Optional[Prediction]:
+    def get_prediction_by_id(self, prediction_id: uuid.UUID) -> Prediction | None:
         return self.db.query(Prediction).filter(Prediction.id == prediction_id).first()
 
     def save_feedback(self, feedback: Feedback) -> Feedback:
@@ -28,15 +29,10 @@ class InferenceRepository:
         self.db.refresh(feedback)
         return feedback
 
-    def get_recent_predictions(self, limit: int = 50) -> List[Prediction]:
-        return (
-            self.db.query(Prediction)
-            .order_by(Prediction.created_at.desc())
-            .limit(limit)
-            .all()
-        )
+    def get_recent_predictions(self, limit: int = 50) -> list[Prediction]:
+        return self.db.query(Prediction).order_by(Prediction.created_at.desc()).limit(limit).all()
 
-    def get_unexported_feedback(self, limit: int = 100) -> List[Feedback]:
+    def get_unexported_feedback(self, limit: int = 100) -> list[Feedback]:
         return (
             self.db.query(Feedback)
             .filter(Feedback.exported_at.is_(None))

@@ -2,10 +2,11 @@
 
 import json
 from pathlib import Path
+
 import joblib
 import pandas as pd
-from sklearn.metrics import classification_report, f1_score, confusion_matrix
 import skops.io as sio
+from sklearn.metrics import classification_report, confusion_matrix, f1_score
 
 
 def load_model(path_base: Path):
@@ -33,7 +34,7 @@ def evaluate_routing(model, test_path: Path) -> dict:
     macro_f1 = f1_score(y_true, y_pred, average="macro")
     weighted_f1 = f1_score(y_true, y_pred, average="weighted")
     class_report = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
-    labels = sorted(list(set(y_true)))
+    labels = sorted(set(y_true))
     cm = confusion_matrix(y_true, y_pred, labels=labels).tolist()
 
     return {
@@ -56,7 +57,7 @@ def evaluate_routing(model, test_path: Path) -> dict:
 
 def evaluate_robustness(model, messy_path: Path) -> dict:
     """Evaluates routing model against 30 hand-written messy edge cases from PRD Appendix A."""
-    with open(messy_path, "r", encoding="utf-8") as f:
+    with open(messy_path, encoding="utf-8") as f:
         cases = json.load(f)
 
     correct = 0
@@ -68,25 +69,26 @@ def evaluate_robustness(model, messy_path: Path) -> dict:
         pred = model.predict([text])[0]
         # Miscellaneous / multi_issue accepts top secondary predictions or Miscellaneous
         probs = model.predict_proba([text])[0]
-        classes = list(model.classes_)
         top_idx = probs.argmax()
         top_conf = round(float(probs[top_idx]), 4)
 
-        is_match = (pred == expected)
+        is_match = pred == expected
         if expected == "Miscellaneous" and top_conf < 0.60:
-            is_match = True # Successfully flagged for review as intended
+            is_match = True  # Successfully flagged for review as intended
 
         if is_match:
             correct += 1
 
-        results.append({
-            "id": c.get("id"),
-            "text": text[:60] + "...",
-            "expected": expected,
-            "predicted": pred,
-            "confidence": top_conf,
-            "match": is_match,
-        })
+        results.append(
+            {
+                "id": c.get("id"),
+                "text": text[:60] + "...",
+                "expected": expected,
+                "predicted": pred,
+                "confidence": top_conf,
+                "match": is_match,
+            }
+        )
 
     accuracy = round(correct / len(cases), 4)
     return {
@@ -122,10 +124,12 @@ def main() -> None:
     with open(metrics_file, "w", encoding="utf-8") as f:
         json.dump(all_metrics, f, indent=2)
 
-    print(f"\n================ MODEL EVALUATION REPORT ================")
+    print("\n================ MODEL EVALUATION REPORT ================")
     print(f"Test Set Macro-F1:     {routing_metrics['macro_f1']:.4f} (PRD Target >= 0.80)")
     print(f"Test Set Weighted-F1:  {routing_metrics['weighted_f1']:.4f}")
-    print(f"Messy Robustness Acc:  {robustness_metrics['accuracy']:.1%} ({robustness_metrics['correct']}/{robustness_metrics['total_test_cases']})")
+    print(
+        f"Messy Robustness Acc:  {robustness_metrics['accuracy']:.1%} ({robustness_metrics['correct']}/{robustness_metrics['total_test_cases']})"
+    )
     print("\nPer-Class F1 Scores:")
     for cls, stats in routing_metrics["per_class"].items():
         print(f" - {cls:25s}: F1={stats['f1']:.4f} (Support: {stats['support']:,})")

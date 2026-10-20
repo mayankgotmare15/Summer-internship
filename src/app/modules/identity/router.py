@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, Header, Response, status
 from sqlalchemy.orm import Session
+
 from src.app.errors import UnauthorizedError
 from src.app.modules.identity.controller import IdentityController
 from src.app.modules.identity.schemas import DemoLoginIn, LoginIn, UserOut
@@ -57,4 +58,4 @@ def get_current_user(
         user_id = claims.get("sub")
         return controller.get_user_by_id(user_id, db)
     except Exception:
-        raise UnauthorizedError("Invalid or expired session token")
+        raise UnauthorizedError("Invalid or expired session token") from None

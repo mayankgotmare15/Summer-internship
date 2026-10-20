@@ -2,10 +2,12 @@
 
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON, String, UniqueConstraint
+from typing import Any
+
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from src.db.base import Base, GUID, TimestampMixin
+
+from src.db.base import GUID, Base, TimestampMixin
 
 
 class SlaClock(Base, TimestampMixin):
@@ -18,16 +20,22 @@ class SlaClock(Base, TimestampMixin):
     )
     policy_version: Mapped[str] = mapped_column(String(50), default="v1.0", nullable=False)
     priority: Mapped[str] = mapped_column(String(50), nullable=False)
-    calendar: Mapped[str] = mapped_column(String(50), default="business", nullable=False)  # business | 24x7
+    calendar: Mapped[str] = mapped_column(
+        String(50), default="business", nullable=False
+    )  # business | 24x7
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     first_response_due: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     resolution_due: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    paused_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    paused_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     paused_seconds: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    state: Mapped[str] = mapped_column(String(50), default="running", nullable=False)  # running | paused | stopped | pending_approval
+    state: Mapped[str] = mapped_column(
+        String(50), default="running", nullable=False
+    )  # running | paused | stopped | pending_approval
     cycle: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
-    next_check_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
-    breached_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    next_check_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    breached_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     first_response_met: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
 
@@ -55,7 +63,7 @@ class SlaEvent(Base):
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
-    detail: Mapped[Dict[str, Any]] = mapped_column(JSON, default=dict)
+    detail: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
 
 class EtaChange(Base, TimestampMixin):
@@ -75,4 +83,6 @@ class EtaChange(Base, TimestampMixin):
     old_resolution_due: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     new_resolution_due: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     reason: Mapped[str] = mapped_column(String(255), nullable=False)
-    actor_id: Mapped[Optional[uuid.UUID]] = mapped_column(GUID, ForeignKey("users.id"), nullable=True)
+    actor_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID, ForeignKey("users.id"), nullable=True
+    )
