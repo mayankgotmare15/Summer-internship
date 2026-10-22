@@ -103,3 +103,12 @@ Thumbs.db
 *.swp
 *.swo
 
+# Android & Gradle
+.gradle/
+android/**/build/
+android/**/bin/
+android/**/.gradle/
+local.properties
+*.apk
+*.aab
+*.dex
